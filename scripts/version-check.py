@@ -180,9 +180,11 @@ def compare_versions(current: str, latest: str) -> str:
 def main():
     local_version = get_local_version()
 
-    # Dogfood mode: if VERSION is a symlink, this IS the canonical source repo.
+    # Dogfood mode: if this script is running inside the canonical source repo,
+    # it will find AGENTS.md and templates/ at the repository root.
     # Skip remote comparison — we are the upstream, not a downstream consumer.
-    if VERSION_FILE.is_symlink():
+    repo_root = Path(__file__).resolve().parent.parent
+    if (repo_root / "AGENTS.md").is_file() and (repo_root / "templates").is_dir():
         print(f"{GREEN}✅ VERSION_CHECK:DOGFOOD{NC} — {local_version} (canonical source repo)")
         sys.exit(0)
 
