@@ -1,0 +1,68 @@
+#!/bin/bash
+# Pre-commit hook — runs before every commit
+# Checks for secrets, validates markdown, enforces conventions
+
+echo "🔍 Running pre-commit checks..."
+
+# 1. Secret scan — check staged files for actual secrets (not security rules)
+# Skip .md files in skills/ and commands/ — they contain security RULES, not secrets
+# Skip hooks/ directory — contains security patterns in comments
+SECRETS=$(git diff --cached --name-only | grep -v '\.md$' | grep -v '^hooks/' | xargs grep -l -iE '(password|secret|api_key|token|credential|private_key)\s*[:=]\s*["\x27]' 2>/dev/null || true)
+# Also check .md files but only for actual assignments (not rules or documentation)
+MD_SECRETS=$(git diff --cached --name-only | grep '\.md$' | xargs grep -l -iE '(password|secret|api_key|token|credential|private_key)\s*[:=]\s*["\x27][^"]+["\x27]' 2>/dev/null | grep -v 'skills/' | grep -v 'commands/' | grep -v 'docs/' || true)
+if [ -n "$SECRETS" ] || [ -n "$MD_SECRETS" ]; then
+  echo "❌ SECRETS DETECTED in staged files:"
+  [ -n "$SECRETS" ] && echo "$SECRETS"
+  [ -n "$MD_SECRETS" ] && echo "$MD_SECRETS"
+  echo ""
+  echo "Remove secrets before committing. Secrets should live in ~/.config/<app>/"
+  exit 1
+fi
+
+# 2. Check for .env files
+ENV_FILES=$(git diff --cached --name-only | grep -E '\.env$|\.env\.' || true)
+if [ -n "$ENV_FILES" ]; then
+  echo "❌ ENV FILES DETECTED:"
+  echo "$ENV_FILES"
+  echo ""
+  echo ".env files must not be committed. Add them to .gitignore."
+  exit 1
+fi
+
+# 3. Check for large files (>100KB)
+LARGE_FILES=$(git diff --cached --name-only | xargs ls -la 2>/dev/null | awk '$5 > 102400 {print $NF}' || true)
+if [ -n "$LARGE_FILES" ]; then
+  echo "⚠️  LARGE FILES (>100KB):"
+  echo "$LARGE_FILES"
+  echo ""
+  echo "Consider using Git LFS for large files."
+fi
+
+# 4. Validate markdown syntax (basic check)
+MD_FILES=$(git diff --cached --name-only | grep '\.md$' || true)
+if [ -n "$MD_FILES" ]; then
+  for f in $MD_FILES; do
+    if [ -f "$f" ]; then
+      # Check for unclosed code blocks
+      OPEN=$(grep -c '```' "$f" 2>/dev/null || true)
+      OPEN=${OPEN:-0}
+      if [ $((OPEN % 2)) -ne 0 ]; then
+        echo "⚠️  POSSIBLY UNCLOSED CODE BLOCK in $f"
+      fi
+    fi
+  done
+fi
+
+# 5. Check commit message format (if commit-msg hook not available)
+if [ -f "$1" ]; then
+  MSG=$(cat "$1")
+  if ! echo "$MSG" | grep -qE '^(feat|fix|docs|chore|test|refactor|style|ci|build|perf|revert)(\(.+\))?: .{1,}'; then
+    echo "⚠️  COMMIT MESSAGE doesn't follow conventional commits:"
+    echo "   $MSG"
+    echo ""
+    echo "   Expected: type(scope): description"
+    echo "   Types: feat, fix, docs, chore, test, refactor, style, ci, build, perf, revert"
+  fi
+fi
+
+echo "✅ Pre-commit checks passed"

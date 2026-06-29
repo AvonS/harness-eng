@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate tag matches project version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="$(cat version.txt 2>/dev/null || cat .harness-eng/VERSION 2>/dev/null || echo 'unknown')"
+          TAG_CLEAN="${TAG#v}"
+          VERSION_CLEAN="${VERSION#v}"
+          if [ "$TAG_CLEAN" != "$VERSION_CLEAN" ]; then
+            echo "❌ Tag '$TAG' does not match project version '$VERSION'."
+            echo "   This tag may belong to a different project that accidentally"
+            echo "   pushed to this repo. Aborting release."
+            exit 1
+          fi
+          echo "✅ Tag '$TAG' matches project version '$VERSION'. Proceeding."
+      
+      - name: Generate release notes
+        run: bash scripts/generate-release-notes.sh .harness-eng
+      
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE-NOTES.md
+          generate_release_notes: true
