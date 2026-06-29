@@ -35,9 +35,8 @@ __pycache__/
 # Logs
 *.log
 
-# Harness-eng runtime caches (not project state)
-.harness-eng/.version-cache
-.harness-eng/build-log.json
+# Harness-eng runtime and state (upstream repo does not check this in)
+.harness-eng/
 
 # Temp files
 *.tmp
