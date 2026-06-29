@@ -16,7 +16,7 @@ jobs:
       - name: Validate tag matches project version
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          VERSION="$(cat version.txt 2>/dev/null || cat .harness-eng/VERSION 2>/dev/null || echo 'unknown')"
+          VERSION="$(cat VERSION 2>/dev/null || cat .harness-eng/VERSION 2>/dev/null || echo 'unknown')"
           TAG_CLEAN="${TAG#v}"
           VERSION_CLEAN="${VERSION#v}"
           if [ "$TAG_CLEAN" != "$VERSION_CLEAN" ]; then
@@ -28,7 +28,7 @@ jobs:
           echo "✅ Tag '$TAG' matches project version '$VERSION'. Proceeding."
       
       - name: Generate release notes
-        run: bash scripts/generate-release-notes.sh .harness-eng
+        run: python3 scripts/generate-release-notes.py .harness-eng
       
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
