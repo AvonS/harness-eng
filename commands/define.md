@@ -19,6 +19,9 @@ preflight:
 
 actions:
   - identify_feature_from_brd
+  - perform_adaptive_behavior_discovery: choose Example Mapping, Journey Mapping, or Event Storming based on complexity
+  - propose_behavior_model: identify actors, goals, initial conditions, event flow, state transitions, and invariants
+  - present_behavior_playback_to_human: ask bounded, contextual questions about load-bearing uncertainties
   - for_each_requirement:
     - create_given_when_then_stories
     - identify_acceptance_criteria
@@ -30,6 +33,9 @@ outputs:
   - spec.md with Ref: PENDING
 
 must_do:
+  - Perform behavior discovery before generating acceptance scenarios
+  - Mark statements as confirmed, observed, inferred, or assumed
+  - Present a concise behavior playback to the human before writing spec
   - Include Given/When/Then stories
   - Cover all acceptance criteria
   - Get human review of spec

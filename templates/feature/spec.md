@@ -38,6 +38,31 @@ agent_contract:
 
 ---
 
+## Behavior Model
+
+### Actors and Goals
+- [Who initiates the behavior and what outcome they need]
+
+### Initial Conditions
+- [Facts that must already be true]
+
+### Primary Event Flow
+- [Command -> domain event -> policy/reaction -> resulting state]
+
+### Alternative and Failure Flows
+- [Validation failure, rejection, timeout, retry, cancellation, recovery]
+
+### State Transitions
+- [Current state, event, guard, resulting state, side effect, visible result]
+
+### Invariants
+- [Conditions that must always or never be true]
+
+### Provenance
+- [Mark statements as: Confirmed, Observed, Inferred, or Assumed]
+
+---
+
 ## User Stories
 
 ### Story 1 — [STORY_TITLE] (Priority: P1)
