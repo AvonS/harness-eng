@@ -27,6 +27,7 @@ actions:
   - derive_constitution: from project analysis + user input (if not converted)
   - derive_brd: from PRD/docs/conversation (Use templates/big-picture/BRD.md to ensure rich markdown structure)
   - derive_architecture: from code structure/docs/conversation (Use templates/big-picture/ARCHITECTURE.md and include mermaid diagrams)
+  - derive_design_registry: copy templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
   - derive_technology: from detected stack
   - fetch_skills: progressively fetch only the necessary skills from harness repo based on derived technology stack
   - present: all docs to human for review

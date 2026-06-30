@@ -1,0 +1,61 @@
+design_registry:
+  systems:
+    - id: oat
+      use_for: ["simple apps", "server-rendered apps", "internal tools", "vanilla HTML", "low-dependency dashboards"]
+      strengths: ["semantic HTML", "zero dependencies", "tiny CSS/JS", "minimal class pollution", "simple theming"]
+      avoid_for: ["highly branded consumer apps", "complex custom interactions", "large design-system-heavy products"]
+      extract:
+        - "semantic HTML-first component patterns"
+        - "minimal CSS variable theming"
+        - "basic app components without framework lock-in"
+        - "simple accessible defaults"
+      docs:
+        home: "https://oat.ink/"
+        components: "https://oat.ink/components/"
+
+    - id: shadcn
+      use_for: ["React + Tailwind already present", "modern SaaS", "dashboards", "forms", "fast implementation"]
+      strengths: ["component registry", "blocks", "semantic CSS tokens", "Tailwind-friendly", "agent-friendly docs"]
+      avoid_for: ["projects without Tailwind", "simple server-rendered apps", "low-dependency targets"]
+      extract:
+        - "semantic theme tokens"
+        - "component composition patterns"
+        - "form/table/dialog/sheet patterns"
+      docs:
+        components: "https://ui.shadcn.com/docs/components"
+        theming: "https://ui.shadcn.com/docs/theming"
+
+    - id: radix-themes
+      use_for: ["accessible app UI", "disciplined visual foundations", "neutral product interfaces"]
+      strengths: ["theme tokens", "color scales", "typography", "spacing", "breakpoints", "accessible primitives"]
+      avoid_for: ["simple pages where native controls and CSS are enough"]
+      extract:
+        - "typography scale"
+        - "accent/gray/radius/scaling model"
+        - "component behavior and accessibility expectations"
+      docs:
+        getting_started: "https://www.radix-ui.com/themes/docs/overview/getting-started"
+        color: "https://www.radix-ui.com/themes/docs/theme/color"
+        typography: "https://www.radix-ui.com/themes/docs/theme/typography"
+
+    - id: carbon
+      use_for: ["enterprise dashboards", "admin tools", "data-heavy workflows", "B2B operations"]
+      strengths: ["information architecture", "patterns", "accessibility", "data density", "multi-framework components"]
+      avoid_for: ["small apps", "consumer branded apps", "projects where full enterprise design-system weight is unjustified"]
+      extract:
+        - "dashboard and admin patterns"
+        - "table/filter/search behaviors"
+        - "enterprise accessibility and content guidance"
+      docs:
+        home: "https://carbondesignsystem.com/"
+
+    - id: fluent2
+      use_for: ["business apps", "productivity tools", "Microsoft ecosystem", "internal tools"]
+      strengths: ["cross-platform components", "Figma kits", "accessibility resources", "focus/contrast guidance"]
+      avoid_for: ["small apps", "non-Microsoft visual direction", "projects where full productivity-suite patterns are unnecessary"]
+      extract:
+        - "productivity app navigation"
+        - "command/action patterns"
+        - "accessibility review practices"
+      docs:
+        home: "https://www.fluentui.dev/"
