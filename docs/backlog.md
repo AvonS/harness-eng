@@ -11,7 +11,6 @@
 
 *These ideas were extracted from the PI extension archive and filtered through the Ponytail YAGNI principle to ensure they don't over-engineer the canonical file-based harness.*
 
-*   **Read-Only Boundaries**: Instead of creating a complex new `SOUL.md` layer, strictly enforce read-only boundaries (e.g., for the `Sr Tech Lead`) directly in the existing `commands/` templates to prevent silent code rewrites.
 *   **Git Hooks for Gate Enforcement**: Instead of relying purely on agent prompts for gates (which agents can ignore), enforce the state machine natively using Git pre-commit hooks (e.g., blocking commits if `design.md` lacks `Ref: APPROVED`).
 *   **File-Based Asynchronous Escalation**: Instead of complex chat UI loops, if an agent fails 3 times, have it natively write a simple `BLOCKED.md` file and cleanly exit, allowing the human to review asynchronously.
 
@@ -38,3 +37,11 @@
 *   **[Fizzy](https://www.fizzy.do/)**: Pattern reference for making a board feel "alive and current" through lightweight micro-interactions.
 *   **[Dark Factory Architecture](https://www.infralovers.com/blog/2026-02-22-architektur-patterns-dark-factory/)**: Architectural pattern reference for autonomous systems.
 *   **[Augmented Coding Patterns](https://lexler.github.io/augmented-coding-patterns/patterns/approved-scenarios/)**: Pattern reference for managing human-in-the-loop approved scenarios.
+
+## Multi-User Presentation Layer (SOUL.md)
+
+*As the harness scales to multi-user environments, we need to decouple the "Engine Layer" (`AGENTS.md`) from the "Presentation Layer".*
+
+*   **User Communication Profile**: Each human user can define their preferred output (terse, conversational, executive-summary) in a local `SOUL.md` or user-profile config.
+*   **Agent Operating Persona**: `SOUL.md` governs the specific role, risk posture, and communication traits of the agent talking to that human.
+*   **Canonical Artifact Voice**: Even though the agent speaks to different users differently (based on their `SOUL.md`), the underlying project truth (PRDs, designs, logs) must remain neutral, factual, and strictly consistent. This ensures presentation changes don't pollute the actual engineering artifacts.
