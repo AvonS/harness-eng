@@ -14,9 +14,9 @@ gates:
 actions:
   - scan: project for existing docs (README, PRD, ADR, code)
   - classify_scenario: [A: greenfield, B: brownfield, C: documented]
-  - if_brownfield: convert existing agents.md or rules to .harness-eng/CONSTITUTION.md
   - create: .harness-eng/ directory structure
-  - copy_from_harness_repo:
+  - if_brownfield: convert existing agents.md or rules to .harness-eng/CONSTITUTION.md
+  - fetch_and_replace_from_canonical:
     - commands/ -> .harness-eng/commands/
     - agents/ -> .harness-eng/agents/
     - scripts/ -> .harness-eng/scripts/

@@ -9,27 +9,34 @@ reason: Bootstrap operation
 gates:
   - check: .harness-eng/ exists
     on_fail: STOP, run /h:init
-  - check: current version < latest version
-    on_fail: report "already up to date"
+  - check: git status is clean
+    on_fail: STOP, commit or stash changes before upgrading
 
 actions:
-  - fetch: latest commands from harness repo
-  - fetch: latest scripts from harness repo (EXCLUDING sanity-check.sh)
-  - fetch: latest templates from harness repo
-  - compare: local vs remote for each file
-  - preserve: project-specific files (constitution, BRD, architecture, sanity-check.sh)
-  - update: harness files only
-  - report: what changed
-  - commit: upgrade changes
+  - fetch_and_replace_from_canonical:
+    - commands/ -> .harness-eng/commands/
+    - agents/ -> .harness-eng/agents/
+    - scripts/ -> .harness-eng/scripts/ (EXCLUDE: sanity-check.sh)
+    - skills/ -> .harness-eng/skills/
+    - templates/ -> .harness-eng/templates/
+    - AGENTS.md -> ./AGENTS.md
+  - preserve_project_state:
+    - .harness-eng/CONSTITUTION.md
+    - .harness-eng/BRD.md
+    - .harness-eng/ARCHITECTURE.md
+    - .harness-eng/SLICE_LOG.md
+    - .harness-eng/scripts/sanity-check.sh
+    - all active/done phases
+  - report: list of updated files
+  - commit: "chore: upgrade harness-eng to latest"
 
 must_do:
-  - Fetch from canonical source
-  - Preserve project customizations
-  - Exclude sanity-check.sh from updates (it is a project-specific file)
+  - Fetch exactly the specified folders from canonical source
+  - Always preserve project customizations and state
+  - Exclude sanity-check.sh from script updates
   - Report changes clearly
 
 must_not_do:
-  - Overwrite project-level files (e.g., sanity-check.sh)
-  - Skip comparison
-  - Upgrade without reporting
+  - Overwrite project-level files (BRD, CONSTITUTION, SLICE_LOG)
+  - Upgrade with uncommitted changes
 ---
