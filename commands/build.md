@@ -1,7 +1,7 @@
 ---
 name: harness-build
 description: Implement features using TDD
-persona: Jr Programmer
+persona: Developer
 
 gates:
   - check: 'design.md "Ref: APPROVED"'

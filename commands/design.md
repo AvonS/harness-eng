@@ -1,8 +1,8 @@
 ---
 name: harness-design
-description: Collaborator persona - design architecture and interfaces
+description: Analyst persona - design architecture and interfaces
 
-persona: Collaborator
+persona: Analyst
 subagent: true
 goal: Produce a comprehensive, deterministic, and highly readable design.md document with architecture diagrams (mermaid) and API contracts, following templates/feature/design.md.
 

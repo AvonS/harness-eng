@@ -32,12 +32,12 @@ Each command runs in a **subagent** with the right persona. The subagent reads o
 
 | Command | Subagent Persona | Isolation | Returns |
 |---------|-----------------|-----------|---------|
-| `/h:define` | Collaborator | Reads BRD, writes spec | spec.md |
-| `/h:design` | Collaborator | Reads spec, writes design | design.md |
-| `/h:approve` | Collaborator (human gate) | N/A — waits for human | Ref: APPROVED |
+| `/h:define` | Analyst | Reads BRD, writes spec | spec.md |
+| `/h:design` | Analyst | Reads spec, writes design | design.md |
+| `/h:approve` | Analyst (human gate) | N/A — waits for human | Ref: APPROVED |
 | `/h:tasks` | Developer | Reads design, writes tasks | tasks.md |
 | `/h:review-pre-build` | Sr Architect | Audits design against BRD | pre-build report |
-| `/h:build` | Jr Programmer | Reads tasks, writes code | code + tests |
+| `/h:build` | Developer | Reads tasks, writes code | code + tests |
 | `/h:review-pre-verify` | Sr Tech Lead | Fresh context, no build memory | review report |
 | `/h:verify` | Gatekeeper | Runs tests, writes report | verification.md |
 | `/h:release` | Gatekeeper (human gate) | N/A — waits for human | merged PR |
@@ -49,7 +49,7 @@ User says "build it"
   ↓
 Manager receives request
   ↓
-Manager spawns /h:build subagent (Jr Programmer persona)
+Manager spawns /h:build subagent (Developer persona)
   ↓
 Subagent reads tasks.md, implements each task (TDD), commits
   ↓
@@ -212,24 +212,32 @@ The harness uses a **multi-agent orchestration model** where the Manager spawns 
   - Checks gates after subagent completes
   - Routes to next step or stops if gates fail
   - Maintains workflow state
+  - *Note: The Manager orchestrates, but architecture review belongs to the Sr Architect, and actual approval belongs to the human.*
 
 ### Subagent Personas
 Each command runs in an isolated subagent context with a specific persona:
 
-| Persona | Commands | Behavior | Isolation |
-|---------|----------|----------|-----------|
-| **Collaborator** | `/h:triage`, `/h:bug`, `/h:define`, `/h:design`, `/h:approve` | Front-line agent. Triages issues, clarifies ambiguities, and presents designs for human approval | Fresh context, talks to user |
-| **Sr Architect** | `/h:review-pre-build` | Audits proposed design against business requirements (BRD) and constraints | Fresh context, reads BRD/design |
-| **Developer** | `/h:tasks` | Breaks design into granular tasks, orders by dependency | Reads design, writes tasks |
-| **Jr Programmer** | `/h:build` | Follows TDD strictly, implements one task at a time, never improvises | Reads tasks, writes code + tests |
-| **Sr Tech Lead** | `/h:review-pre-verify` | Reviews with fresh eyes, catches gaps between design and implementation | No build memory, isolated context |
-| **Gatekeeper** | `/h:verify`, `/h:release` | Runs tests, produces verification report, and presents release to human for approval | Runs tests, writes verification.md |
+| Persona | Commands | Behavior | Authority Boundary |
+|---------|----------|----------|--------------------|
+| **Analyst** | `/h:triage`, `/h:bug`, `/h:define`, `/h:design` | Requirements, BDD discovery, design research, UI brief | Writes specs and designs; does not implement |
+| **Sr Architect** | `/h:review-pre-build` | Independent pre-Gate-1 review of architecture, security, UI | Read-only; reports findings, does not fix or approve |
+| **Developer** | `/h:tasks`, `/h:build` | TDD implementation, smallest compliant change, task commits | Can edit implementation; cannot alter gates |
+| **Sr Tech Lead** | `/h:review-pre-verify` | Independent code review, behavior validation, final verification | Read-only; does not fix implementation |
+| **Gatekeeper** | `/h:verify`, `/h:release`, `/h:approve` | Checks gate prerequisites, carries human explicit decisions | Cannot write files; returns structured verdict |
+
+### Human and System Authority
+- **Human**: owns Gate 1 and Gate 2 decisions.
+- **Gatekeeper**: validates readiness and transmits the explicit human decision.
+- **Manager**: coordinates but cannot perform specialist work itself. Writes review and verification reports through delegation.
+- **Sr Architect**: checks design before Gate 1.
+- **Sr Tech Lead**: checks implementation before Gate 2.
+- **Analyst**: owns design research. Typography, branding, visual references, accessibility, BDD, TDD, and Event Storming are *skills*, not separate personas.
 
 ### Subagent Handover Pattern
 
 ```
 1. Manager receives request (e.g., "build it")
-2. Manager spawns subagent with correct persona (e.g., Jr Programmer for /h:build)
+2. Manager spawns subagent with correct persona (e.g., Developer for /h:build)
 3. Subagent executes in isolated context:
    - Reads only what it needs (tasks.md, spec.md, design.md)
    - Does its work (implements tasks, writes tests)
@@ -248,7 +256,7 @@ Each command runs in an isolated subagent context with a specific persona:
 1. **Prevents context drift**: Each subagent has fresh context, no memory of previous work
 2. **Enforces fresh-eyes review**: Sr Tech Lead subagent reviews with no build memory
 3. **Clear separation of concerns**: Each persona has specific responsibilities
-4. **Prevents mode confusion**: Jr Programmer doesn't try to design, Collaborator doesn't implement
+4. **Prevents mode confusion**: Developer doesn't try to design, Analyst doesn't implement
 5. **Maintains discipline**: Subagents follow strict rules, Manager enforces gates
 
 ### Bug/CR Workflow
@@ -257,7 +265,7 @@ For bugs and change requests, the workflow is streamlined:
 
 | Type | Branch | Subagent Flow |
 |------|--------|---------------|
-| **Bug** | `bugfix/BUG-NNN-<slug>` | Manager → Collaborator (simplified spec) → Developer (tasks) → Jr Programmer (regression test + fix) → Gatekeeper (verify) |
-| **CR** | `cr/CR-NNN-<slug>` | Manager → Collaborator (simplified spec + approval) → Developer → Jr Programmer → Gatekeeper |
+| **Bug** | `bugfix/BUG-NNN-<slug>` | Manager → Analyst (simplified spec) → Developer (tasks) → Developer (regression test + fix) → Gatekeeper (verify) |
+| **CR** | `cr/CR-NNN-<slug>` | Manager → Analyst (simplified spec + approval) → Developer → Developer → Gatekeeper |
 
 Both skip full design cycle but maintain approval gates and TDD discipline.

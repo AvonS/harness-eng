@@ -1,7 +1,7 @@
 ---
 name: harness-approve
 description: Human gate for design approval
-persona: Collaborator
+persona: Gatekeeper
 
 gates:
   - check: 'IF NOT bug/cr THEN review-pre-build.md "Ref: APPROVED"'

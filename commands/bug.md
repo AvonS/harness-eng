@@ -1,7 +1,7 @@
 ---
 name: harness-bug
 description: Process bug/CR with simplified workflow
-persona: Collaborator
+persona: Analyst
 
 gates:
   - check: triage_classified (critical bug)

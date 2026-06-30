@@ -6,7 +6,7 @@ description: >
 
 persona: Sr Architect
 subagent: true
-reason: Needs fresh perspective, separate from design Collaborator
+reason: Needs fresh perspective, separate from design Analyst
 
 gates:
   - check: design.md exists

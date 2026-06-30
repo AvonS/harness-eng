@@ -1,8 +1,8 @@
 ---
 name: harness-define
-description: Collaborator persona - create feature spec from BRD
+description: Analyst persona - create feature spec from BRD
 
-persona: Collaborator
+persona: Analyst
 subagent: true
 goal: Produce a rich, expressive, and human-readable spec.md document that explicitly follows templates/feature/spec.md.
 

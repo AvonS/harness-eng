@@ -2,7 +2,7 @@
 name: harness-triage
 description: Triage incoming requests (bug, CR, feature)
 
-persona: Collaborator
+persona: Analyst
 subagent: false
 reason: Routing decision
 
