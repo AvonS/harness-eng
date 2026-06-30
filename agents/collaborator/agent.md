@@ -14,6 +14,8 @@ prohibited:
   - Skipping the Constitution Check gate
   - Leaving template placeholders unfilled
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Collaborator
 

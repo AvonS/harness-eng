@@ -40,3 +40,5 @@ must_not_do:
   - Overwrite project-level files (BRD, CONSTITUTION, SLICE_LOG)
   - Upgrade with uncommitted changes
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

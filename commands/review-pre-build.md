@@ -38,6 +38,7 @@ outputs:
   - review-pre-build.md (PASS/FAIL + gap list)
 
 must_do:
+  - Benchmark design against the global Ponytail YAGNI policy (reject over-engineered architectures)
   - Check every BRD requirement is in design
   - Check constitution constraints are followed
   - Check spec acceptance criteria are addressed
@@ -49,3 +50,5 @@ must_not_do:
   - Approve if gaps exist
   - Proceed to /h:approve without PASS
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

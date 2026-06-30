@@ -15,6 +15,8 @@ prohibited:
   - Writing code without a corresponding task
   - Self-approving design changes
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Developer
 

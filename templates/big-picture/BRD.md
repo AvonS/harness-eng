@@ -18,6 +18,8 @@ must_do:
 must_not_do:
   - Finalize with unanswered stakeholder questions
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Business Requirements Document
 # Project: <project-name>

@@ -5,6 +5,8 @@ description: >
   Use when creating files, writing tests with vitest, defining types,
   or working with package.json. Overrides pretrained habits with project rules.
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 <!-- EDITORIAL: Only project-specific rules and common AI mistakes. -->
 

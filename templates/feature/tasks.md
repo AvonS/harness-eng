@@ -24,6 +24,8 @@ agent_contract:
     - id: OUT-001
       path: "tasks.md with dependency ordering"
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Tasks Template: [FEATURE_NAME]
 

@@ -18,6 +18,8 @@ must_do:
 must_not_do:
   - Leave system boundary undefined
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Architecture Document
 # Project: <project-name>

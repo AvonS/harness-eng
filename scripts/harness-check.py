@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade ***
 """
 harness-check.py — Validate prerequisites for each workflow step.
 

@@ -5,6 +5,8 @@ description: >
   attribute syntax, CDN URLs, SDK helpers, and common patterns. Prevents
   common integration mistakes like wrong attribute format or GET vs POST.
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 <!-- EDITORIAL GUIDELINES
 - Be terse. Use tables and code examples over prose.

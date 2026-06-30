@@ -31,3 +31,5 @@ must_not_do:
   - Write verification if tests fail
   - Skip documentation checks
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

@@ -24,6 +24,8 @@ agent_contract:
     - id: OUT-001
       path: "design.md with Ref: PENDING"
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Design Template: [FEATURE_NAME]
 

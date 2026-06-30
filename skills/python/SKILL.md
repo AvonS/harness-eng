@@ -5,6 +5,8 @@ description: >
   Python habits with project-specific conventions.
   Use when creating modules, writing tests with pytest, defining types, or packaging.
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 <!-- EDITORIAL: Only project-specific rules and common AI mistakes. Not a Python tutorial. -->
 

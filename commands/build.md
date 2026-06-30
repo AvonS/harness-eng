@@ -16,6 +16,7 @@ preflight:
 
 actions:
   - for_each_task:
+    - execute_ponytail_decision_ladder: evaluate before adding any dependencies or abstractions
     - write_test (must fail)
     - implement (must pass test)
     - commit
@@ -25,6 +26,7 @@ actions:
     - if tests_pass: route to /h:review-pre-verify
 
 must_do:
+  - Strictly follow the Ponytail YAGNI framework when writing code
   - Write test first (TDD)
   - Test must fail before implementation
   - Test must pass after implementation
@@ -35,3 +37,5 @@ must_not_do:
   - Skip failing test
   - Commit without passing test
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

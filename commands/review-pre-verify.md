@@ -34,6 +34,7 @@ actions:
     - STOP, route to build
 
 must_do:
+  - Audit code for Ponytail YAGNI compliance (flag unnecessary third-party dependencies or excessive abstractions)
   - Read ALL code files
   - Verify sanity-check.sh covers new features
   - Verify sanity-check.sh has regression tests for bug fixes
@@ -48,3 +49,5 @@ must_not_do:
   - Give PASS if sanity check incomplete
   - Give PASS if gaps exist
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

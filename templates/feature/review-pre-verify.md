@@ -19,6 +19,8 @@ agent_contract:
     - id: OUT-001
       path: "review-pre-verify.md with verdict"
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Sr Tech Lead Review: <feature>
 

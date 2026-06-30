@@ -13,6 +13,8 @@ prohibited:
   - Modifying the design directly during review
   - Marking PASS when gaps exist
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Sr Architect
 

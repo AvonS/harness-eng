@@ -25,3 +25,5 @@ must_not_do:
   - Fix the bug directly
   - Skip human approval
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

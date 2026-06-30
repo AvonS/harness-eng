@@ -5,6 +5,8 @@ description: >
   Go habits with project-specific rules derived from CONSTITUTION.md.
   Use when creating files, writing functions, tests, goroutines, or SQL queries in Go.
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 <!-- EDITORIAL GUIDELINES
 This file is loaded into an agent's context window as a correction layer for

@@ -14,6 +14,8 @@ prohibited:
   - Releasing with failing tests
   - Skipping pre-flight checks
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Gatekeeper
 

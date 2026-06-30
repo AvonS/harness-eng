@@ -42,3 +42,5 @@ must_not_do:
   - Forget version bump
   - Skip SLICE_LOG update
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

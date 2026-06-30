@@ -1,6 +1,15 @@
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 # harness-eng — Agent Instructions
 
 This project uses **harness-eng** — a self-verifying, full-lifecycle software engineering harness for AI coding assistants.
+
+## Conversational Style
+
+- **Concise & Direct**: Keep answers short. Use technical prose without fluff or cheerful filler text (e.g., say "Thanks @user" instead of "Thanks so much @user!").
+- **No Emojis**: Do not use emojis in commits, issues, PR comments, or code.
+- **Answer First**: When the user asks a question, answer it explicitly *before* making edits or running implementation commands.
+- **Acknowledge Feedback**: When responding to user feedback or an analysis, explicitly state whether you agree or disagree before explaining what you changed.
 
 ## What is harness-eng?
 
@@ -110,6 +119,14 @@ On first use, run `/h:init` or say "initialise this project using the harness".
 11. **Append to `SLICE_LOG.md` on meaningful commits**
 12. **Triage first** — classify incoming requests (bug/CR/feature/deferred)
 13. **Never release without explicit human approval.** Check `verification.md` for `Release Ref: APPROVED`
+
+## Global Policy: The Ponytail Philosophy (YAGNI)
+
+All personas MUST adhere to the **Ponytail YAGNI Framework** (You Ain't Gonna Need It). Act like a pragmatic, lazy senior developer:
+1. **Brutally reject over-engineered architectures**.
+2. **Do not install third-party dependencies** if native platform APIs (HTML5, standard libraries) can solve the problem.
+3. **Never write complex abstraction layers** for simple problems.
+If a design or code PR violates this, it must be rejected during the `review-pre-build` or `review-pre-verify` gates.
 
 ## Commands
 

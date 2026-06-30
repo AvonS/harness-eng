@@ -18,6 +18,8 @@ must_do:
 must_not_do:
   - Remove SST rules or mandatory gate definitions
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # Constitution Template
 

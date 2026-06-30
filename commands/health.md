@@ -30,3 +30,5 @@ must_not_do:
   - Skip any rule check
   - Soft-pedal violations
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+

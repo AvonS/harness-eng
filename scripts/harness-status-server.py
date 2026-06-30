@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade ***
 """
 harness-status-server.py — Serve an HTML status dashboard for harness-eng projects.
 

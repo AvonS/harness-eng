@@ -22,6 +22,8 @@ agent_contract:
     - id: OUT-001
       path: "ui-brief.md"
 ---
+<!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
+
 
 # UI Design Brief
 
