@@ -9,29 +9,36 @@ reason: Bootstrap operation
 
 gates:
   - check: "! .harness-eng/ exists"
-    on_fail: STOP, run /h:upgrade-harness
+    on_fail: STOP, .harness-eng already exists. Use /h:upgrade-harness instead.
 
 actions:
   - scan: project for existing docs (README, PRD, ADR, code)
   - classify_scenario: [A: greenfield, B: brownfield, C: documented]
-  - derive_constitution: from project analysis + user input
+  - if_brownfield: convert existing agents.md or rules to .harness-eng/CONSTITUTION.md
+  - create: .harness-eng/ directory structure
+  - copy_from_harness_repo:
+    - commands/ -> .harness-eng/commands/
+    - agents/ -> .harness-eng/agents/
+    - scripts/ -> .harness-eng/scripts/
+    - skills/ -> .harness-eng/skills/
+    - templates/ -> .harness-eng/templates/
+    - AGENTS.md -> ./AGENTS.md
+  - derive_constitution: from project analysis + user input (if not converted)
   - derive_brd: from PRD/docs/conversation
   - derive_architecture: from code structure/docs/conversation
   - derive_technology: from detected stack
-  - fetch: AGENTS.md from harness repo
-  - create: .harness-eng/ symlink structure
   - present: all docs to human for review
   - wait: human approval
   - commit: initial harness setup
 
 must_do:
   - Get human approval on all docs
-  - Fetch AGENTS.md from canonical source
-  - Create complete symlink structure
+  - Copy engine folders exactly as specified
+  - Preserve any existing agent rules in CONSTITUTION.md
   - Explain what was derived and why
 
 must_not_do:
   - Skip human review
   - Guess without asking
-  - Leave docs unapproved
+  - Overwrite existing files without asking
 ---
