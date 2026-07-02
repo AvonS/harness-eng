@@ -47,30 +47,30 @@ The core philosophy of `harness-eng` is the **Autonomous Agent Loop** bounded by
 ```
 
 ### 1. Planning & Design (Pre-Design Loop)
-Before the first human gate, agents loop to ensure the architecture is sound. If `review-pre-build` detects gaps in the design or spec, it automatically routes back to `define` or `design` for the task agents to fix them.
+Before the first human gate, agents loop to ensure the architecture is sound. If `review-pre-build` detects gaps in the design or spec, it automatically routes back to `define` or `design` for the Analyst to fix them.
 
-| Command | Persona | What happens | Gate |
-|---------|---------|-------------|------|
+| Command | Logical Role | What happens | Gate |
+|---------|--------------|-------------|------|
 | `/h:init` | Manager | Derive constitution, BRD, architecture | — |
-| `/h:define` | Collaborator | Create feature spec. Large BRDs auto-organize into phases | — |
-| `/h:design` | Collaborator | Design architecture, interfaces, file layout | — |
-| `/h:review-pre-build` | Sr Tech Lead | Agent validates readiness to build, returns to `define`/`design` if gaps found | ✅ Agent |
-| `/h:approve` | Manager | **Human Gate 1:** Review design, approve or request changes | ✅ Human |
+| `/h:define` | Analyst | Create a prioritized feature spec with testable acceptance criteria | — |
+| `/h:design` | Analyst | Design architecture, interfaces, file layout | — |
+| `/h:review-pre-build` | Sr Architect | Agent validates design against BRD and Constitution before human review | Agent Review 1 |
+| `/h:approve` | Gatekeeper | **Human Gate 1:** Review design, approve or request changes | ✅ Human Gate 1 |
 
 ### 2. The Agent Loop (Autonomous)
 Once the design is approved, the agent works through these commands iteratively. If `review-pre-verify` or `verify` catches a bug, the agent automatically loops back to `build` (or `design` for major gaps) to fix it.
 
-| Command | Persona | What happens | Gate |
-|---------|---------|-------------|------|
+| Command | Logical Role | What happens | Gate |
+|---------|--------------|-------------|------|
 | `/h:tasks` | Developer | Break design into granular tasks with dependencies | — |
-| `/h:build` | Jr Programmer | TDD implementation — one commit per task | — |
-| `/h:review-pre-verify`| Sr Tech Lead | Agent reviews code against design to catch gaps | ✅ Agent |
-| `/h:verify` | Gatekeeper | Run tests, check acceptance criteria, sanity-check | ✅ Agent |
+| `/h:build` | Developer | Implement against the approved Evidence Contract — one commit per task | — |
+| `/h:review-pre-verify`| Sr Tech Lead | Agent reviews code against design to catch gaps | Agent Review 2 |
+| `/h:verify` | Gatekeeper | Run tests, check acceptance criteria, write verification.md | — |
 
 ### 3. Release
-| Command | Persona | What happens | Gate |
-|---------|---------|-------------|------|
-| `/h:release` | Manager | **Human Gate 2:** Approve release — PR, merge, update status | ✅ Human |
+| Command | Logical Role | What happens | Gate |
+|---------|--------------|-------------|------|
+| `/h:release` | Gatekeeper | **Human Gate 2:** Approve release — PR, merge, update status | ✅ Human Gate 2 |
 
 ---
 
@@ -84,7 +84,7 @@ read https://github.com/AvonS/harness-eng/blob/main/commands/bug.md and follow t
 
 | Type | Branch | Workflow |
 |------|--------|----------|
-| **Bug** | `bugfix/BUG-NNN-<slug>` | Skip design, write regression test first (TDD) |
+| **Bug** | `bugfix/BUG-NNN-<slug>` | Skip design; require a regression test when the defect is reproducible through automation |
 | **CR** | `cr/CR-NNN-<slug>` | Skip full design, simplified spec + approval |
 
 ---
@@ -138,7 +138,7 @@ Read command files from `.harness-eng/commands/` and follow them.
 | `/h:design` | Design architecture, interfaces, file layout |
 | `/h:approve` | **Human gate** — review design, approve or request changes |
 | `/h:tasks` | Break design into granular tasks with dependencies |
-| `/h:build` | TDD implementation — one commit per task |
+| `/h:build` | Implement against the approved Evidence Contract — one commit per task |
 | `/h:verify` | Run tests, check acceptance criteria, fill verification report |
 | `/h:release` | Create PR, merge, archive, update status |
 | `/h:upgrade-harness` | Fetch latest instructions from `https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md` |

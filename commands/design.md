@@ -21,6 +21,7 @@ actions:
   - design_interfaces (APIs, contracts)
   - design_file_layout (where things go)
   - design_ui_brief_if_applicable (UX, components)
+  - define_evidence_contract: select the minimum evidence required by change type, risk, and reversibility
   - check_constitution_compliance
   - write_design: use templates/feature/design.md to produce a rich technical document including architecture diagrams, data flow, and file layout (design.md with UI brief if applicable)
   - write_design_references: if visual patterns are adopted, record them in design-references.md with source URL and adoption note
@@ -34,6 +35,8 @@ outputs:
 must_do:
   - Follow constitution conventions
   - Design for testability
+  - State required evidence and explicitly unnecessary test categories
+  - Match evidence cost to risk, uncertainty, reversibility, and user-visible impact
   - Include error handling
   - Start from existing app design system if one exists
   - Use the registry before broad web search
@@ -49,6 +52,6 @@ must_not_do:
   - Copy/paste UI code, layouts, themes, or component structures from reference repos unless explicitly approved and licensed
   - Use a reference to justify a dependency (it can only justify a design decision)
   - Ask open-ended questions like "what color do you want?" as the first question (propose a direction first)
+  - Require every available testing technique regardless of change type
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

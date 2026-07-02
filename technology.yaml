@@ -1,0 +1,11 @@
+sensors:
+  - id: unit-tests
+    command: python3 -m unittest discover -v tests
+    required_before: verify
+    timeout: 60
+    evidence: stdout, stderr, exit status, timestamp
+  - id: sanity-check
+    command: bash scripts/sanity-check.sh
+    required_before: review-pre-verify, verify
+    timeout: 120
+    evidence: stdout, stderr, exit status, timestamp

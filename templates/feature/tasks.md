@@ -73,10 +73,12 @@ agent_contract:
 **Goal**: [What this story delivers]
 **Independent Test**: [How to verify alone]
 
-### Tests (TDD — write first, confirm FAIL)
+### Required Evidence
 
-- [ ] T007 [P] [US1] Contract test for [endpoint] in tests/contract/
-- [ ] T008 [P] [US1] Integration test in tests/integration/
+> Add only checks required by the approved Evidence Contract. For executable logic, put meaningful automated tests before implementation tasks.
+
+- [ ] T007 [P] [US1] [required check from Evidence Contract]
+- [ ] T008 [P] [US1] [additional required check, or remove]
 
 ### Implementation
 

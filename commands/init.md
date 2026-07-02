@@ -30,6 +30,7 @@ actions:
   - derive_design_registry: copy templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
   - derive_technology: from detected stack
   - fetch_skills: progressively fetch only the necessary skills from harness repo based on derived technology stack
+  - run: scripts/skill-selection.py for deterministic preview, install, and install log creation
   - present: all docs to human for review
   - wait: human approval
   - commit: initial harness setup
@@ -47,4 +48,3 @@ must_not_do:
   - Overwrite existing files without asking
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

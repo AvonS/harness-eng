@@ -19,11 +19,12 @@ preflight:
 
 actions:
   - identify_feature_from_brd
-  - perform_adaptive_behavior_discovery: choose Example Mapping, Journey Mapping, or Event Storming based on complexity
+  - classify_change: documentation, configuration, executable_logic, workflow, bug_fix, business_behavior, ui_behavior, security_boundary, migration, or prototype
+  - perform_adaptive_behavior_discovery: use examples only when behavior, state transitions, or user outcomes require clarification
   - propose_behavior_model: identify actors, goals, initial conditions, event flow, state transitions, and invariants
   - present_behavior_playback_to_human: ask bounded, contextual questions about load-bearing uncertainties
   - for_each_requirement:
-    - create_given_when_then_stories
+    - create_testable_acceptance_examples: use Given/When/Then only for material behavior
     - identify_acceptance_criteria
   - write_spec: use templates/feature/spec.md to produce a detailed, well-formatted markdown document
   - set_ref: PENDING
@@ -33,10 +34,11 @@ outputs:
   - spec.md with Ref: PENDING
 
 must_do:
-  - Perform behavior discovery before generating acceptance scenarios
+  - Classify the change before selecting evidence
+  - Perform behavior discovery when behavior is material or uncertain
   - Mark statements as confirmed, observed, inferred, or assumed
   - Present a concise behavior playback to the human before writing spec
-  - Include Given/When/Then stories
+  - Make acceptance criteria testable without forcing one notation
   - Cover all acceptance criteria
   - Get human review of spec
 
@@ -46,4 +48,3 @@ must_not_do:
   - Proceed without human approval
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-
