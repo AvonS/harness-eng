@@ -10,6 +10,7 @@
 - **Fix**: Corrected `ROOT` path resolution in `sanity-check.sh` to prevent `HARNESS_DIR` from resolving to `.harness-eng/.harness-eng` in managed projects.
 - **Fix**: Added `VERSION` to the `fetch_and_replace_from_canonical` block in `upgrade-harness.md` so managed projects sync their framework version correctly.
 - **Feature**: Added `shadcn-svelte` and `web.dev-patterns` to `design-registry.yaml` to support Svelte/Tailwind architectures and Chrome Developers best practices.
+- **Feature**: Split `design-registry.yaml` into a canonical template and local project overrides to resolve confusion and merge collisions.
 
 
 ## v0.2.0 - Phase 2 Versioned Migration
