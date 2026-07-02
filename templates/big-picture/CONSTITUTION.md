@@ -131,16 +131,16 @@ must_not_do:
 
 ---
 
-## 4-Persona Workflow
+## Logical Roles and Agent Mappings
 
-> *Universal personas. Hardcoded — do not modify.*
-
-| Persona | Commands | Role |
-|---------|----------|------|
-| **Collaborator** | define, design | Explore problem space, challenge assumptions, create spec and design |
-| **Developer** | tasks, build | Follow instructions precisely, TDD, one commit per task |
-| **Sr Tech Lead** | review-pre-verify | Compare design vs code, identify gaps, assess quality |
-| **Gatekeeper** | approve, release | Facilitate human gates — present evidence, wait for decision |
+| Logical Role | Commands Managed | File-Based Agent Definition | Responsibility & Context |
+|--------------|------------------|-----------------------------|--------------------------|
+| **Manager** | `/h:init`, `/h:upgrade-harness`, `/h:health`, `/h:status` | *None (Parent Context)* | Orchestrates the workflow execution, manages the subagent invocation loop, and checks status/quality gates. Run directly in the main/parent shell. |
+| **Analyst** | `/h:triage`, `/h:bug`, `/h:define`, `/h:design` | `agents/collaborator/agent.md` | Explores problem space, triages requests, drafts feature specifications (`spec.md`), and architectures designs (`design.md`). |
+| **Sr Architect** | `/h:review-pre-build` | `agents/sr-architect/agent.md` | Audits proposed design documents against the BRD and project constitution before the design is presented for human approval. |
+| **Developer** | `/h:tasks`, `/h:build` | `agents/developer/agent.md` | Breaks the approved design down into task lists (`tasks.md`) and implements code using Test-Driven Development (TDD). |
+| **Sr Tech Lead** | `/h:review-pre-verify` | `agents/sr-tech-lead/agent.md` | Audits implementation code against the approved design and spec, verifying alignment and syntax conformance. |
+| **Gatekeeper** | `/h:verify`, `/h:release`, `/h:approve` | `agents/gatekeeper/agent.md` | Validates gate prerequisites, runs testing validation, and handles human decisions (transmitting explicit human approvals for design and release). |
 
 ---
 
