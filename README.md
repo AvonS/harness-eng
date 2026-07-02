@@ -232,4 +232,6 @@ The [AI Manifesto](https://krishavanoor.github.io/) names the core problem: *"Th
 
 ## License
 
-MIT — by [Avon Software Labs](https://avons.github.io)
+Copyright (c) 2026 [Avon Software Labs](https://avons.github.io).
+
+Licensed under the GNU Affero General Public License v3.0 only (`AGPL-3.0-only`). See [LICENSE](LICENSE).
