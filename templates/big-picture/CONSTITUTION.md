@@ -135,7 +135,7 @@ must_not_do:
 
 ```yaml
 release_policy:
-  strategy: "[MUST INPUT: local_merge | pull_request | direct]"
+  strategy: "local_merge" # Options: local_merge | pull_request | direct
   target_branch: "main"
   require_human_approval: true
   push_branch: true
