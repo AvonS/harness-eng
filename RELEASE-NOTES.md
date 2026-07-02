@@ -12,6 +12,7 @@
 - Refactored legacy detection into a simplified catch-all for pre-Foundry projects.
 - Updated `upgrade-harness.md` to properly orchestrate pre-upgrade staging, migrations, and canonical file replacement.
 - Updated `init.md` to establish the new identity structure automatically on bootstrap.
+- Added Testing Level prompts and design template integrations for scaled verification.
 ## v0.1.2 - Project Release Policies
 
 **Date**: 2026-07-02
