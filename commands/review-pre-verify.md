@@ -17,6 +17,7 @@ actions:
   - read_all_code_files (no skipping)
   - read_design (architecture, interfaces)
   - read_spec (requirements, acceptance criteria)
+  - run_required_sensors from technology.yaml
   - check_sanity_check_completeness: new_features_have_tests, bug_fixes_have_regression_tests, all_phases_covered
   - check_design_implementation_gaps
   - check_spec_requirement_gaps
@@ -50,4 +51,3 @@ must_not_do:
   - Give PASS if gaps exist
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

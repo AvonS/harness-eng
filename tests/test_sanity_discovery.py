@@ -1,43 +1,73 @@
-import unittest
 import os
 import shutil
 import subprocess
+import tempfile
+from pathlib import Path
+import unittest
+
 
 class TestSanityDiscovery(unittest.TestCase):
-    def setUp(self):
-        self.root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        self.sanity_script = os.path.join(self.root, "scripts", "sanity-check.sh")
-        
-        # Determine the local skills directory (in dogfood repo since that's where the active state lives)
-        self.skills_dir = os.path.join(self.root, ".harness-eng", "skills")
-        if not os.path.exists(self.skills_dir):
-            self.skills_dir = os.path.abspath(os.path.join(self.root, "..", "harness-eng-dogfood", ".harness-eng", "skills"))
+    def setUp(self) -> None:
+        self.repo_root = Path(__file__).resolve().parent.parent
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+        self.sanity_script = self.root / "scripts" / "sanity-check.sh"
 
-        self.mock_skill_dir = os.path.join(self.skills_dir, "mockskilltest")
+        self._symlink(self.repo_root / "commands", self.root / "commands")
+        self._symlink(self.repo_root / "templates", self.root / "templates")
+        self._symlink(self.repo_root / "hooks", self.root / "hooks")
+        self._symlink(self.repo_root / "docs", self.root / "docs")
+        self._symlink(self.repo_root / "VERSION", self.root / "VERSION")
+        self._symlink(self.repo_root / "technology.yaml", self.root / "technology.yaml")
 
-    def tearDown(self):
-        # Cleanup mock skill
-        if os.path.exists(self.mock_skill_dir):
-            shutil.rmtree(self.mock_skill_dir)
+        scripts_dir = self.root / "scripts"
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+        for name in ["sanity-check.sh", "harness-status.py", "version-check.py"]:
+            shutil.copy2(self.repo_root / "scripts" / name, scripts_dir / name)
 
-    def test_dynamic_skills_discovery(self):
-        """Verify that scripts/sanity-check.sh dynamically detects skills instead of hardcoding counts."""
-        # Create a mock skill directory and file
-        os.makedirs(self.mock_skill_dir, exist_ok=True)
-        with open(os.path.join(self.mock_skill_dir, "SKILL.md"), "w", encoding="utf-8") as f:
-            f.write("---\nname: mockskilltest\ndescription: test skill\n---\n")
+        harness_dir = self.root / ".harness-eng"
+        harness_dir.mkdir(parents=True, exist_ok=True)
+        self._symlink(self.repo_root / ".harness-eng" / "agents", harness_dir / "agents")
+        self._symlink(self.repo_root / ".harness-eng" / "internal-scripts", harness_dir / "internal-scripts")
+        self._symlink(self.repo_root / ".harness-eng" / "VERSION", harness_dir / "VERSION")
+        self._symlink(self.repo_root / ".harness-eng" / "CONSTITUTION.md", harness_dir / "CONSTITUTION.md")
+        self._symlink(self.repo_root / ".harness-eng" / "BRD.md", harness_dir / "BRD.md")
 
-        # Count actual skills on disk
-        actual_skills_count = len([d for d in os.listdir(self.skills_dir) if os.path.isdir(os.path.join(self.skills_dir, d))])
+        real_skills = self.repo_root / ".harness-eng" / "skills"
+        self.skills_dir = harness_dir / "skills"
+        shutil.copytree(real_skills, self.skills_dir, dirs_exist_ok=True)
+        self.mock_skill_dir = self.skills_dir / "mockskilltest"
 
-        # Run sanity-check.sh
-        # Note: We expect the script itself to pass or fail, but we parse its stdout for the count
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def _symlink(self, source: Path, target: Path) -> None:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(source, target_is_directory=source.is_dir())
+
+    def test_dynamic_skills_discovery(self) -> None:
+        self.mock_skill_dir.mkdir(parents=True, exist_ok=True)
+        (self.mock_skill_dir / "SKILL.md").write_text(
+            "---\nname: mockskilltest\ndescription: test skill\n---\n",
+            encoding="utf-8",
+        )
+
+        actual_skills_count = len([path for path in self.skills_dir.iterdir() if path.is_dir()])
         env = os.environ.copy()
         env["SKIP_UNITTESTS"] = "1"
-        res = subprocess.run(["bash", self.sanity_script], cwd=self.root, capture_output=True, text=True, env=env)
-        
+        res = subprocess.run(
+            ["bash", str(self.sanity_script)],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+        )
+
         expected_output_fragment = f"{actual_skills_count} skills verified"
-        self.assertIn(expected_output_fragment, res.stdout, f"Sanity check did not dynamically discover all {actual_skills_count} skills. Output: {res.stdout}")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertIn(expected_output_fragment, res.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,6 +8,8 @@ gates:
     on_fail: STOP, route to design
   - check: tasks.md exists
     on_fail: STOP, route to tasks
+  - check: no BLOCKED.md in active features
+    on_fail: STOP, route to blocked-state recovery
 
 preflight:
   - read_design (architecture, interfaces)
@@ -38,4 +40,3 @@ must_not_do:
   - Commit without passing test
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

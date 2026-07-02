@@ -285,14 +285,15 @@ def get_step_statuses() -> list[dict]:
     # build
     if tasks_count > 0:
         remaining = count_incomplete_tasks()
+        blocked = find_blocked_features()
         steps.append(
             {
                 "step": "build",
-                "status": "done" if remaining == 0 else "pending",
+                "status": "pending" if blocked else ("done" if remaining == 0 else "pending"),
                 "label": "Build",
-                "message": "All tasks complete"
-                if remaining == 0
-                else f"{remaining} tasks remaining",
+                "message": "Blocked by BLOCKED.md"
+                if blocked
+                else ("All tasks complete" if remaining == 0 else f"{remaining} tasks remaining"),
                 "remaining_tasks": remaining,
             }
         )
@@ -380,6 +381,8 @@ def determine_next_step(steps: list[dict]) -> str:
     """Determine the recommended next action."""
     step_map = {s["step"]: s for s in steps}
 
+    if find_blocked_features():
+        return "resolve BLOCKED.md"
     if step_map["init"]["status"] != "done":
         return "init"
     if step_map["define"]["status"] != "done":
@@ -421,6 +424,20 @@ def get_build_times() -> dict | None:
         return None
 
 
+def get_skill_install_log() -> dict | None:
+    log_path = HARNESS_DIR / "skill-install.json"
+    if not log_path.is_file():
+        return None
+    try:
+        return json.loads(log_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def find_blocked_features() -> list[Path]:
+    return find_active("BLOCKED.md")
+
+
 def format_human(steps: list[dict], slice_log: dict, version: dict):
     """Print human-readable colored output matching the original .sh format."""
     print(f"{CYAN}=== harness-eng Workflow Status ==={NC}")
@@ -434,6 +451,11 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
         else:
             icon = f"{RED}❌{NC}"
         print(f"{icon} {s['label'].lower():8} — {s['message']}")
+
+    blocked = find_blocked_features()
+    if blocked:
+        print()
+        print(f"{RED}⛔ BLOCKED{NC} — {blocked[0]}")
 
     # Build times
     build_data = get_build_times()
@@ -481,6 +503,12 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
     else:
         print(f"{YELLOW}⚠️  Version check not available{NC}")
 
+    skill_log = get_skill_install_log()
+    if skill_log is not None:
+        print()
+        print(f"{CYAN}=== Skill Install Log ==={NC}")
+        print(f"{GREEN}✅ {len(skill_log)} skill install record(s){NC}")
+
     # Next step
     print()
     print(f"{CYAN}=== Next Step ==={NC}")
@@ -494,6 +522,8 @@ def format_json(steps: list[dict], slice_log: dict, version: dict):
         "slice_log": slice_log,
         "version": version,
         "build_times": get_build_times(),
+        "skill_install_log": get_skill_install_log(),
+        "blocked_features": [str(p) for p in find_blocked_features()],
         "next_step": determine_next_step(steps),
     }
     print(json.dumps(output, indent=2, default=str))

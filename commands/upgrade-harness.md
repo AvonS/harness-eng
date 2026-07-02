@@ -27,6 +27,7 @@ actions:
     - .harness-eng/SLICE_LOG.md
     - .harness-eng/scripts/sanity-check.sh
     - all active/done phases
+  - use: scripts/skill-selection.py to preserve project-modified skills
   - report: list of updated files
   - commit: "chore: upgrade harness-eng to latest"
 
@@ -41,4 +42,3 @@ must_not_do:
   - Upgrade with uncommitted changes
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

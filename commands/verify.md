@@ -13,6 +13,7 @@ gates:
 
 actions:
   - run_all_tests (unit + integration)
+  - run_required_sensors from technology.yaml
   - if tests_fail: STOP, fix tests
   - check_readme_updated (if user-facing changes)
   - check_release_notes_updated
@@ -32,4 +33,3 @@ must_not_do:
   - Skip documentation checks
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-
