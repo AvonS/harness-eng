@@ -2,6 +2,15 @@
 # e2e_workflow_test.sh - Integration test for harness gates
 set -euo pipefail
 
+echo "Test 0: Dogfood Script Separation Verification"
+for script in check-agent-contracts.py check-approved-designs.py check-approved-designs.sh check-containment.py check-slice-log-entry.py check-slice-log.py; do
+    if [ -f "scripts/$script" ]; then
+        echo "❌ FAIL: Dogfood script scripts/$script should not exist in distributed scripts directory"
+        exit 1
+    fi
+done
+echo "✅ Dogfood script separation verified"
+
 echo "Setting up E2E tests..."
 mv .harness-eng/phases/phase-0-foundation/features/active .harness-eng/phases/phase-0-foundation/features/active_bak 2>/dev/null || true
 rm -rf .harness-eng/phase-e2e-test
