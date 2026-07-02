@@ -1,24 +1,39 @@
-# Phase 0 Foundation Completion
+# Release Notes
+
+## v0.1.2 - Project Release Policies
+
+**Date**: 2026-07-02
+**Status**: Released
+
+### Changes
+
+- Added a project-specific `release_policy` to the canonical constitution template.
+- Added `local_merge` and `pull_request` release strategies.
+- Preserved explicit Human Gate 2 approval for both strategies.
+- Required publication checks for the target branch and release tag.
+- Corrected release-gate parsing for canonical `**Release Ref**: PENDING` fields.
+- Added regression coverage for release policy consumption and release-reference parsing.
+
+## v0.1.1 - Phase 1 Gap Closure
+
+**Date**: 2026-07-02
+**Status**: Released
+
+### Changes
+
+- Reconciled canonical inventory and logical role documentation.
+- Added deterministic skill selection with preservation of project-owned edits.
+- Added bounded failure tracking and scoped `BLOCKED.md` recovery.
+- Added material-scenario traceability through tasks, review, and verification.
+- Added fail-closed project sensor execution.
+- Replaced universal TDD/BDD mandates with proportionate Evidence Contracts fixed at Gate 1.
+- Isolated product E2E tests from live dogfood state.
+
+## v0.0.1 - Phase 0 Foundation
 
 **Date**: 2026-06-30
-**Status**: ✅ Done
+**Status**: Released
 
-## What's New
+### Changes
 
-- Rebuilt the entire document and command scaffolding.
-- Restructured `commands/` into 11 strict workflow steps using the simplified CR-005 YAML frontmatter schema.
-- Added explicit human gates (`/h:approve`, `/h:release`) and agent gates (`/h:review-pre-build`, `/h:review-pre-verify`).
-- Rewrote the main verification script (`harness-check.py`) to correctly route state machine flow across all 4 gates.
-- Consolidated all utility shell scripts into cross-platform Python scripts (`check-approved-designs.py`, `check-containment.py`, `check-slice-log.py`, `check-slice-log-entry.py`, `generate-release-notes.py`, `log-release.py`).
-- Added End-to-End integration testing (`tests/e2e_workflow_test.sh`) to actively simulate and block invalid gate transitions.
-- Defined System Events (e.g. `pre-design`, `post-build`) in `BRD.md` to prepare for a native plugin architecture.
-- Re-opened and bundled all 8 foundational features (`F001` - `F008`) into a single active phase for a clean initial release.
-
-## Key Decisions
-
-- Moved all completed `F001`-`F007` features from `done/` back to `active/` to bundle them into a single, cohesive initial commit and release tag.
-- Deleted duplicate bash scripts to permanently eliminate cross-platform (macOS/Linux) discrepancies and maintainability overhead.
-
-## Changes
-
-See [CHANGELOG](CHANGELOG.md) for full details.
+- Established canonical workflow commands, templates, agent roles, gates, scripts, hooks, and documentation.
