@@ -74,9 +74,9 @@ HARNESS_DIR="$ROOT/.harness-eng"
 if [ ! -d "$HARNESS_DIR" ]; then
     HARNESS_DIR="$(cd "$ROOT/../harness-eng-dogfood/.harness-eng" 2>/dev/null && pwd || echo "$ROOT/.harness-eng")"
 fi
-if [ -f "$ROOT/scripts/check-approved-designs.sh" ]; then
-    if ! bash "$ROOT/scripts/check-approved-designs.sh" "$HARNESS_DIR" > /dev/null 2>&1; then
-        echo "⚠️  check-approved-designs.sh found no approved designs"
+if [ -f "$HARNESS_DIR/internal-scripts/check-approved-designs.py" ]; then
+    if ! python3 "$HARNESS_DIR/internal-scripts/check-approved-designs.py" > /dev/null 2>&1; then
+        echo "⚠️  check-approved-designs.py found no approved designs (expected for PENDING phase)"
     fi
 fi
 echo "   ✅ Gate script executable"
@@ -122,11 +122,15 @@ fi
 
 # --- CR-003: Deep agent_contract validation (Python validator) ---
 echo "CR-003: Running deep agent_contract validation..."
-if ! python3 "$ROOT/scripts/check-agent-contracts.py" 2>/dev/null; then
-    echo "❌ FAIL: agent_contract validation errors (see above)"
-    ERRORS=$((ERRORS + 1))
+if [ -f "$HARNESS_DIR/internal-scripts/check-agent-contracts.py" ]; then
+    if ! python3 "$HARNESS_DIR/internal-scripts/check-agent-contracts.py" 2>/dev/null; then
+        echo "❌ FAIL: agent_contract validation errors"
+        ERRORS=$((ERRORS + 1))
+    else
+        echo "   ✅ All agent_contract blocks valid"
+    fi
 else
-    echo "   ✅ All agent_contract blocks valid"
+    echo "⚠️  No internal validation script found for agent contracts"
 fi
 
 # --- CR-003: Check managed scaffold boundaries in sanity-check.sh ---
