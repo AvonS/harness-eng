@@ -189,6 +189,12 @@ def main():
         print(f"{GREEN}✅ VERSION_CHECK:DOGFOOD{NC} — {local_version} (canonical source repo)")
         sys.exit(0)
 
+    # Legacy/Migration check
+    manifest_path = HARNESS_DIR / "manifest.json"
+    if HARNESS_DIR.is_dir() and not manifest_path.exists():
+        print(f"{YELLOW}⚠️  VERSION_CHECK:MIGRATION_REQUIRED{NC} — Project lacks Foundry manifest")
+        sys.exit(0)
+
     # Try cache first
     latest_version = get_cached_version()
 

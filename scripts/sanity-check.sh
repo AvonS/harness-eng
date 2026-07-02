@@ -259,6 +259,19 @@ else
     fi
 fi
 
+# --- Manifest check ---
+echo "Checking project manifest..."
+if [ -f "$HARNESS_DIR/manifest.json" ]; then
+    if ! jq -e .harness.lineage.name "$HARNESS_DIR/manifest.json" >/dev/null 2>&1; then
+        echo "❌ FAIL: manifest.json is invalid or lacks lineage name"
+        ERRORS=$((ERRORS + 1))
+    else
+        echo "   ✅ .harness-eng/manifest.json is valid"
+    fi
+else
+    echo "⚠️  No manifest.json found"
+fi
+
 # --- Version check ---
 echo "Checking project version..."
 if [ -f "$ROOT/version.txt" ]; then
