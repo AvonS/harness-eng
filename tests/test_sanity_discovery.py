@@ -33,9 +33,13 @@ class TestSanityDiscovery(unittest.TestCase):
         self._symlink(self.repo_root / ".harness-eng" / "CONSTITUTION.md", harness_dir / "CONSTITUTION.md")
         self._symlink(self.repo_root / ".harness-eng" / "BRD.md", harness_dir / "BRD.md")
 
-        real_skills = self.repo_root / ".harness-eng" / "skills"
         self.skills_dir = harness_dir / "skills"
-        shutil.copytree(real_skills, self.skills_dir, dirs_exist_ok=True)
+        baseline_skill = self.skills_dir / "python"
+        baseline_skill.mkdir(parents=True)
+        (baseline_skill / "SKILL.md").write_text(
+            "---\nname: python\ndescription: baseline test skill\n---\n",
+            encoding="utf-8",
+        )
         self.mock_skill_dir = self.skills_dir / "mockskilltest"
 
     def tearDown(self) -> None:

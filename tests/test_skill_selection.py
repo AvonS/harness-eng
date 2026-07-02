@@ -81,7 +81,7 @@ class TestSkillSelection(unittest.TestCase):
             self.assertEqual(payload[0]["name"], "python")
 
     def test_offline_failure_message(self) -> None:
-        self.assertIn("local registry", offline_failure_message())
+        self.assertIn("harness-eng-skills clone or local cache", offline_failure_message())
 
     def test_cli_preview_only(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -90,4 +90,17 @@ class TestSkillSelection(unittest.TestCase):
             (root / "skills" / "python" / "SKILL.md").write_text("name: python", encoding="utf-8")
             (root / "technology.yaml").write_text("skills: [python]", encoding="utf-8")
             rc = main(["--root", str(root), "--preview-only"])
+            self.assertEqual(rc, 0)
+
+    def test_explicit_external_source_root(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "project"
+            source = Path(td) / "harness-eng-skills" / "skills"
+            root.mkdir()
+            (source / "python").mkdir(parents=True)
+            (source / "python" / "SKILL.md").write_text("name: python", encoding="utf-8")
+            (root / "technology.yaml").write_text("skills: [python]", encoding="utf-8")
+
+            rc = main(["--root", str(root), "--source-root", str(source), "--preview-only"])
+
             self.assertEqual(rc, 0)

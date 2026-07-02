@@ -17,7 +17,6 @@ actions:
     - commands/ -> .harness-eng/commands/
     - agents/ -> .harness-eng/agents/
     - scripts/ -> .harness-eng/scripts/ (EXCLUDE: sanity-check.sh)
-    - skills/ -> .harness-eng/skills/
     - templates/ -> .harness-eng/templates/
     - AGENTS.md -> ./AGENTS.md
   - preserve_project_state:
@@ -27,7 +26,8 @@ actions:
     - .harness-eng/SLICE_LOG.md
     - .harness-eng/scripts/sanity-check.sh
     - all active/done phases
-  - use: scripts/skill-selection.py to preserve project-modified skills
+  - fetch_skill_source: update https://github.com/AvonS/harness-eng-skills.git in the user cache
+  - use_skill_selector: install selected upstream skills while preserving project-modified copies
   - report: list of updated files
   - commit: "chore: upgrade harness-eng to latest"
 
@@ -36,6 +36,7 @@ must_do:
   - Always preserve project customizations and state
   - Exclude sanity-check.sh from script updates
   - Report changes clearly
+  - Record the harness-eng-skills source revision and installed skill digests
 
 must_not_do:
   - Overwrite project-level files (BRD, CONSTITUTION, SLICE_LOG)

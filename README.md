@@ -107,7 +107,7 @@ your-project/
     ├── scripts/                 ← status, check scripts
     ├── templates/               ← feature templates
     ├── hooks/                   ← pre-commit hook
-    ├── skills/                  ← language-specific rules
+    ├── skills/                  ← selected project-owned copies from harness-eng-skills
     │
     └── specs/ or phases/        ← feature specs and designs
 ```

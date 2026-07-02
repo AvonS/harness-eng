@@ -29,8 +29,9 @@ actions:
   - derive_architecture: from code structure/docs/conversation (Use templates/big-picture/ARCHITECTURE.md and include mermaid diagrams)
   - derive_design_registry: copy templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
   - derive_technology: from detected stack
-  - fetch_skills: progressively fetch only the necessary skills from harness repo based on derived technology stack
-  - run: scripts/skill-selection.py for deterministic preview, install, and install log creation
+  - fetch_skill_source: clone or update https://github.com/AvonS/harness-eng-skills.git in the user cache
+  - preview_skills: run scripts/skill-selection.py with the cached repository skills path
+  - install_selected_skills: copy only skills required by the derived technology stack
   - present: all docs to human for review
   - wait: human approval
   - commit: initial harness setup
@@ -41,6 +42,7 @@ must_do:
   - Preserve all existing agent rules (claude.md, .cursorrules, etc.) into CONSTITUTION.md
   - Symlink all alternative agent config files to AGENTS.md
   - Explain what was derived and why
+  - Record the harness-eng-skills source revision and installed skill digests
 
 must_not_do:
   - Skip human review

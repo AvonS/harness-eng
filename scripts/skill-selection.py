@@ -9,6 +9,8 @@ from __future__ import annotations
 import json
 import hashlib
 import argparse
+import os
+import subprocess
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,10 +36,7 @@ class SkillInstallRecord:
     action: str
 
 
-DEFAULT_SKILL_ROOTS = [
-    Path("skills"),
-    Path(".harness-eng/skills"),
-]
+DEFAULT_CACHE_ROOT = Path.home() / ".cache" / "harness-eng-skills" / "skills"
 
 
 def detect_technology(root: Path) -> list[str]:
@@ -58,15 +57,24 @@ def detect_technology(root: Path) -> list[str]:
     return sorted(dict.fromkeys(tech))
 
 
-def _skill_registry_root(root: Path) -> Path:
-    for candidate in DEFAULT_SKILL_ROOTS:
-        if (root / candidate).is_dir():
-            return root / candidate
-    return root / "skills"
+def _skill_registry_root(root: Path, source_root: Path | None = None) -> Path:
+    configured = os.environ.get("HARNESS_ENG_SKILLS_ROOT")
+    candidates = [
+        source_root,
+        Path(configured) if configured else None,
+        root / ".harness-eng" / "skill-cache" / "skills",
+        DEFAULT_CACHE_ROOT,
+        root / "skills",  # Compatibility for explicit local registries.
+        root / ".harness-eng" / "skills",  # Offline fallback to installed copies.
+    ]
+    for candidate in candidates:
+        if candidate is not None and candidate.is_dir():
+            return candidate
+    return source_root or DEFAULT_CACHE_ROOT
 
 
-def resolve_skills(technology_ids: list[str], root: Path) -> list[SkillMatch]:
-    registry = _skill_registry_root(root)
+def resolve_skills(technology_ids: list[str], root: Path, source_root: Path | None = None) -> list[SkillMatch]:
+    registry = _skill_registry_root(root, source_root)
     matches: list[SkillMatch] = []
     for tech in technology_ids:
         skill_dir = registry / tech
@@ -148,12 +156,20 @@ def write_install_log(records: list[SkillInstallRecord], log_path: Path) -> None
 
 def offline_failure_message() -> str:
     return (
-        "Skill resolution requires a local registry or cache. "
-        "Configure technology.yaml with local skills or provide a local fallback."
+        "Skill resolution requires a harness-eng-skills clone or local cache. "
+        "Set --source-root, HARNESS_ENG_SKILLS_ROOT, or populate ~/.cache/harness-eng-skills/skills."
     )
 
 
 def _revision_for(skill_file: Path) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(skill_file.parent), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode == 0 and result.stdout.strip():
+        return result.stdout.strip()
     return str(int(skill_file.stat().st_mtime))
 
 
@@ -173,6 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", default=".")
     parser.add_argument("--destination", default=".harness-eng/skills")
     parser.add_argument("--log", default=".harness-eng/skill-install.json")
+    parser.add_argument("--source-root")
     parser.add_argument("--preview-only", action="store_true")
     args = parser.parse_args(argv)
 
@@ -183,7 +200,8 @@ def main(argv: list[str] | None = None) -> int:
     if not technology_ids:
         print(offline_failure_message())
         return 1
-    matches = resolve_skills(technology_ids, root)
+    source_root = Path(args.source_root).expanduser() if args.source_root else None
+    matches = resolve_skills(technology_ids, root, source_root)
     if not matches:
         print(offline_failure_message())
         return 1
