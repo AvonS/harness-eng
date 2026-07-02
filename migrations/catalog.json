@@ -1,0 +1,32 @@
+{
+  "catalog_version": 1,
+  "target": {
+    "product": "harness-eng",
+    "lineage": "foundry",
+    "release": "0.2.0",
+    "schema": 2
+  },
+  "supported_sources": [
+    "legacy-v1",
+    "foundry"
+  ],
+  "migrations": [
+    {
+      "id": "0001-bootstrap-foundry-manifest",
+      "phase": "pre_upgrade",
+      "from": {
+        "lineage": "foundry",
+        "schema": 0
+      },
+      "to": {
+        "lineage": "foundry",
+        "schema": 1
+      },
+      "module": "0001-bootstrap-foundry-manifest.py",
+      "sha256": "fake_digest",
+      "affected_paths": [
+        ".harness-eng/manifest.json"
+      ]
+    }
+  ]
+}
