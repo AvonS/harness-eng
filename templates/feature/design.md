@@ -116,6 +116,12 @@ agent_contract:
 
 ---
 
+## UI Design
+
+[Describe UI architecture, components, and layout mapping from registry]
+
+---
+
 ## Evidence Contract
 
 **Change classification**: [documentation / configuration / pure logic / stateful behavior / integration boundary / UI / security-sensitive]
