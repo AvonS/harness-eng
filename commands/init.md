@@ -25,7 +25,7 @@ actions:
     - templates/ -> .harness-eng/templates/
     - AGENTS.md -> ./AGENTS.md
   - symlink_agent_configs: symlink claude.md, .cursorrules, .clinerules to ./AGENTS.md
-  - derive_constitution: from project analysis + user input (if not converted)
+  - derive_constitution: from project analysis + user input (ask user for preferred release strategy: local_merge, pull_request, or direct, and set release_policy.strategy accordingly)
   - derive_brd: from PRD/docs/conversation (Use templates/big-picture/BRD.md to ensure rich markdown structure)
   - derive_architecture: from code structure/docs/conversation (Use templates/big-picture/ARCHITECTURE.md and include mermaid diagrams)
   - derive_design_registry: copy templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml

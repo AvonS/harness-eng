@@ -12,10 +12,12 @@ gates:
     on_fail: STOP, run /h:verify
   - check: "verification.md contains 'Release Ref: PENDING'"
     on_fail: STOP, verification not approved
-  - check: on feature branch (not main)
+  - check: "on feature branch (unless strategy is direct)"
     on_fail: STOP, switch to feature branch
+  - check: "on target branch (if strategy is direct)"
+    on_fail: STOP, switch to target branch
   - check: constitution contains a valid release_policy strategy
-    on_fail: STOP, ask human to choose local_merge or pull_request
+    on_fail: STOP, ask human to choose local_merge, pull_request, or direct
 
 actions:
   - read_release_policy: strategy, target_branch, require_human_approval, push_branch, push_tag
@@ -29,6 +31,8 @@ actions:
     - output_pull_request_url
     - wait_for_human_merge
     - synchronize_target_branch
+  - if strategy == direct:
+    - push_target_branch_if_enabled
   - move: .harness-eng/specs/active/<feature> → .harness-eng/specs/done/
   - run: python3 scripts/harness-status.py
   - update: VERSION according to phase, change, or bug version policy
@@ -47,7 +51,7 @@ must_do:
   - Update SLICE_LOG.md
 
 must_not_do:
-  - Assume pull_request when the project selects local_merge
+  - Assume pull_request when the project selects local_merge or direct
   - Merge or publish without human approval
   - Skip archiving
   - Forget version bump

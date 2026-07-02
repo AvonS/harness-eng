@@ -135,7 +135,7 @@ must_not_do:
 
 ```yaml
 release_policy:
-  strategy: "[MUST INPUT: local_merge | pull_request]"
+  strategy: "[MUST INPUT: local_merge | pull_request | direct]"
   target_branch: "main"
   require_human_approval: true
   push_branch: true
@@ -144,6 +144,7 @@ release_policy:
 
 - `local_merge`: after explicit release approval, merge into the target branch locally, then push the target branch and release tag.
 - `pull_request`: create a PR, wait for the human to merge it remotely, synchronize the target branch, then push the release tag.
+- `direct`: for solo devs, assuming work is done directly on the target branch. Just push the target branch and release tag.
 
 ---
 
