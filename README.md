@@ -235,3 +235,10 @@ The [AI Manifesto](https://krishavanoor.github.io/) names the core problem: *"Th
 Copyright (c) 2026 [Avon Software Labs](https://avons.github.io).
 
 Licensed under the GNU Affero General Public License v3.0 only (`AGPL-3.0-only`). See [LICENSE](LICENSE).
+
+## Harness Migrations
+This version of `harness-eng` uses the `Foundry` lineage.
+If you are upgrading from a legacy installation (v1 or unversioned), the `/h:upgrade-harness` command will automatically apply one-time migrations and preserve your state.
+
+### Recovery
+In the rare event a migration fails, inspect `.harness-eng/backups/` and `.harness-eng/migrations/reports/` for state details and recovery instructions.

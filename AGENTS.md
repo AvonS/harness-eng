@@ -289,3 +289,8 @@ For bugs and change requests, the workflow is streamlined:
 | **CR** | `cr/CR-NNN-<slug>` | Manager → Analyst (simplified spec + approval) → Developer → Developer → Gatekeeper |
 
 Both skip the full design cycle but retain approval gates and a proportionate Evidence Contract.
+
+### Migration and Legacy Support
+The harness supports versioned migrations for internal data structures (.harness-eng/manifest.json).
+The current generation lineage is `Foundry`.
+Legacy projects without a manifest will automatically route to a migration process when `/h:upgrade-harness` is invoked.
