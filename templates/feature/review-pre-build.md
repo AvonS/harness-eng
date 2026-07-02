@@ -9,6 +9,8 @@ agent_contract:
   actions:
     - id: ACT-001
       action: "Fill BRD coverage matrix, spec completeness, design alignment, and verdict."
+    - id: ACT-002
+      action: "Assess whether the Evidence Contract is sufficient and proportionate."
   must_do:
     - id: MUST-001
       action: "Include all 6 check categories (A-F) in report."
@@ -38,6 +40,14 @@ agent_contract:
 ## Missing Requirements
 
 <list any BRD requirements not covered by spec>
+
+## Evidence Contract Review
+
+| Risk or Requirement | Proposed Evidence | Sufficient? | Proportionate? | Required Change |
+|---------------------|-------------------|-------------|----------------|-----------------|
+| <item> | <evidence> | YES/NO | YES/NO | <change or none> |
+
+Confirm both missing evidence and unnecessary test categories. Evidence scope must be settled before Human Gate 1.
 
 ## Verdict
 

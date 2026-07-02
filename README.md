@@ -52,7 +52,7 @@ Before the first human gate, agents loop to ensure the architecture is sound. If
 | Command | Logical Role | What happens | Gate |
 |---------|--------------|-------------|------|
 | `/h:init` | Manager | Derive constitution, BRD, architecture | — |
-| `/h:define` | Analyst | Create feature spec with BDD Given/When/Then stories | — |
+| `/h:define` | Analyst | Create a prioritized feature spec with testable acceptance criteria | — |
 | `/h:design` | Analyst | Design architecture, interfaces, file layout | — |
 | `/h:review-pre-build` | Sr Architect | Agent validates design against BRD and Constitution before human review | Agent Review 1 |
 | `/h:approve` | Gatekeeper | **Human Gate 1:** Review design, approve or request changes | ✅ Human Gate 1 |
@@ -63,7 +63,7 @@ Once the design is approved, the agent works through these commands iteratively.
 | Command | Logical Role | What happens | Gate |
 |---------|--------------|-------------|------|
 | `/h:tasks` | Developer | Break design into granular tasks with dependencies | — |
-| `/h:build` | Developer | TDD implementation — one commit per task | — |
+| `/h:build` | Developer | Implement against the approved Evidence Contract — one commit per task | — |
 | `/h:review-pre-verify`| Sr Tech Lead | Agent reviews code against design to catch gaps | Agent Review 2 |
 | `/h:verify` | Gatekeeper | Run tests, check acceptance criteria, write verification.md | — |
 
@@ -84,7 +84,7 @@ read https://github.com/AvonS/harness-eng/blob/main/commands/bug.md and follow t
 
 | Type | Branch | Workflow |
 |------|--------|----------|
-| **Bug** | `bugfix/BUG-NNN-<slug>` | Skip design, write regression test first (TDD) |
+| **Bug** | `bugfix/BUG-NNN-<slug>` | Skip design; require a regression test when the defect is reproducible through automation |
 | **CR** | `cr/CR-NNN-<slug>` | Skip full design, simplified spec + approval |
 
 ---
@@ -138,7 +138,7 @@ Read command files from `.harness-eng/commands/` and follow them.
 | `/h:design` | Design architecture, interfaces, file layout |
 | `/h:approve` | **Human gate** — review design, approve or request changes |
 | `/h:tasks` | Break design into granular tasks with dependencies |
-| `/h:build` | TDD implementation — one commit per task |
+| `/h:build` | Implement against the approved Evidence Contract — one commit per task |
 | `/h:verify` | Run tests, check acceptance criteria, fill verification report |
 | `/h:release` | Create PR, merge, archive, update status |
 | `/h:upgrade-harness` | Fetch latest instructions from `https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md` |

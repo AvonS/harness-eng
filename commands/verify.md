@@ -8,13 +8,14 @@ gates:
     on_fail: STOP, route to review-pre-verify
   - check: all tasks complete
     on_fail: STOP, route to build
-  - check: all tests pass
-    on_fail: STOP, fix failing tests
+  - check: all required evidence passes
+    on_fail: STOP, fix evidence failures
 
 actions:
-  - run_all_tests (unit + integration)
+  - run_evidence_contract_checks
+  - run_existing_regression_suite
   - run_required_sensors from technology.yaml
-  - if tests_fail: STOP, fix tests
+  - if evidence_fails: STOP, fix evidence failures
   - check_readme_updated (if user-facing changes)
   - check_release_notes_updated
   - write_verification (Release Ref: PENDING)
@@ -22,13 +23,14 @@ actions:
   - route: to /h:release (human gate)
 
 must_do:
-  - All tests must pass
+  - All required evidence must pass
+  - Existing regression suite must not regress
   - README updated if user-facing changes
   - RELEASE-NOTES.md updated
   - Include Release Ref: PENDING
 
 must_not_do:
-  - Skip test run
+  - Skip required evidence
   - Write verification if tests fail
   - Skip documentation checks
 ---

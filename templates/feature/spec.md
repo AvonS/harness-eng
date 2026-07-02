@@ -1,7 +1,7 @@
 ---
 name: spec
 description: >
-  Feature specification with Given/When/Then stories.
+  Feature specification with prioritized, testable acceptance criteria.
   Created during /h:define phase.
   Stories must be testable and prioritized.
 agent_contract:
@@ -11,12 +11,12 @@ agent_contract:
       on_failure: "STOP: Cannot write spec without project context."
   actions:
     - id: ACT-001
-      action: "Write Given/When/Then stories with P1/P2/P3 priorities."
+      action: "Write prioritized stories with testable acceptance criteria."
     - id: ACT-002
       action: "Include NEEDS INPUT and MUST INPUT markers where required."
   must_do:
     - id: MUST-001
-      action: "Every story must use testable Given/When/Then format."
+      action: "Use Given/When/Then only when material behavior benefits from explicit scenarios."
   must_not_do:
     - id: NEVER-001
       action: "Do not leave MUST INPUT markers unfilled."
@@ -39,6 +39,8 @@ agent_contract:
 ---
 
 ## Behavior Model
+
+> Complete this section when the change introduces material or uncertain user-visible behavior, state transitions, or failure handling. Otherwise write `N/A` with a reason.
 
 ### Actors and Goals
 - [Who initiates the behavior and what outcome they need]
@@ -72,10 +74,10 @@ agent_contract:
 **Why this priority**: [Value and reasoning]
 **Independent test**: [How to verify this story alone]
 
-**Acceptance Scenarios**:
+**Acceptance Criteria**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+1. [Observable, independently verifiable outcome]
+2. [Use Given/When/Then when state and event sequencing matter]
 
 ---
 
@@ -86,7 +88,7 @@ agent_contract:
 **Why this priority**: [Value]
 **Independent test**: [How to verify]
 
-**Acceptance Scenarios**:
+**Acceptance Criteria**:
 
 1. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
@@ -158,7 +160,7 @@ agent_contract:
 - [ ] Requirements are testable and unambiguous
 - [ ] Success criteria are measurable
 - [ ] Success criteria are technology-agnostic
-- [ ] All acceptance scenarios use Given/When/Then
+- [ ] Material behavioral scenarios use Given/When/Then where it improves precision
 - [ ] Edge cases identified
 - [ ] Scope clearly bounded
 

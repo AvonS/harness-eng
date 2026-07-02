@@ -24,6 +24,7 @@ actions:
   - check: design covers ALL BRD requirements
   - check: design follows constitution constraints
   - check: design addresses all spec acceptance criteria
+  - check: evidence contract is sufficient and proportionate before approval
   - check: no gaps between requirements and design
   - if gaps_found:
     - write: review-pre-build.md with gap list
@@ -43,12 +44,13 @@ must_do:
   - Check constitution constraints are followed
   - Check spec acceptance criteria are addressed
   - Report ALL gaps, not just critical ones
+  - Challenge missing evidence and unnecessary evidence with equal rigor
 
 must_not_do:
   - Skip any BRD requirement
   - Ignore constitution constraints
   - Approve if gaps exist
   - Proceed to /h:approve without PASS
+  - Defer evidence-scope decisions until pre-verify
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

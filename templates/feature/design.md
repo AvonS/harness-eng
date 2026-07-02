@@ -17,6 +17,8 @@ agent_contract:
   must_do:
     - id: MUST-001
       action: "Document data flow, interfaces, file layout, and verification criteria."
+    - id: MUST-002
+      action: "Define a proportionate Evidence Contract for the change."
   must_not_do:
     - id: NEVER-001
       action: "Do not finalize without **Ref**: PENDING marker."
@@ -111,6 +113,22 @@ agent_contract:
 
 ---
 
+## Evidence Contract
+
+**Change classification**: [documentation / configuration / pure logic / stateful behavior / integration boundary / UI / security-sensitive]
+**Risk and reversibility**: [LOW / MEDIUM / HIGH] — [reason]
+
+| Requirement or Risk | Required Evidence | Evidence Level | Why Sufficient |
+|---------------------|-------------------|----------------|----------------|
+| [behavior/risk] | [inspection, static check, unit test, integration test, browser check, scenario, other] | [level] | [reason] |
+
+**Explicitly not required:**
+- [Test or technique that adds no decision value for this change, with reason]
+
+**Completion rule:** All required evidence passes and the existing regression suite has no failures. Testing techniques not listed above are not release requirements unless implementation exposes a security risk, scope change, or false design assumption.
+
+---
+
 ## Research
 
 > *Technical decisions with rationale.*
@@ -177,6 +195,8 @@ agent_contract:
 - [ ] Alternatives considered and rejected
 
 **Quality:**
+- [ ] Evidence Contract is proportionate to change risk and reversibility
+- [ ] Required and unnecessary evidence are explicit
 - [ ] Design confidence tags filled (VERIFIED/INFERRED/ASSUMED)
 - [ ] Self-challenge completed
 - [ ] No implementation code (design only)

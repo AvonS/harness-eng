@@ -37,7 +37,7 @@ Each command runs in a **subagent** with the right persona. The subagent reads o
 | `/h:approve` | Analyst (human gate) | N/A — waits for human | Ref: APPROVED |
 | `/h:tasks` | Developer | Reads design, writes tasks | tasks.md |
 | `/h:review-pre-build` | Sr Architect | Audits design against BRD | pre-build report |
-| `/h:build` | Developer | Reads tasks, writes code | code + tests |
+| `/h:build` | Developer | Reads tasks, writes code | code + evidence |
 | `/h:review-pre-verify` | Sr Tech Lead | Fresh context, no build memory | review report |
 | `/h:verify` | Gatekeeper | Runs tests, writes report | verification.md |
 | `/h:release` | Gatekeeper (human gate) | N/A — waits for human | merged PR |
@@ -51,7 +51,7 @@ Manager receives request
   ↓
 Manager spawns /h:build subagent (Developer persona)
   ↓
-Subagent reads tasks.md, implements each task (TDD), commits
+Subagent reads tasks.md, implements each task against the approved Evidence Contract, commits
   ↓
 Subagent completes → returns control to Manager
   ↓
@@ -109,7 +109,7 @@ On first use, run `/h:init` or say "initialise this project using the harness".
 1. **MUST read `.harness-eng/CONSTITUTION.md` before every action**
 2. **NEVER start implementing before design is human-approved** (after `/h:approve`)
 3. **MUST write tests in the same commit as production code**
-4. **MUST run the full test suite before filling `verification.md`**
+4. **MUST run the approved Evidence Contract and existing regression suite before filling `verification.md`**
 5. **MUST pass the full sanity test suite before running `verification.md`**
 6. **Never move a feature to `done/` without a passing `verification.md`**
 7. **After 3 failed fix attempts, write a BLOCKED section and stop — escalate to human**
@@ -140,7 +140,7 @@ Read command files from `.harness-eng/commands/` and follow them. Users talk nat
 | `/h:approve` | **Human gate** — review design, approve or request changes | ✅ Human |
 | `/h:tasks` | Break design into granular tasks with dependencies | — |
 | `/h:review-pre-build` | **Agent gate** — Sr Architect review, compare design vs BRD | ✅ Agent |
-| `/h:build` | TDD implementation — one commit per task | — |
+| `/h:build` | Implement against the approved Evidence Contract — one commit per task | — |
 | `/h:review-pre-verify` | **Agent gate** — Sr Tech Lead review, compare design vs code | ✅ Agent |
 | `/h:verify` | Run tests, check acceptance criteria, fill verification report | — |
 | `/h:release` | **Human gate** — create PR, merge, archive, update status | ✅ Human |
@@ -222,7 +222,7 @@ Each command runs in an isolated subagent context with a specific persona:
 | **Manager** | `/h:init`, `/h:upgrade-harness`, `/h:health`, `/h:status` | *None (Parent Context)* | Orchestrates the workflow execution, manages the subagent invocation loop, and checks status/quality gates. Run directly in the main/parent shell. |
 | **Analyst** | `/h:triage`, `/h:bug`, `/h:define`, `/h:design` | `agents/collaborator/agent.md` | Explores problem space, triages requests, drafts feature specifications (`spec.md`), and architectures designs (`design.md`). |
 | **Sr Architect** | `/h:review-pre-build` | `agents/sr-architect/agent.md` | Audits proposed design documents against the BRD and project constitution before the design is presented for human approval. |
-| **Developer** | `/h:tasks`, `/h:build` | `agents/developer/agent.md` | Breaks the approved design down into task lists (`tasks.md`) and implements code using Test-Driven Development (TDD). |
+| **Developer** | `/h:tasks`, `/h:build` | `agents/developer/agent.md` | Breaks the approved design into tasks and implements against its approved Evidence Contract. |
 | **Sr Tech Lead** | `/h:review-pre-verify` | `agents/sr-tech-lead/agent.md` | Audits implementation code against the approved design and spec, verifying alignment and syntax conformance. |
 | **Gatekeeper** | `/h:verify`, `/h:release`, `/h:approve` | `agents/gatekeeper/agent.md` | Validates gate prerequisites, runs testing validation, and handles human decisions (transmitting explicit human approvals for design and release). |
 
@@ -270,4 +270,4 @@ For bugs and change requests, the workflow is streamlined:
 | **Bug** | `bugfix/BUG-NNN-<slug>` | Manager → Analyst (simplified spec) → Developer (tasks) → Developer (regression test + fix) → Gatekeeper (verify) |
 | **CR** | `cr/CR-NNN-<slug>` | Manager → Analyst (simplified spec + approval) → Developer → Developer → Gatekeeper |
 
-Both skip full design cycle but maintain approval gates and TDD discipline.
+Both skip the full design cycle but retain approval gates and a proportionate Evidence Contract.

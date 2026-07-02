@@ -12,6 +12,8 @@ agent_contract:
   actions:
     - id: ACT-001
       action: "Fill acceptance criteria status table with story-by-story test results."
+    - id: ACT-002
+      action: "Run every check required by the approved Evidence Contract."
   must_do:
     - id: MUST-001
       action: "Include Release Ref: PENDING at top."
@@ -45,7 +47,15 @@ agent_contract:
 
 ---
 
-## Test Suite Results
+## Evidence Contract Results
+
+| Required Evidence | Result | Command or Artifact |
+|-------------------|--------|---------------------|
+| [approved evidence] | PASS / FAIL | [reproducible evidence] |
+
+**Non-applicable checks:** [checks intentionally excluded by the approved Evidence Contract and why]
+
+## Regression Suite Results
 
 - **Full suite**: ✅ All passing / ❌ N failing
 - **Race detector**: ✅ CLEAN / ❌ RACE DETECTED / N/A
@@ -67,14 +77,15 @@ agent_contract:
 ## Quality Checklist
 
 **Acceptance:**
-- [ ] All Given/When/Then scenarios pass
+- [ ] All approved acceptance criteria pass
 - [ ] All functional requirements met
 - [ ] Success criteria achievable
 
 **Code Quality:**
-- [ ] Full test suite passes
+- [ ] All Evidence Contract checks pass
+- [ ] Existing regression suite passes
 - [ ] Race detector clean (if concurrent code)
-- [ ] Coverage meets threshold
+- [ ] Coverage meets threshold (if required by Evidence Contract)
 - [ ] Linter clean
 - [ ] Constitution rules followed
 

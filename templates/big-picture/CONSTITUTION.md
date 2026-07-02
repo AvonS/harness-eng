@@ -70,8 +70,8 @@ must_not_do:
 
 ### Harness Principles (Universal — Do Not Modify)
 
-#### I. TDD Mandatory
-Write tests first. Confirm failure. Implement. Pass. No feature is "done" without tests.
+#### I. Proportionate Evidence
+Define the minimum convincing evidence for each change before implementation. Use TDD for executable logic when a meaningful automated test exists. Do not require BDD, unit, integration, UI, or mutation testing by default; require only evidence justified by behavior, risk, and reversibility.
 
 #### II. Std Lib First
 Use standard library before adding dependencies. Justify every dependency addition.
@@ -138,7 +138,7 @@ must_not_do:
 | **Manager** | `/h:init`, `/h:upgrade-harness`, `/h:health`, `/h:status` | *None (Parent Context)* | Orchestrates the workflow execution, manages the subagent invocation loop, and checks status/quality gates. Run directly in the main/parent shell. |
 | **Analyst** | `/h:triage`, `/h:bug`, `/h:define`, `/h:design` | `agents/collaborator/agent.md` | Explores problem space, triages requests, drafts feature specifications (`spec.md`), and architectures designs (`design.md`). |
 | **Sr Architect** | `/h:review-pre-build` | `agents/sr-architect/agent.md` | Audits proposed design documents against the BRD and project constitution before the design is presented for human approval. |
-| **Developer** | `/h:tasks`, `/h:build` | `agents/developer/agent.md` | Breaks the approved design down into task lists (`tasks.md`) and implements code using Test-Driven Development (TDD). |
+| **Developer** | `/h:tasks`, `/h:build` | `agents/developer/agent.md` | Breaks the approved design into tasks and implements against its approved Evidence Contract. |
 | **Sr Tech Lead** | `/h:review-pre-verify` | `agents/sr-tech-lead/agent.md` | Audits implementation code against the approved design and spec, verifying alignment and syntax conformance. |
 | **Gatekeeper** | `/h:verify`, `/h:release`, `/h:approve` | `agents/gatekeeper/agent.md` | Validates gate prerequisites, runs testing validation, and handles human decisions (transmitting explicit human approvals for design and release). |
 
@@ -184,10 +184,10 @@ must_not_do:
 
 > *Universal quality standards that apply to all code, regardless of language.*
 
-### Testing
-- **Integration tests required for server packages** — start the server, make HTTP requests, verify responses, test graceful shutdown
-- **No feature is "done" without integration test** — unit tests verify logic, integration tests verify behavior
-- **Test the happy path AND the failure path** — what happens when DB is down, when input is invalid, when timeout occurs
+### Evidence
+- **Evidence is change-specific** — select checks based on behavior, risk, and reversibility
+- **Prefer the cheapest deterministic check** — inspection, static validation, unit, integration, browser, and scenario checks are options, not a mandatory stack
+- **Exercise failure paths when failure behavior is material** — do not manufacture irrelevant test categories
 
 ### Server Hygiene
 - **Graceful shutdown mandatory** — catch SIGINT/SIGTERM, drain in-flight requests, close connections
@@ -213,7 +213,7 @@ must_do:
   - Read technology.yaml before running test, lint, or build commands
   - Read active language skills before writing code
   - Triage requests (bug/CR/feature/deferred) before implementing
-  - Run integration tests (not just unit tests) before claiming "done"
+  - Run every check in the approved Evidence Contract before claiming "done"
   - Run tests before AND after refactoring
   - Test core functionality under actual runtime conditions (button clicks, API responses, stream chunks)
   - After 3 failed fix attempts: write BLOCKED and escalate to human
@@ -222,7 +222,7 @@ must_not_do:
   - Violate any rule in this CONSTITUTION
   - Change CONSTITUTION without explicit human instruction
   - Start implementing before design is approved
-  - Claim "done" without running integration tests
+  - Claim "done" without satisfying the approved Evidence Contract
   - Assume feature works just because it compiles without errors
   - Skip regression tests for bug fixes
 ```

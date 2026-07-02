@@ -9,6 +9,8 @@ agent_contract:
   actions:
     - id: ACT-001
       action: "Fill coverage matrix, code quality assessment, process compliance, and verdict."
+    - id: ACT-002
+      action: "Verify compliance with the approved Evidence Contract."
   must_do:
     - id: MUST-001
       action: "Include coverage matrix showing every story status."
@@ -32,8 +34,8 @@ agent_contract:
 
 ## Story Coverage
 
-| Story | Implemented | Tests | Design Match | Quality | Status |
-|-------|-------------|-------|--------------|---------|--------|
+| Story | Implemented | Required Evidence | Design Match | Quality | Status |
+|-------|-------------|-------------------|--------------|---------|--------|
 | US1 | ✅/❌ | ✅/❌ | ✅/❌ | ✅/❌ | PASS/FAIL |
 | US2 | ✅/❌ | ✅/❌ | ✅/❌ | ✅/❌ | PASS/FAIL |
 
@@ -42,6 +44,14 @@ agent_contract:
 | # | Story | Gap | Category | Severity | Fix |
 |---|-------|-----|----------|----------|-----|
 | 1 | <story> | <description> | Feature/Test/Code | CRITICAL/HIGH/MEDIUM | <fix> |
+
+## Evidence Contract Compliance
+
+| Required Evidence | Result | Reproducible Evidence | Status |
+|-------------------|--------|-----------------------|--------|
+| <approved evidence> | <result> | <command/artifact> | PASS/FAIL |
+
+Classify every finding as `DEFECT`, `DESIGN_GAP`, or `IMPROVEMENT`. Only defects and design gaps block verification. Do not expand the approved Evidence Contract unless implementation exposes a security risk, scope change, or false design assumption.
 
 ## Quality Findings
 
@@ -61,11 +71,11 @@ agent_contract:
 - HIGH gaps: N
 - MEDIUM gaps: N
 - Stories passing: N/M
-- Test coverage: N%
+- Evidence Contract coverage: N/M required checks
 
 ## Verdict
 
-- **PASS**: All stories implemented, tested, and quality acceptable → proceed to verify
+- **PASS**: All stories implemented, required evidence passes, and quality is acceptable → proceed to verify
 - **CONDITIONAL**: High gaps found → back to build for fixes
 - **FAIL**: Critical gaps found → back to build for fixes
 

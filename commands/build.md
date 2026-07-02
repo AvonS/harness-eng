@@ -1,6 +1,6 @@
 ---
 name: harness-build
-description: Implement features using TDD
+description: Implement features using the approved evidence contract
 persona: Developer
 
 gates:
@@ -19,24 +19,26 @@ preflight:
 actions:
   - for_each_task:
     - execute_ponytail_decision_ladder: evaluate before adding any dependencies or abstractions
-    - write_test (must fail)
-    - implement (must pass test)
+    - produce_required_evidence: follow the approved evidence contract
+    - use_tdd_for_executable_logic: confirm failure before implementation when a meaningful executable test exists
     - commit
   - after_all_tasks:
-    - run_all_tests
-    - if tests_fail: STOP, fix tests
-    - if tests_pass: route to /h:review-pre-verify
+    - run_required_evidence
+    - run_existing_regression_suite
+    - if evidence_fails: STOP, fix evidence failures
+    - if evidence_passes: route to /h:review-pre-verify
 
 must_do:
   - Strictly follow the Ponytail YAGNI framework when writing code
-  - Write test first (TDD)
-  - Test must fail before implementation
-  - Test must pass after implementation
+  - Use the cheapest deterministic evidence that proves the task
+  - Use regression-first testing for bug fixes
+  - Use TDD for executable logic
+  - Record why a required evidence item is not applicable
   - Commit after each task
 
 must_not_do:
-  - Implement without test
-  - Skip failing test
-  - Commit without passing test
+  - Implement executable logic without its required evidence
+  - Add test categories excluded by the approved evidence contract without a discovered design gap
+  - Commit without passing required evidence
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->

@@ -12,12 +12,14 @@
 - **BDD Traceability Enforcement**: scenario IDs, task linkage, and evidence checks are now enforced programmatically during `review-pre-verify` and `verify`.
 - **Project Sensor Contract**: `technology.yaml` defines repo-owned sensors, and required hooks now fail closed on command failure, timeout, missing command, or missing required sensor configuration.
 - **Isolated Integration Tests**: both `tests/e2e_workflow_test.sh` and `tests/test_sanity_discovery.py` now run in temporary project roots instead of mutating live harness state.
+- **Proportionate Evidence Contracts**: design approval now fixes the minimum convincing evidence for each change. TDD, BDD, integration, UI, and other test techniques are selected by behavior, risk, and reversibility instead of being universally required.
 
 ## Key Decisions
 
 - Used install-log digests to distinguish unchanged installed skills from project-modified skills.
 - Kept traceability and sensor enforcement in the gate layer so missing evidence or missing required sensors stop the workflow mechanically.
 - Preserved the file-edition boundary by keeping optional Pi-harness capabilities out of the Phase 1 implementation.
+- Made evidence scope a Gate 1 decision so pre-verify can enforce agreed proof without repeatedly inventing new test categories. Only defects, design gaps, or newly exposed security/scope assumptions may expand it.
 
 ## Verification Snapshot
 

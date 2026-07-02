@@ -69,5 +69,45 @@ class TestSanityDiscovery(unittest.TestCase):
         self.assertIn(expected_output_fragment, res.stdout)
 
 
+class TestEvidenceContractPolicy(unittest.TestCase):
+    def setUp(self) -> None:
+        self.repo_root = Path(__file__).resolve().parent.parent
+
+    def test_decision_points_reference_evidence_contract(self) -> None:
+        required_files = (
+            "commands/design.md",
+            "commands/review-pre-build.md",
+            "commands/build.md",
+            "commands/review-pre-verify.md",
+            "commands/verify.md",
+            "templates/feature/design.md",
+            "templates/feature/review-pre-build.md",
+            "templates/feature/review-pre-verify.md",
+            "templates/feature/verification.md",
+        )
+        for relative_path in required_files:
+            with self.subTest(path=relative_path):
+                content = (self.repo_root / relative_path).read_text(encoding="utf-8")
+                normalized = content.lower().replace("_", " ")
+                self.assertIn("evidence contract", normalized)
+
+    def test_canonical_guidance_has_no_universal_test_mandate(self) -> None:
+        canonical_files = (
+            "AGENTS.md",
+            "README.md",
+            "templates/big-picture/CONSTITUTION.md",
+        )
+        prohibited = (
+            "TDD Mandatory",
+            'No feature is "done" without integration test',
+            "Every story must use testable Given/When/Then format",
+        )
+        for relative_path in canonical_files:
+            content = (self.repo_root / relative_path).read_text(encoding="utf-8")
+            for phrase in prohibited:
+                with self.subTest(path=relative_path, phrase=phrase):
+                    self.assertNotIn(phrase, content)
+
+
 if __name__ == "__main__":
     unittest.main()
