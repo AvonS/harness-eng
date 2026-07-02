@@ -20,10 +20,10 @@ actions:
   - design_architecture (components, boundaries)
   - design_interfaces (APIs, contracts)
   - design_file_layout (where things go)
-  - design_ui_brief_if_applicable (UX, components)
+  - design_ui_brief: reference design-registry.yaml and map allowed registry patterns directly into the mandatory ## UI Design section
   - define_evidence_contract: select the minimum evidence required by change type, risk, and reversibility
   - check_constitution_compliance
-  - write_design: use templates/feature/design.md to produce a rich technical document including architecture diagrams, data flow, and file layout (design.md with UI brief if applicable)
+  - write_design: use templates/feature/design.md to produce a rich technical document including architecture diagrams, data flow, file layout, and UI Design (mandatory)
   - write_design_references: if visual patterns are adopted, record them in design-references.md with source URL and adoption note
   - set_ref: PENDING
   - route: to /h:review-pre-build
