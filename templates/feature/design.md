@@ -19,6 +19,8 @@ agent_contract:
       action: "Document data flow, interfaces, file layout, and verification criteria."
     - id: MUST-002
       action: "Define a proportionate Evidence Contract for the change."
+    - id: MUST-003
+      action: "Set the Testing Level (S/M/L) in the header. The Developer will read this field to determine the depth of tests to implement."
   must_not_do:
     - id: NEVER-001
       action: "Do not finalize without **Ref**: PENDING marker."
@@ -37,6 +39,7 @@ agent_contract:
 **Ref**: [APPROVED|PENDING|REJECTED]
 **Approved by**: [Human|Agent]
 **Approved date**: [YYYY-MM-DD]
+**Testing Level**: [S|M|L]
 
 **Input**: Feature specification from `specs/[FEATURE]/spec.md`
 
