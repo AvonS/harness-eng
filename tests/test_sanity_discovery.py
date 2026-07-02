@@ -32,7 +32,9 @@ class TestSanityDiscovery(unittest.TestCase):
 
         # Run sanity-check.sh
         # Note: We expect the script itself to pass or fail, but we parse its stdout for the count
-        res = subprocess.run(["bash", self.sanity_script], cwd=self.root, capture_output=True, text=True)
+        env = os.environ.copy()
+        env["SKIP_UNITTESTS"] = "1"
+        res = subprocess.run(["bash", self.sanity_script], cwd=self.root, capture_output=True, text=True, env=env)
         
         expected_output_fragment = f"{actual_skills_count} skills verified"
         self.assertIn(expected_output_fragment, res.stdout, f"Sanity check did not dynamically discover all {actual_skills_count} skills. Output: {res.stdout}")

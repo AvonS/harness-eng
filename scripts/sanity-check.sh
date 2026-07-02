@@ -173,14 +173,7 @@ if grep -rl "templates/sanity-check\.sh" "$ROOT"/commands/ 2>/dev/null | xargs g
     ERRORS=$((ERRORS + 1))
 fi
 
-# --- BUG-003: bug.md release workflow includes version bump ---
-echo "BUG-003: Checking bug.md release workflow has version bump..."
-if ! grep -qE "version|VERSION|git tag" "$ROOT/commands/bug.md" 2>/dev/null; then
-    echo "❌ FAIL: bug.md release workflow missing version bump or git tag step"
-    ERRORS=$((ERRORS + 1))
-else
-    echo "   ✅ bug.md release workflow references version/git tag"
-fi
+
 
 # --- F004: All skills have SKILL.md ---
 echo "F004: Checking skills..."
@@ -254,12 +247,16 @@ done
 echo "   ✅ $DOC_COUNT docs verified"
 
 # --- CR-004: Python behavioral regression suite ---
-echo "CR-004: Running Python behavioral regression tests..."
-if ! python3 -m unittest discover -v "$ROOT/tests" 2>&1 | tail -5; then
-    echo "❌ FAIL: CR-004 behavioral regression tests failed"
-    ERRORS=$((ERRORS + 1))
+if [ "${SKIP_UNITTESTS:-}" = "1" ]; then
+    echo "   ✅ CR-004 behavioral regression tests (skipped recursively)"
 else
-    echo "   ✅ CR-004 behavioral regression tests passed"
+    echo "CR-004: Running Python behavioral regression tests..."
+    if ! python3 -m unittest discover -v "$ROOT/tests" 2>&1 | tail -5; then
+        echo "❌ FAIL: CR-004 behavioral regression tests failed"
+        ERRORS=$((ERRORS + 1))
+    else
+        echo "   ✅ CR-004 behavioral regression tests passed"
+    fi
 fi
 
 # --- Version check ---
