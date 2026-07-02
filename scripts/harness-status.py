@@ -85,15 +85,17 @@ def verification_passed() -> bool:
 
 def count_archived() -> int:
     count = 0
-    archive_dir = HARNESS_DIR / "specs" / "archive"
-    if archive_dir.is_dir():
-        count += len([d for d in archive_dir.iterdir() if d.is_dir()])
+    for name in ["done", "archive"]:
+        archive_dir = HARNESS_DIR / "specs" / name
+        if archive_dir.is_dir():
+            count += len([d for d in archive_dir.iterdir() if d.is_dir()])
     phases_dir = HARNESS_DIR / "phases"
     if phases_dir.is_dir():
         for phase_dir in phases_dir.iterdir():
-            features_archive = phase_dir / "features" / "archive"
-            if features_archive.is_dir():
-                count += len([d for d in features_archive.iterdir() if d.is_dir()])
+            for name in ["done", "archive"]:
+                features_archive = phase_dir / "features" / name
+                if features_archive.is_dir():
+                    count += len([d for d in features_archive.iterdir() if d.is_dir()])
     return count
 
 

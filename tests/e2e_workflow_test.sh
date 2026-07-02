@@ -3,7 +3,7 @@
 set -euo pipefail
 
 echo "Setting up E2E tests..."
-mv .harness-eng/phase-0-foundation/features/active .harness-eng/phase-0-foundation/features/active_bak 2>/dev/null || true
+mv .harness-eng/phases/phase-0-foundation/features/active .harness-eng/phases/phase-0-foundation/features/active_bak 2>/dev/null || true
 rm -rf .harness-eng/phase-e2e-test
 mkdir -p .harness-eng/phase-e2e-test/features/active/F999-test
 touch .harness-eng/phase-e2e-test/features/active/F999-test/spec.md
@@ -66,5 +66,5 @@ fi
 echo "✅ Gate 3 Passed"
 
 rm -rf .harness-eng/phase-e2e-test
-mv .harness-eng/phase-0-foundation/features/active_bak .harness-eng/phase-0-foundation/features/active 2>/dev/null || true
+mv .harness-eng/phases/phase-0-foundation/features/active_bak .harness-eng/phases/phase-0-foundation/features/active 2>/dev/null || true
 echo "✅ All E2E Integration Tests Passed!"
