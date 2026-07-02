@@ -29,7 +29,7 @@ actions:
   - prompt_testing_level: ask user for project-wide testing level (S, M, or L, default S) and persist in CONSTITUTION.md
   - derive_brd: from PRD/docs/conversation (Use templates/big-picture/BRD.md to ensure rich markdown structure)
   - derive_architecture: from code structure/docs/conversation (Use templates/big-picture/ARCHITECTURE.md and include mermaid diagrams)
-  - derive_design_registry: copy templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
+  - derive_design_registry: create an empty .harness-eng/design-registry.yaml for project-specific additions
   - derive_technology: from detected stack
   - fetch_skill_source: clone or update https://github.com/AvonS/harness-eng-skills.git in the user cache
   - preview_skills: run scripts/skill-selection.py with the cached repository skills path

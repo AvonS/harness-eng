@@ -1,3 +1,8 @@
+# CANONICAL REGISTRY
+# This file (.harness-eng/templates/big-picture/design-registry.yaml) is maintained by the harness.
+# It is updated automatically during /h:upgrade-harness.
+# Do NOT add project-specific UI systems here.
+# Instead, add them to the local project registry: .harness-eng/design-registry.yaml
 design_registry:
   systems:
     - id: oat

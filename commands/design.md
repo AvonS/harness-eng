@@ -16,7 +16,7 @@ preflight:
   - read_review_pre_build (to act on gap list if returning from failure)
 
 actions:
-  - research_design_registry: read .harness-eng/design-registry.yaml before broad web search
+  - research_design_registry: read .harness-eng/templates/big-picture/design-registry.yaml (canonical) and .harness-eng/design-registry.yaml (project overrides) before broad web search
   - design_architecture (components, boundaries)
   - design_interfaces (APIs, contracts)
   - design_file_layout (where things go)

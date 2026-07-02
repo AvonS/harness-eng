@@ -36,7 +36,7 @@ actions:
     - .harness-eng/design-registry.yaml
     - .harness-eng/scripts/sanity-check.sh
     - all active/done phases
-  - initialize_design_registry_if_missing: copy .harness-eng/templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
+  - initialize_design_registry_if_missing: create an empty .harness-eng/design-registry.yaml for project-specific additions if it doesn't exist
   - validate_migration: python3 .harness-eng/scripts/migrate-harness.py status
   - finalize_migration: update manifest target release
   - fetch_skill_source: update https://github.com/AvonS/harness-eng-skills.git in the user cache
