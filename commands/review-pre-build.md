@@ -40,6 +40,7 @@ outputs:
 
 must_do:
   - Benchmark design against the global Ponytail YAGNI policy (reject over-engineered architectures)
+  - Reject UI bloat and over-engineered, bespoke front-end components, enforcing the Ponytail YAGNI Framework
   - Check every BRD requirement is in design
   - Check constitution constraints are followed
   - Check spec acceptance criteria are addressed
