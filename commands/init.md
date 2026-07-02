@@ -16,6 +16,7 @@ actions:
   - scan: project for existing docs (README, PRD, ADR, code)
   - classify_scenario: [A: greenfield, B: brownfield, C: documented]
   - create: .harness-eng/ directory structure
+  - stamp_manifest: write .harness-eng/manifest.json with product harness-eng, lineage Foundry, schema 2, release 0.2.0
   - if_brownfield: convert existing agents.md, claude.md, .cursorrules, or other agent files to .harness-eng/CONSTITUTION.md
   - fetch_and_replace_from_canonical:
     - commands/ -> .harness-eng/commands/

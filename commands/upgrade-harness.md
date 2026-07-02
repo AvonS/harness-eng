@@ -17,10 +17,14 @@ gates:
     on_fail: STOP, commit or stash changes before upgrading
 
 actions:
+  - run_version_check: python3 .harness-eng/scripts/version-check.py . .harness-eng
+  - plan_migration: python3 .harness-eng/scripts/migrate-harness.py plan --target staged
+  - apply_pre_migration: python3 .harness-eng/scripts/migrate-harness.py apply --target staged
   - fetch_and_replace_from_canonical:
     - commands/ -> .harness-eng/commands/
     - agents/ -> .harness-eng/agents/
     - scripts/ -> .harness-eng/scripts/ (EXCLUDE: sanity-check.sh)
+    - migrations/ -> .harness-eng/migrations/
     - templates/ -> .harness-eng/templates/
     - AGENTS.md -> ./AGENTS.md
   - preserve_project_state:
@@ -32,6 +36,8 @@ actions:
     - .harness-eng/scripts/sanity-check.sh
     - all active/done phases
   - initialize_design_registry_if_missing: copy .harness-eng/templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
+  - validate_migration: python3 .harness-eng/scripts/migrate-harness.py status
+  - finalize_migration: update manifest target release
   - fetch_skill_source: update https://github.com/AvonS/harness-eng-skills.git in the user cache
   - use_skill_selector: install selected upstream skills while preserving project-modified copies
   - report: list of updated files
@@ -40,6 +46,7 @@ actions:
 must_do:
   - Execute the fetched canonical upgrade contract instead of the installed local copy
   - Fetch exactly the specified folders from canonical source
+  - Run migration engine before replacing files
   - Always preserve project customizations and state
   - Create design-registry.yaml only when the project file is missing
   - Exclude sanity-check.sh from script updates
