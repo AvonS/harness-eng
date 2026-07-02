@@ -17,6 +17,9 @@ set -euo pipefail
 
 ERRORS=0
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [ "$(basename "$ROOT")" = ".harness-eng" ]; then
+    ROOT="$(cd "$ROOT/.." && pwd)"
+fi
 
 echo "=== Sanity Check: Happy Path Integration Test ==="
 
