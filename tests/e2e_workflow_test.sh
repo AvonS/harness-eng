@@ -12,7 +12,11 @@ done
 echo "✅ Dogfood script separation verified"
 
 echo "Setting up E2E tests..."
-mv .harness-eng/phases/phase-0-foundation/features/active .harness-eng/phases/phase-0-foundation/features/active_bak 2>/dev/null || true
+for active_dir in .harness-eng/phases/*/features/active; do
+    if [ -d "$active_dir" ]; then
+        mv "$active_dir" "${active_dir}_bak" 2>/dev/null || true
+    fi
+done
 rm -rf .harness-eng/phase-e2e-test
 mkdir -p .harness-eng/phase-e2e-test/features/active/F999-test
 touch .harness-eng/phase-e2e-test/features/active/F999-test/spec.md
@@ -75,5 +79,9 @@ fi
 echo "✅ Gate 3 Passed"
 
 rm -rf .harness-eng/phase-e2e-test
-mv .harness-eng/phases/phase-0-foundation/features/active_bak .harness-eng/phases/phase-0-foundation/features/active 2>/dev/null || true
+for active_bak in .harness-eng/phases/*/features/active_bak; do
+    if [ -d "$active_bak" ]; then
+        mv "$active_bak" "${active_bak%_bak}" 2>/dev/null || true
+    fi
+done
 echo "✅ All E2E Integration Tests Passed!"
