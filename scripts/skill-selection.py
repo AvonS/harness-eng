@@ -44,16 +44,36 @@ def detect_technology(root: Path) -> list[str]:
     for name in ["technology.yaml", ".harness-eng/technology.yaml"]:
         path = root / name
         if path.is_file():
+            in_target_section = False
             for line in path.read_text(encoding="utf-8").splitlines():
-                if ":" not in line:
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
                     continue
-                key, value = line.split(":", 1)
-                if key.strip() in {"skills", "technology", "stack"}:
-                    tech.extend(
-                        part.strip().lower()
-                        for part in value.replace("[", "").replace("]", "").split(",")
-                        if part.strip()
-                    )
+                
+                # Check for section headers
+                if ":" in line and not stripped.startswith("-"):
+                    key, value = line.split(":", 1)
+                    key = key.strip()
+                    if key in {"skills", "technology", "stack", "tools"}:
+                        in_target_section = True
+                        # Parse inline comma-separated values if any
+                        tech.extend(
+                            part.strip().lower()
+                            for part in value.replace("[", "").replace("]", "").split(",")
+                            if part.strip()
+                        )
+                    elif not line.startswith(" ") and not line.startswith("\t"):
+                        # We hit a new top-level key, exit section if it's not a target
+                        if key not in {"skills", "technology", "stack", "tools"}:
+                            in_target_section = False
+                    continue
+                
+                # Parse list items if in target section
+                if in_target_section and stripped.startswith("-"):
+                    item = stripped[1:].strip().strip("\"'")
+                    if item:
+                        tech.append(item.lower())
+
     return sorted(dict.fromkeys(tech))
 
 
