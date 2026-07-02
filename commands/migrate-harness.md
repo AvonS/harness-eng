@@ -1,6 +1,7 @@
 ---
 name: migrate-harness
 description: Run the migration engine to update project state to a new release
+persona: Manager
 agent_contract:
   prerequisites:
     - id: PRE-001
