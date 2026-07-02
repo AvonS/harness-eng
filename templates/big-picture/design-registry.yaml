@@ -59,3 +59,27 @@ design_registry:
         - "accessibility review practices"
       docs:
         home: "https://www.fluentui.dev/"
+
+    - id: shadcn-svelte
+      use_for: ["Svelte/SvelteKit apps", "projects using Tailwind", "dashboards", "forms"]
+      strengths: ["copy-paste components (own your code)", "accessible primitives via Bits UI/Melt UI", "Tailwind styling", "highly customizable"]
+      avoid_for: ["projects without Tailwind", "vanilla HTML/JS", "projects wanting a traditional npm package component library"]
+      extract:
+        - "semantic theme tokens"
+        - "accessible component behaviors (from Bits UI)"
+        - "form/table/dialog/sheet patterns"
+      docs:
+        components: "https://www.shadcn-svelte.com/docs/components"
+        bits_ui: "https://bits-ui.com/docs/introduction"
+
+    - id: web.dev-patterns
+      use_for: ["any web project", "reference for best practices", "accessibility guidelines", "responsive design"]
+      strengths: ["backed by Chrome/Google developers", "performance-focused", "Core Web Vitals alignment", "UX patterns for forms and permissions"]
+      avoid_for: ["off-the-shelf component needs (this is a guide, not a library)"]
+      extract:
+        - "responsive UI patterns (fluid layouts without breakpoints)"
+        - "accessible forms and permission flows"
+        - "UX patterns that protect Core Web Vitals"
+      docs:
+        patterns: "https://web.dev/patterns/"
+        css_ui: "https://developer.chrome.com/docs/css-ui/"
