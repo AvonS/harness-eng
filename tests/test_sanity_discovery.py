@@ -11,16 +11,18 @@ class TestSanityDiscovery(unittest.TestCase):
         self.repo_root = Path(__file__).resolve().parent.parent
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.sanity_script = self.root / "scripts" / "sanity-check.sh"
-
-        self._symlink(self.repo_root / "commands", self.root / "commands")
-        self._symlink(self.repo_root / "templates", self.root / "templates")
-        self._symlink(self.repo_root / "hooks", self.root / "hooks")
-        self._symlink(self.repo_root / "docs", self.root / "docs")
-        self._symlink(self.repo_root / "VERSION", self.root / "VERSION")
+        harness_dir = self.root / ".harness-eng"
+        harness_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.sanity_script = harness_dir / "scripts" / "sanity-check.sh"
+        
+        self._symlink(self.repo_root / "commands", harness_dir / "commands")
+        self._symlink(self.repo_root / "templates", harness_dir / "templates")
+        self._symlink(self.repo_root / "hooks", harness_dir / "hooks")
+        self._symlink(self.repo_root / "docs", harness_dir / "docs")
         self._symlink(self.repo_root / "technology.yaml", self.root / "technology.yaml")
-
-        scripts_dir = self.root / "scripts"
+        
+        scripts_dir = harness_dir / "scripts"
         scripts_dir.mkdir(parents=True, exist_ok=True)
         for name in ["sanity-check.sh", "harness-status.py", "version-check.py"]:
             shutil.copy2(self.repo_root / "scripts" / name, scripts_dir / name)
@@ -28,7 +30,6 @@ class TestSanityDiscovery(unittest.TestCase):
         harness_dir = self.root / ".harness-eng"
         harness_dir.mkdir(parents=True, exist_ok=True)
         self._symlink(self.repo_root / ".harness-eng" / "agents", harness_dir / "agents")
-        self._symlink(self.repo_root / ".harness-eng" / "internal-scripts", harness_dir / "internal-scripts")
         self._symlink(self.repo_root / ".harness-eng" / "VERSION", harness_dir / "VERSION")
         self._symlink(self.repo_root / ".harness-eng" / "CONSTITUTION.md", harness_dir / "CONSTITUTION.md")
         self._symlink(self.repo_root / ".harness-eng" / "BRD.md", harness_dir / "BRD.md")
