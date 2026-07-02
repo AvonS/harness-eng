@@ -122,6 +122,13 @@ class TestEvidenceContractPolicy(unittest.TestCase):
         self.assertIn("push_target_branch_if_enabled", release_command)
         self.assertIn("push_release_tag_if_enabled", release_command)
 
+    def test_upgrade_requires_fetched_canonical_contract(self) -> None:
+        upgrade = (self.repo_root / "commands/upgrade-harness.md").read_text(encoding="utf-8")
+
+        self.assertIn("execution_source: fetched_canonical_required", upgrade)
+        self.assertIn("restart using the fetched contract", upgrade)
+        self.assertIn("instead of the installed local copy", upgrade)
+
 
 if __name__ == "__main__":
     unittest.main()

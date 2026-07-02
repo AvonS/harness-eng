@@ -144,7 +144,7 @@ Read command files from `.harness-eng/commands/` and follow them. Users talk nat
 | `/h:review-pre-verify` | **Agent gate** — Sr Tech Lead review, compare design vs code | ✅ Agent |
 | `/h:verify` | Run tests, check acceptance criteria, fill verification report | — |
 | `/h:release` | **Human gate** — create PR, merge, archive, update status | ✅ Human |
-| `/h:upgrade-harness` | Fetch latest instructions from `https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md` and follow them | — |
+| `/h:upgrade-harness` | Fetch the latest command from `https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md`; execute the fetched contract, never the installed copy | — |
 | `/h:status` | Print project status | — |
 | `/h:health` | Check agent compliance with harness rules | — |
 

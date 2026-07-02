@@ -5,8 +5,12 @@ description: Upgrade harness to latest version
 persona: Manager
 subagent: false
 reason: Bootstrap operation
+canonical_url: https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md
+execution_source: fetched_canonical_required
 
 gates:
+  - check: current upgrade contract was fetched from canonical_url for this invocation
+    on_fail: STOP, fetch canonical_url and restart using the fetched contract
   - check: .harness-eng/ exists
     on_fail: STOP, run /h:init
   - check: git status is clean
@@ -32,6 +36,7 @@ actions:
   - commit: "chore: upgrade harness-eng to latest"
 
 must_do:
+  - Execute the fetched canonical upgrade contract instead of the installed local copy
   - Fetch exactly the specified folders from canonical source
   - Always preserve project customizations and state
   - Exclude sanity-check.sh from script updates
@@ -39,6 +44,7 @@ must_do:
   - Record the harness-eng-skills source revision and installed skill digests
 
 must_not_do:
+  - Continue from an installed local upgrade command after fetching its replacement
   - Overwrite project-level files (BRD, CONSTITUTION, SLICE_LOG)
   - Upgrade with uncommitted changes
 ---
