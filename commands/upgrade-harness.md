@@ -27,6 +27,7 @@ actions:
     - migrations/ -> .harness-eng/migrations/
     - templates/ -> .harness-eng/templates/
     - AGENTS.md -> ./AGENTS.md
+    - VERSION -> .harness-eng/VERSION
   - preserve_project_state:
     - .harness-eng/CONSTITUTION.md
     - .harness-eng/BRD.md
