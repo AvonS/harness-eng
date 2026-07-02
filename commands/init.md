@@ -26,6 +26,7 @@ actions:
     - AGENTS.md -> ./AGENTS.md
   - symlink_agent_configs: symlink claude.md, .cursorrules, .clinerules to ./AGENTS.md
   - derive_constitution: from project analysis + user input (default release_policy.strategy to local_merge, but allow user to opt into pull_request or direct)
+  - prompt_testing_level: ask user for project-wide testing level (S, M, or L, default S) and persist in CONSTITUTION.md
   - derive_brd: from PRD/docs/conversation (Use templates/big-picture/BRD.md to ensure rich markdown structure)
   - derive_architecture: from code structure/docs/conversation (Use templates/big-picture/ARCHITECTURE.md and include mermaid diagrams)
   - derive_design_registry: copy templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
