@@ -45,3 +45,9 @@
 *   **User Communication Profile**: Each human user can define their preferred output (terse, conversational, executive-summary) in a local `SOUL.md` or user-profile config.
 *   **Agent Operating Persona**: `SOUL.md` governs the specific role, risk posture, and communication traits of the agent talking to that human.
 *   **Canonical Artifact Voice**: Even though the agent speaks to different users differently (based on their `SOUL.md`), the underlying project truth (PRDs, designs, logs) must remain neutral, factual, and strictly consistent. This ensures presentation changes don't pollute the actual engineering artifacts.
+
+## Horizon 2 & 3 Roadmap (pi-harness & Hasp)
+
+*   **Tool-Level Permission Constraints (pi-harness)**: Programmatically restrict what tools each subagent persona can call. For example, Developer is restricted from modifying configuration or approving gates; Sr Tech Lead is denied write access to production code.
+*   **Enforced Gate Ownership (pi-harness)**: Ensure that only the system orchestrator (or Gatekeeper persona carrying explicit human decisions) can write to state markers (`Ref: APPROVED`), blocking arbitrary file edits from modifying gate states.
+*   **Hasp Team Workspaces (Hasp)**: Multi-user project operating system supporting shared project truth, trust evidence dashboard, and team-scale delivery across multiple local developer workspaces.
