@@ -16,6 +16,7 @@ actions:
   - wait_for_human_response
   - if approved:
     - set_ref: 'APPROVED (in design.md)'
+    - prompt_testing_level: ask user to confirm or select the feature's Testing Level (S/M/L) and update design.md header
     - route: to /h:tasks
   - if changes_requested:
     - set_ref: 'REJECTED (in design.md)'
@@ -24,6 +25,7 @@ actions:
 must_do:
   - Present full design document
   - Wait for explicit human approval
+  - Confirm or select Testing Level (S/M/L) and update design.md header upon approval
   - Update Ref marker in design.md
 
 must_not_do:
