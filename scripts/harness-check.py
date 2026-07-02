@@ -11,6 +11,7 @@ Exit: 0 = prerequisites met, 1 = prerequisites not met
 
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -23,6 +24,10 @@ NC = "[0m"
 
 JSON_MODE = "--json" in sys.argv
 SCRIPTS_DIR = Path("scripts")
+RELEASE_REF_PENDING_RE = re.compile(
+    r"^\s*\*{0,2}Release Ref\*{0,2}\s*:\s*\*{0,2}PENDING\*{0,2}\s*$",
+    re.MULTILINE,
+)
 
 
 def load_helper(script_name: str, module_name: str):
@@ -121,6 +126,10 @@ def check_active_file(filename: str, description: str) -> bool:
     else:
         fail_msg(f"{description} — {filename} not found in any active feature")
         return False
+
+
+def has_pending_release_ref(content: str) -> bool:
+    return RELEASE_REF_PENDING_RE.search(content) is not None
 
 
 def any_blocked_features() -> list[Path]:
@@ -359,7 +368,7 @@ def validate_release() -> int:
     release_pending = False
     for f in find_active("verification.md"):
         content = f.read_text(encoding="utf-8", errors="replace")
-        if "Release Ref: PENDING" in content:
+        if has_pending_release_ref(content):
             release_pending = True
             break
     if release_pending:

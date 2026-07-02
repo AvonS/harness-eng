@@ -111,7 +111,7 @@ fi
 cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/verification.md"
 # Verification
 All passing
-**Release Ref: PENDING**
+**Release Ref**: PENDING
 EOF
 if ! run_check "$project" release >/dev/null 2>&1; then
     echo "FAIL: Blocked release with Release Ref: PENDING"

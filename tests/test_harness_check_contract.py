@@ -73,3 +73,28 @@ evidence_strategy: verification.md
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("Traceability incomplete", proc.stdout)
 
+    def test_release_accepts_canonical_markdown_release_ref(self) -> None:
+        root = self.make_project()
+        feature = root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test"
+        (feature / "verification.md").write_text(
+            "# Verification\n\n**Release Ref**: PENDING\n",
+            encoding="utf-8",
+        )
+
+        proc = self.run_check(root, "release")
+
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("Ready to release", proc.stdout)
+
+    def test_release_rejects_non_pending_release_ref(self) -> None:
+        root = self.make_project()
+        feature = root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test"
+        (feature / "verification.md").write_text(
+            "# Verification\n\n**Release Ref**: APPROVED\n",
+            encoding="utf-8",
+        )
+
+        proc = self.run_check(root, "release")
+
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("not complete or not marked PENDING", proc.stdout)
