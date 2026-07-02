@@ -464,6 +464,9 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
     if version["status"] == "up_to_date":
         v = version.get("local_version", "?")
         print(f"{GREEN}✅ VERSION_CHECK:UP-TO-DATE{NC} — {v}")
+    elif version["status"] == "dogfood":
+        v = version.get("local_version", "?")
+        print(f"{GREEN}✅ VERSION_CHECK:DOGFOOD{NC} — {v} (canonical source repo)")
     elif version["status"] == "behind":
         raw = version.get("raw_output", "")
         # Extract the version from raw output

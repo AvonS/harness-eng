@@ -36,7 +36,7 @@ __pycache__/
 *.log
 
 # Harness-eng runtime and state (upstream repo does not check this in)
-.harness-eng/
+.harness-eng
 
 # Temp files
 *.tmp
