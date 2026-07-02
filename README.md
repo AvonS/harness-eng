@@ -36,6 +36,9 @@ and follow the instructions to upgrade harness-eng in this folder
 
 **Project-specific files are NEVER overwritten:** CONSTITUTION.md, BRD.md, ARCHITECTURE.md, technology.yaml, sanity-check.sh, SLICE_LOG.md.
 
+### Migration & Recovery
+Projects using this harness are tracked under the **`Foundry`** generation identity (stored in `.harness-eng/manifest.json`). When upgrading, a migration engine safely transitions older "legacy" state to the current schema. Backups are automatically created before any writes.
+If an upgrade is interrupted, a migration lock protects your state. Run `/h:upgrade-harness` again or use the resume script to safely recover.
 ---
 
 ## The Workflow
