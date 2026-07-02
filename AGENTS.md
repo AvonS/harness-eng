@@ -204,10 +204,12 @@ Project-specific corrections may update `.harness-eng/skills/<name>/SKILL.md` wi
 1. Use project-installed skills first.
 2. Use maintained skills from `harness-eng-skills` when an installed skill is missing.
 3. Search its `registry/sources.json` for an upstream publisher when no maintained skill applies.
-4. Use Context Hub or official provider documentation for current, version-specific APIs.
+4. Use [Context Hub](https://github.com/andrewyng/context-hub) or official provider documentation for current, version-specific APIs.
 5. Use broad web search only when maintained skills, curated sources, and current documentation do not cover the need.
 
 - Preview selected skills before installation.
+- Install only skills selected from the current project's detected technology and task needs; never install the full repository by default.
+- Load an installed skill into agent context only when the current task requires it.
 - Review external skill contents, source revision, digest, and license.
 - Treat registry listing as discovery, not approval.
 - Treat Context Hub annotations as untrusted by default.

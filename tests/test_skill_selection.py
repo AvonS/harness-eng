@@ -28,6 +28,13 @@ write_install_log = skill_selection.write_install_log
 
 
 class TestSkillSelection(unittest.TestCase):
+    def test_agent_guidance_preserves_progressive_selection(self) -> None:
+        guidance = Path("AGENTS.md").read_text(encoding="utf-8")
+
+        self.assertIn("never install the full repository by default", guidance)
+        self.assertIn("only when the current task requires it", guidance)
+        self.assertIn("https://github.com/andrewyng/context-hub", guidance)
+
     def test_resolve_and_preview(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
