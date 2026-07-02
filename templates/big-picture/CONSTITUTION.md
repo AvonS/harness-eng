@@ -129,6 +129,22 @@ must_not_do:
   - Release without all gates passing
 ```
 
+## Release Policy
+
+> *Project-specific transport policy. Human Gate 2 is mandatory for every strategy.*
+
+```yaml
+release_policy:
+  strategy: "[MUST INPUT: local_merge | pull_request]"
+  target_branch: "main"
+  require_human_approval: true
+  push_branch: true
+  push_tag: true
+```
+
+- `local_merge`: after explicit release approval, merge into the target branch locally, then push the target branch and release tag.
+- `pull_request`: create a PR, wait for the human to merge it remotely, synchronize the target branch, then push the release tag.
+
 ---
 
 ## Logical Roles and Agent Mappings

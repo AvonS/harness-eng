@@ -108,6 +108,16 @@ class TestEvidenceContractPolicy(unittest.TestCase):
                 with self.subTest(path=relative_path, phrase=phrase):
                     self.assertNotIn(phrase, content)
 
+    def test_release_policy_is_canonical_and_consumed(self) -> None:
+        constitution = (self.repo_root / "templates/big-picture/CONSTITUTION.md").read_text(encoding="utf-8")
+        release_command = (self.repo_root / "commands/release.md").read_text(encoding="utf-8")
+
+        self.assertIn("release_policy:", constitution)
+        self.assertIn("local_merge | pull_request", constitution)
+        self.assertIn("read_release_policy", release_command)
+        self.assertIn("push_target_branch_if_enabled", release_command)
+        self.assertIn("push_release_tag_if_enabled", release_command)
+
 
 if __name__ == "__main__":
     unittest.main()

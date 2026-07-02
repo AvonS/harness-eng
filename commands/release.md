@@ -1,7 +1,7 @@
 ---
 name: harness-release
 description: >
-  Release approved feature. Create PR, wait for merge, archive, tag.
+  Release approved work using the project constitution release policy.
 
 persona: Gatekeeper
 subagent: false
@@ -14,33 +14,43 @@ gates:
     on_fail: STOP, verification not approved
   - check: on feature branch (not main)
     on_fail: STOP, switch to feature branch
+  - check: constitution contains a valid release_policy strategy
+    on_fail: STOP, ask human to choose local_merge or pull_request
 
 actions:
-  - run_gh_pr_create: 'base=main, title="feat: <feature> [VERIFIED]", labels="verified"'
-  - output: PR URL
-  - wait: human merges PR
-  - run: git checkout main && git pull
-  - run: git branch -d <feature-branch>
-  - run: git push origin --delete <feature-branch>
+  - read_release_policy: strategy, target_branch, require_human_approval, push_branch, push_tag
+  - wait_for_explicit_human_gate_2_approval
+  - if strategy == local_merge:
+    - checkout_target_branch
+    - merge_feature_branch
+    - push_target_branch_if_enabled
+  - if strategy == pull_request:
+    - create_verified_pull_request
+    - output_pull_request_url
+    - wait_for_human_merge
+    - synchronize_target_branch
   - move: .harness-eng/specs/active/<feature> → .harness-eng/specs/done/
   - run: python3 scripts/harness-status.py
-  - update: version.txt (bump patch)
-  - run: git tag v<version>
-  - run: git push origin v<version>
+  - update: VERSION according to phase, change, or bug version policy
+  - create_release_tag
+  - push_release_tag_if_enabled
+  - delete_feature_branch_after_merge
   - update: .harness-eng/SLICE_LOG.md (add release entry)
 
 must_do:
-  - PR includes [VERIFIED] label
-  - Wait for human merge (never self-merge)
+  - Read release_policy from the project constitution
+  - Require explicit human approval before either merge strategy
+  - Push the target branch when push_branch is true
+  - Push the release tag when push_tag is true
+  - Verify the published target branch and tag match the local release
   - Archive spec to done/
-  - Tag with version
   - Update SLICE_LOG.md
 
 must_not_do:
-  - Merge PR without human approval
+  - Assume pull_request when the project selects local_merge
+  - Merge or publish without human approval
   - Skip archiving
   - Forget version bump
   - Skip SLICE_LOG update
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-
