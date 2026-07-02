@@ -129,6 +129,8 @@ class TestEvidenceContractPolicy(unittest.TestCase):
         self.assertIn("https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md", upgrade)
         self.assertIn("restart using the fetched contract", upgrade)
         self.assertIn("instead of the installed local copy", upgrade)
+        self.assertIn("initialize_design_registry_if_missing", upgrade)
+        self.assertIn("Overwrite an existing project design-registry.yaml", upgrade)
 
 
 if __name__ == "__main__":

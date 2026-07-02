@@ -28,8 +28,10 @@ actions:
     - .harness-eng/BRD.md
     - .harness-eng/ARCHITECTURE.md
     - .harness-eng/SLICE_LOG.md
+    - .harness-eng/design-registry.yaml
     - .harness-eng/scripts/sanity-check.sh
     - all active/done phases
+  - initialize_design_registry_if_missing: copy .harness-eng/templates/big-picture/design-registry.yaml to .harness-eng/design-registry.yaml
   - fetch_skill_source: update https://github.com/AvonS/harness-eng-skills.git in the user cache
   - use_skill_selector: install selected upstream skills while preserving project-modified copies
   - report: list of updated files
@@ -39,12 +41,14 @@ must_do:
   - Execute the fetched canonical upgrade contract instead of the installed local copy
   - Fetch exactly the specified folders from canonical source
   - Always preserve project customizations and state
+  - Create design-registry.yaml only when the project file is missing
   - Exclude sanity-check.sh from script updates
   - Report changes clearly
   - Record the harness-eng-skills source revision and installed skill digests
 
 must_not_do:
   - Continue from an installed local upgrade command after fetching its replacement
+  - Overwrite an existing project design-registry.yaml
   - Overwrite project-level files (BRD, CONSTITUTION, SLICE_LOG)
   - Upgrade with uncommitted changes
 ---
