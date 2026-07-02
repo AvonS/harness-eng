@@ -28,7 +28,7 @@ read https://github.com/AvonS/harness-eng/blob/main/commands/init.md and follow 
 ## Upgrade
 
 ```
-read https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md 
+read https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md
 and follow the instructions to upgrade harness-eng in this folder
 ```
 
@@ -141,7 +141,7 @@ Read command files from `.harness-eng/commands/` and follow them.
 | `/h:build` | Implement against the approved Evidence Contract — one commit per task |
 | `/h:verify` | Run tests, check acceptance criteria, fill verification report |
 | `/h:release` | Create PR, merge, archive, update status |
-| `/h:upgrade-harness` | Fetch latest instructions from `https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md` |
+| `/h:upgrade-harness` | Fetch latest instructions from `https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md` |
 | `/h:status` | Print project status |
 | `/h:health` | Check agent compliance with harness rules |
 | `/h:bug` | Process bug fixes with shortened workflow |

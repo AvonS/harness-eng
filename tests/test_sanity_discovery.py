@@ -126,6 +126,7 @@ class TestEvidenceContractPolicy(unittest.TestCase):
         upgrade = (self.repo_root / "commands/upgrade-harness.md").read_text(encoding="utf-8")
 
         self.assertIn("execution_source: fetched_canonical_required", upgrade)
+        self.assertIn("https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md", upgrade)
         self.assertIn("restart using the fetched contract", upgrade)
         self.assertIn("instead of the installed local copy", upgrade)
 

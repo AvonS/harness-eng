@@ -5,7 +5,7 @@ description: Upgrade harness to latest version
 persona: Manager
 subagent: false
 reason: Bootstrap operation
-canonical_url: https://github.com/AvonS/harness-eng/blob/main/commands/upgrade-harness.md
+canonical_url: https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md
 execution_source: fetched_canonical_required
 
 gates:
