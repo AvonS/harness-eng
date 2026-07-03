@@ -57,6 +57,8 @@ class MigrationPlanner:
             for m in migrations:
                 if m["id"] == "0001-bootstrap-foundry-manifest":
                     return [m]
+        if source == "foundry":
+            return [m for m in migrations if m["id"] == "0002-phase-level-lifecycle"]
         return []
 
 class MigrationLock:
@@ -165,6 +167,23 @@ class MigrationEngine:
                         manifest_path.parent.mkdir(parents=True, exist_ok=True)
                         with open(manifest_path, "w") as f:
                             json.dump(manifest_data, f, indent=2)
+                elif m["id"] == "0002-phase-level-lifecycle":
+                    phase_root = self.context.harness_root / "phases"
+                    phase_backup = self.context.backup_root / self.run_id / "phase-layout"
+                    if phase_root.is_dir() and not self.context.dry_run:
+                        shutil.copytree(phase_root, phase_backup)
+                    module_path = self.context.harness_root / "migrations" / m["module"]
+                    spec = importlib.util.spec_from_file_location("phase_layout_migration", module_path)
+                    if spec is None or spec.loader is None:
+                        raise RuntimeError(f"cannot load migration: {module_path}")
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    module.migrate_phase_layout(self.context.harness_root, self.context.dry_run)
+                    manifest_path = self.context.harness_root / "manifest.json"
+                    manifest = json.loads(manifest_path.read_text())
+                    manifest["harness"]["schema"] = 3
+                    manifest["migration"] = {"state": "complete", "last_applied": m["id"]}
+                    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
                             
                 with open(journal_path, "a") as f:
                     f.write(json.dumps({"id": m["id"], "status": "validated"}) + "\n")
@@ -204,8 +223,8 @@ def main():
         target_identity = HarnessIdentity(
             product="harness-eng",
             lineage="foundry",
-            schema=2,
-            release="0.2.0"
+            schema=3,
+            release="0.3.0"
         )
         
         context = MigrationContext(

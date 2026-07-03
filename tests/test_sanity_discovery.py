@@ -24,7 +24,7 @@ class TestSanityDiscovery(unittest.TestCase):
         
         scripts_dir = harness_dir / "scripts"
         scripts_dir.mkdir(parents=True, exist_ok=True)
-        for name in ["sanity-check.sh", "harness-status.py", "version-check.py"]:
+        for name in ["sanity-check.sh", "harness-status.py", "harness_layout.py", "version-check.py"]:
             shutil.copy2(self.repo_root / "scripts" / name, scripts_dir / name)
 
         harness_dir = self.root / ".harness-eng"

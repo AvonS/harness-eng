@@ -7,6 +7,16 @@ description: >
 persona: Sr Architect
 subagent: true
 reason: Needs fresh perspective, separate from design Analyst
+delegation:
+  capability: review
+  outcome: Return a complete design-gap review with an explicit verdict
+  read_paths: [technology.yaml, BRD.md, CONSTITUTION.md, active spec.md, active design.md, relevant installed skills]
+  write_authority: none
+  return_format: Markdown report with Skill Evidence ending with VERDICT PASS or FAIL
+  max_response: 20KB
+  context_policy: Pass paths and concise state; never inline complete files or raw output
+  on_failure: Return ERROR with blocker and no approval
+  persistence: Manager writes the returned report unchanged to review-pre-build.md
 
 gates:
   - check: design.md exists
@@ -17,6 +27,9 @@ gates:
     on_fail: STOP, no BRD to validate against
 
 actions:
+  - derive_relevant_skills: read technology.yaml and map design scope to installed skills
+  - load_relevant_skills: read only the installed skills relevant to the review scope
+  - check_framework_capabilities: reject unjustified duplication of capabilities supplied by the selected stack
   - read: BRD.md (business requirements)
   - read: constitution.md (rules, constraints)
   - read: spec.md (feature requirements)
@@ -39,6 +52,7 @@ outputs:
   - review-pre-build.md (PASS/FAIL + gap list)
 
 must_do:
+  - Record consulted and missing skills in a Skill Evidence section
   - Benchmark design against the global Ponytail YAGNI policy (reject over-engineered architectures)
   - Reject UI bloat and over-engineered, bespoke front-end components, enforcing the Ponytail YAGNI Framework
   - Check every BRD requirement is in design

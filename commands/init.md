@@ -20,14 +20,16 @@ actions:
   - scan: project for existing docs (README, PRD, ADR, code)
   - classify_scenario: [A: greenfield, B: brownfield, C: documented]
   - bind_clarification_context: Treat every requested user answer as initialization input until this command stops
-  - create: .harness-eng/ directory structure
-  - stamp_manifest: write .harness-eng/manifest.json with product harness-eng, lineage Foundry, schema 2, release 0.2.0
+  - create_from_manifest: create every directory declared in templates/init-layout.json
+  - stamp_manifest: write .harness-eng/manifest.json with product harness-eng, lineage Foundry, schema 3, current release
   - if_brownfield: convert existing agents.md, claude.md, .cursorrules, or other agent files to .harness-eng/CONSTITUTION.md
   - fetch_and_replace_from_canonical:
     - commands/ -> .harness-eng/commands/
     - agents/ -> .harness-eng/agents/
     - scripts/ -> .harness-eng/scripts/
     - templates/ -> .harness-eng/templates/
+    - hooks/ -> .harness-eng/hooks/
+    - VERSION -> .harness-eng/VERSION
     - AGENTS.md -> ./AGENTS.md
   - symlink_agent_configs: symlink claude.md, .cursorrules, .clinerules to ./AGENTS.md
   - derive_constitution: from project analysis + user input (default release_policy.strategy to local_merge, but allow user to opt into pull_request or direct)
@@ -39,6 +41,11 @@ actions:
   - fetch_skill_source: clone or update https://github.com/AvonS/harness-eng-skills.git in the user cache
   - preview_skills: run scripts/skill-selection.py with the cached repository skills path
   - install_selected_skills: copy only skills required by the derived technology stack
+  - initialize_phase_index: create derived .harness-eng/PHASES.md
+  - initialize_slice_log: create .harness-eng/SLICE_LOG.md
+  - initialize_skill_log: create .harness-eng/skill-install.json
+  - derive_runtime_smoke: add the cheapest real-entry-point smoke check to the sanity project region for executable applications
+  - validate_layout: run scripts/validate-layout.py against templates/init-layout.json
   - present: all docs to human for review
   - wait: human approval
   - validate_init_boundary: Run scripts/init-boundary.py check --baseline .harness-eng-init-baseline.json

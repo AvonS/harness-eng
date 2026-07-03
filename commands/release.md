@@ -33,7 +33,8 @@ actions:
     - synchronize_target_branch
   - if strategy == direct:
     - push_target_branch_if_enabled
-  - move: .harness-eng/specs/active/<feature> → .harness-eng/specs/done/
+  - if phase_release: move .harness-eng/phases/active/<phase> → .harness-eng/phases/archive/<phase>
+  - if bug_or_cr_release: move .harness-eng/specs/active/<item> → .harness-eng/specs/done/<item>
   - run: python3 scripts/harness-status.py
   - update: VERSION according to phase, change, or bug version policy
   - create_release_tag

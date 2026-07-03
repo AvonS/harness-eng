@@ -93,7 +93,7 @@ class HarnessStatusCollector:
 
     def _get_phases(self):
         """Get all phases and their features."""
-        phases_dir = self.harness_dir / "phases"
+        phases_dir = self.harness_dir / "phases" / "active"
         if not phases_dir.exists():
             return []
 
@@ -138,11 +138,8 @@ class HarnessStatusCollector:
         if not features_dir.exists():
             return "pending"
 
-        active_dir = features_dir / "active"
-        archive_dir = features_dir / "archive"
-
-        has_active = active_dir.exists() and any(active_dir.iterdir()) if active_dir.exists() else False
-        has_archived = archive_dir.exists() and any(archive_dir.iterdir()) if archive_dir.exists() else False
+        has_active = any(features_dir.iterdir())
+        has_archived = False
 
         if has_active:
             return "active"
@@ -849,7 +846,7 @@ function renderPhase(phase) {
 
 function renderFeature(feature, phaseId = null) {
     const featurePath = phaseId
-        ? `phases/${phaseId}/features/active/${feature.id}`
+        ? `phases/active/${phaseId}/features/${feature.id}`
         : `specs/active/${feature.id}`;
 
     const approveBtn = feature.has_design && !feature.design_approved

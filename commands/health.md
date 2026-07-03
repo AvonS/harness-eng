@@ -5,6 +5,15 @@ description: Check agent compliance
 persona: Sr Tech Lead
 subagent: true
 reason: Needs fresh perspective
+delegation:
+  capability: review
+  outcome: Return a lifecycle-aware compliance report
+  read_paths: [AGENTS.md, CONSTITUTION.md, technology.yaml, active artifacts, SLICE_LOG.md]
+  write_authority: none
+  return_format: Report classifying each rule PASS, FAIL, PENDING, or N/A
+  max_response: 20KB
+  context_policy: Pass paths; never inline complete files or raw logs
+  on_failure: Return ERROR with unavailable evidence
 
 prerequisites:
   - check: .harness-eng/ exists

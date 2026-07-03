@@ -3,8 +3,8 @@
   "target": {
     "product": "harness-eng",
     "lineage": "foundry",
-    "release": "0.2.0",
-    "schema": 2
+    "release": "0.3.0",
+    "schema": 3
   },
   "supported_sources": [
     "legacy-v1",
@@ -27,6 +27,15 @@
       "affected_paths": [
         ".harness-eng/manifest.json"
       ]
+    },
+    {
+      "id": "0002-phase-level-lifecycle",
+      "phase": "pre_upgrade",
+      "from": {"lineage": "foundry", "schema": 2},
+      "to": {"lineage": "foundry", "schema": 3},
+      "module": "0002-phase-level-lifecycle.py",
+      "sha256": "release-generated",
+      "affected_paths": []
     }
   ]
 }

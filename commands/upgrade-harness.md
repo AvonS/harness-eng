@@ -18,7 +18,7 @@ gates:
 
 actions:
   - run_version_check: python3 .harness-eng/scripts/version-check.py . .harness-eng
-  - bootstrap_migration_engine: If .harness-eng/scripts/migrate-harness.py or .harness-eng/migrations/catalog.json are missing, download them from the canonical repository before planning migration.
+  - bootstrap_migration_engine: Download the current migrate-harness.py, catalog.json, and every migration module referenced by that catalog before planning migration
   - plan_migration: python3 .harness-eng/scripts/migrate-harness.py plan --target staged
   - apply_pre_migration: python3 .harness-eng/scripts/migrate-harness.py apply --target staged
   - fetch_and_replace_from_canonical:
@@ -36,7 +36,7 @@ actions:
     - .harness-eng/SLICE_LOG.md
     - .harness-eng/design-registry.yaml
     - .harness-eng/scripts/sanity-check.sh
-    - all active/done phases
+    - all active/archive phases and active/done bug or CR specs
   - initialize_design_registry_if_missing: create an empty .harness-eng/design-registry.yaml for project-specific additions if it doesn't exist
   - validate_migration: python3 .harness-eng/scripts/migrate-harness.py status
   - finalize_migration: update manifest target release

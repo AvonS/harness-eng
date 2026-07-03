@@ -4,6 +4,15 @@ description: Analyst persona - create feature spec from BRD
 
 persona: Analyst
 subagent: true
+delegation:
+  capability: work
+  outcome: Create spec.md in the active phase feature folder
+  read_paths: [BRD.md, CONSTITUTION.md, PHASES.md, relevant installed skills]
+  write_authority: Active feature spec.md only
+  return_format: Path, coverage, assumptions, and blockers
+  max_response: 20KB
+  context_policy: Pass paths; never inline complete files
+  on_failure: Return ERROR with unresolved requirement
 goal: Produce a rich, expressive, and human-readable spec.md document that explicitly follows templates/feature/spec.md.
 
 gates:
@@ -18,6 +27,8 @@ preflight:
   - read_previous_feedback (to act on gap list or rejection notes if returning from failure)
 
 actions:
+  - resolve_active_phase: use .harness-eng/phases/active/<phase-id>
+  - create_feature_folder: use <active-phase>/features/<feature-id>/
   - identify_feature_from_brd
   - classify_change: documentation, configuration, executable_logic, workflow, bug_fix, business_behavior, ui_behavior, security_boundary, migration, or prototype
   - perform_adaptive_behavior_discovery: use examples only when behavior, state transitions, or user outcomes require clarification
@@ -26,7 +37,7 @@ actions:
   - for_each_requirement:
     - create_testable_acceptance_examples: use Given/When/Then only for material behavior
     - identify_acceptance_criteria
-  - write_spec: use templates/feature/spec.md to produce a detailed, well-formatted markdown document
+  - write_spec: write <active-phase>/features/<feature-id>/spec.md using templates/feature/spec.md
   - set_ref: PENDING
   - route: to /h:design
 

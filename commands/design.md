@@ -4,6 +4,15 @@ description: Analyst persona - design architecture and interfaces
 
 persona: Analyst
 subagent: true
+delegation:
+  capability: work
+  outcome: Create design.md and required UI brief for the active feature
+  read_paths: [technology.yaml, BRD.md, CONSTITUTION.md, active spec.md, design registries, relevant installed skills]
+  write_authority: Active feature design artifacts only
+  return_format: Paths, decisions, evidence, assumptions, and blockers
+  max_response: 20KB
+  context_policy: Pass paths; never inline complete files
+  on_failure: Return ERROR with unresolved design input
 goal: Produce a comprehensive, deterministic, and highly readable design.md document with architecture diagrams (mermaid) and API contracts, following templates/feature/design.md.
 
 gates:

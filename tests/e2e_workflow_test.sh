@@ -22,13 +22,14 @@ create_project() {
     local name="$1"
     local project="$TMP_ROOT/$name"
     mkdir -p "$project/scripts"
-    mkdir -p "$project/.harness-eng/phases/phase-e2e/features/active/F999-test"
+    mkdir -p "$project/.harness-eng/phases/active/phase-e2e/features/F999-test"
     cp "$SCRIPT_ROOT/scripts/harness-check.py" "$project/scripts/"
     cp "$SCRIPT_ROOT/scripts/blocked-state.py" "$project/scripts/"
     cp "$SCRIPT_ROOT/scripts/traceability.py" "$project/scripts/"
     cp "$SCRIPT_ROOT/scripts/sensor-runner.py" "$project/scripts/"
+    cp "$SCRIPT_ROOT/scripts/harness_layout.py" "$project/scripts/"
     printf 'sensors:\n  - id: unit-tests\n    command: python3 -c '\''print(1)'\''\n    required_before: verify\n    timeout: 5\n    evidence: logs\n  - id: review-check\n    command: python3 -c '\''print(1)'\''\n    required_before: review-pre-verify\n    timeout: 5\n    evidence: logs\n' > "$project/technology.yaml"
-    printf '# Spec\n' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/spec.md"
+    printf '# Spec\n' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/spec.md"
     printf '%s\n' "$project"
 }
 
@@ -40,7 +41,7 @@ run_check() {
 
 echo "Test 1: Gate 1 (Design Approval)"
 project="$(create_project gate-1)"
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/design.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
 # Design
 **Ref**: PENDING
 EOF
@@ -48,11 +49,11 @@ if run_check "$project" build >/dev/null 2>&1; then
     echo "FAIL: Allowed build with unapproved design"
     exit 1
 fi
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/design.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
 # Design
 **Ref**: APPROVED
 EOF
-touch "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/tasks.md"
+touch "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
 if ! run_check "$project" build >/dev/null 2>&1; then
     echo "FAIL: Blocked build with approved design"
     exit 1
@@ -61,11 +62,11 @@ echo "PASS: Gate 1"
 
 echo "Test 2: Gate 2 (Sr Tech Lead Review)"
 project="$(create_project gate-2)"
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/design.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
 # Design
 **Ref**: APPROVED
 EOF
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/spec.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/spec.md"
 ```yaml
 scenario_id: SCN-200
 source_requirement: docs/backlog.md#trace
@@ -76,17 +77,17 @@ then: t
 evidence_strategy: verification.md
 ```
 EOF
-printf '%s\n' "- [x] SCN-200 task" > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/tasks.md"
+printf '%s\n' "- [x] SCN-200 task" > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
 if run_check "$project" verify >/dev/null 2>&1; then
     echo "FAIL: Allowed verify without review-pre-verify.md"
     exit 1
 fi
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/review-pre-verify.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/review-pre-verify.md"
 # Review
 **Ref**: APPROVED
 SCN-200
 EOF
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/verification.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/verification.md"
 # Verification
 SCN-200
 EOF
@@ -98,7 +99,7 @@ echo "PASS: Gate 2"
 
 echo "Test 3: Gate 3 (Release Approval)"
 project="$(create_project gate-3)"
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/verification.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/verification.md"
 # Verification
 | Acceptance Criteria | Status |
 |---------------------|--------|
@@ -108,7 +109,7 @@ if run_check "$project" release >/dev/null 2>&1; then
     echo "FAIL: Allowed release without Release Ref: PENDING"
     exit 1
 fi
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/verification.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/verification.md"
 # Verification
 All passing
 **Release Ref**: PENDING
@@ -121,14 +122,14 @@ echo "PASS: Gate 3"
 
 echo "Test 4: Automatic Blocked Transition"
 project="$(create_project blocked)"
-printf '%s\n' "- [x] complete" > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/tasks.md"
+printf '%s\n' "- [x] complete" > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
 for _ in 1 2 3; do
     if run_check "$project" verify >/dev/null 2>&1; then
         echo "FAIL: verify unexpectedly passed during blocked transition setup"
         exit 1
     fi
 done
-if [ ! -f "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/BLOCKED.md" ]; then
+if [ ! -f "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/BLOCKED.md" ]; then
     echo "FAIL: BLOCKED.md not created after three failures"
     exit 1
 fi
@@ -136,7 +137,7 @@ echo "PASS: Automatic blocked transition"
 
 echo "Test 5: Required Sensor and Traceability Enforcement"
 project="$(create_project trace-and-sensor)"
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/spec.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/spec.md"
 ```yaml
 scenario_id: SCN-300
 source_requirement: docs/backlog.md#trace
@@ -147,11 +148,11 @@ then: t
 evidence_strategy: verification.md
 ```
 EOF
-cat <<'EOF' > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/review-pre-verify.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/review-pre-verify.md"
 # Review
 **Ref**: APPROVED
 EOF
-printf '%s\n' "- [x] unrelated task" > "$project/.harness-eng/phases/phase-e2e/features/active/F999-test/tasks.md"
+printf '%s\n' "- [x] unrelated task" > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
 if run_check "$project" verify >/dev/null 2>&1; then
     echo "FAIL: Allowed verify with missing traceability mapping"
     exit 1

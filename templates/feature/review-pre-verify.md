@@ -32,6 +32,15 @@ agent_contract:
 **Ref**: PENDING
 **Status**: PASS / FAIL / CONDITIONAL
 
+## Skill Evidence
+
+| Technology area | Installed skill | Status | Framework capability checks |
+|-----------------|-----------------|--------|-----------------------------|
+| <scope> | <skill path> | CONSULTED / MISSING | <checks> |
+
+**Missing relevant skills**: <None or list>
+**Duplicated framework capabilities**: <None or findings>
+
 ## Story Coverage
 
 | Story | Implemented | Required Evidence | Design Match | Quality | Status |

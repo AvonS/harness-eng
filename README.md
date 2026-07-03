@@ -105,16 +105,20 @@ your-project/
     ├── BRD.md                   ← business requirements (never overwritten)
     ├── ARCHITECTURE.md          ← system design (never overwritten)
     ├── technology.yaml          ← toolchain + tech decisions (never overwritten)
-    ├── sanity-check.sh          ← integration tests (project-specific)
     ├── SLICE_LOG.md             ← build narrative
     │
     ├── commands/                ← workflow commands
-    ├── scripts/                 ← status, check scripts
+    ├── scripts/                 ← status/check scripts + project-owned sanity region
     ├── templates/               ← feature templates
     ├── hooks/                   ← pre-commit hook
     ├── skills/                  ← selected project-owned copies from harness-eng-skills
     │
-    └── specs/ or phases/        ← feature specs and designs
+    ├── phases/
+    │   ├── active/<phase>/features/<feature>/
+    │   └── archive/<phase>/
+    └── specs/
+        ├── active/              ← CRs and bugs only
+        └── done/                ← released CRs and bugs
 ```
 
 ---

@@ -2,6 +2,16 @@
 name: harness-build
 description: Implement features using the approved evidence contract
 persona: Developer
+subagent: true
+delegation:
+  capability: work
+  outcome: Implement only the approved incomplete tasks and their evidence
+  read_paths: [technology.yaml, active spec.md, active design.md, active tasks.md, relevant installed skills]
+  write_authority: Task-scoped application files, tests, tasks.md, and SLICE_LOG.md
+  return_format: Bounded summary of tasks, changed paths, checks, commits, and blockers
+  max_response: 20KB
+  context_policy: Pass paths and concise retry state; never inline complete files or raw logs
+  on_failure: Return ERROR with blocker and partial task state
 
 gates:
   - check: 'design.md "Ref: APPROVED"'

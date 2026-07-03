@@ -103,6 +103,9 @@ User intent selects the desired outcome. Harness state selects the next permitte
 - Inspect filesystem artifacts and gate markers before routing any later request.
 - Route build-shaped requests to the earliest incomplete lifecycle command.
 - Never treat an answer to a command question as authorization to invoke another command.
+- Pass relevant paths and concise state to subagents; never inline complete project files or session history.
+- Persist read-only review reports unchanged after validating their verdict marker.
+- Load only the installed skills relevant to delegated scope and record them in review evidence.
 
 ## Session Start (MANDATORY)
 
@@ -185,7 +188,7 @@ The harness enforces three critical gates. You MUST stop at each gate and wait f
 ## How to Resume a Session
 
 1. Read `.harness-eng/SLICE_LOG.md` — last 3 entries recover context fastest
-2. Check for active phase in `.harness-eng/phases/*/features/active/` or `.harness-eng/specs/active/`
+2. Check for active phase in `.harness-eng/phases/active/*/features/` or `.harness-eng/specs/active/`
 3. Confirm you are on the correct git branch
 4. Continue from the current active task in `tasks.md`
 

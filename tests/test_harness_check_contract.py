@@ -10,6 +10,7 @@ SCRIPT_NAMES = [
     "blocked-state.py",
     "traceability.py",
     "sensor-runner.py",
+    "harness_layout.py",
 ]
 
 
@@ -19,7 +20,7 @@ class TestHarnessCheckContract(unittest.TestCase):
         (root / "scripts").mkdir()
         for name in SCRIPT_NAMES:
             shutil.copy2(Path("scripts") / name, root / "scripts" / name)
-        (root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test").mkdir(parents=True)
+        (root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test").mkdir(parents=True)
         return root
 
     def run_check(self, root: Path, command: str) -> subprocess.CompletedProcess[str]:
@@ -33,7 +34,7 @@ class TestHarnessCheckContract(unittest.TestCase):
 
     def test_creates_blocked_after_third_failure(self) -> None:
         root = self.make_project()
-        feature = root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test"
+        feature = root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
         (feature / "spec.md").write_text("# Spec\n", encoding="utf-8")
         (feature / "tasks.md").write_text("- [x] complete\n", encoding="utf-8")
         (root / "technology.yaml").write_text(
@@ -49,7 +50,7 @@ class TestHarnessCheckContract(unittest.TestCase):
 
     def test_verify_blocks_on_missing_traceability(self) -> None:
         root = self.make_project()
-        feature = root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test"
+        feature = root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
         (feature / "spec.md").write_text(
             """```yaml
 scenario_id: SCN-100
@@ -75,7 +76,7 @@ evidence_strategy: verification.md
 
     def test_release_accepts_canonical_markdown_release_ref(self) -> None:
         root = self.make_project()
-        feature = root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test"
+        feature = root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
         (feature / "verification.md").write_text(
             "# Verification\n\n**Release Ref**: PENDING\n",
             encoding="utf-8",
@@ -88,7 +89,7 @@ evidence_strategy: verification.md
 
     def test_release_rejects_non_pending_release_ref(self) -> None:
         root = self.make_project()
-        feature = root / ".harness-eng" / "phases" / "phase-test" / "features" / "active" / "F999-test"
+        feature = root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
         (feature / "verification.md").write_text(
             "# Verification\n\n**Release Ref**: APPROVED\n",
             encoding="utf-8",

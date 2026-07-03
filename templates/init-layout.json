@@ -1,0 +1,23 @@
+{
+  "required_directories": [
+    ".harness-eng/commands", ".harness-eng/agents", ".harness-eng/scripts",
+    ".harness-eng/templates", ".harness-eng/hooks", ".harness-eng/skills",
+    ".harness-eng/phases/active", ".harness-eng/phases/archive",
+    ".harness-eng/specs/active", ".harness-eng/specs/done",
+    ".harness-eng/state/failures", ".harness-eng/evidence"
+  ],
+  "required_files": [
+    "AGENTS.md", ".harness-eng/manifest.json", ".harness-eng/VERSION",
+    ".harness-eng/CONSTITUTION.md", ".harness-eng/BRD.md",
+    ".harness-eng/ARCHITECTURE.md", ".harness-eng/technology.yaml",
+    ".harness-eng/design-registry.yaml", ".harness-eng/PHASES.md",
+    ".harness-eng/SLICE_LOG.md", ".harness-eng/skill-install.json",
+    ".harness-eng/scripts/sanity-check.sh", ".harness-eng/hooks/pre-commit"
+  ],
+  "required_symlinks": {
+    "claude.md": "AGENTS.md", ".cursorrules": "AGENTS.md", ".clinerules": "AGENTS.md"
+  },
+  "misplaced_paths": [
+    ".harness-eng/sanity-check.sh"
+  ]
+}

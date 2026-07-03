@@ -4,6 +4,15 @@ description: Developer persona - break design into granular tasks
 
 persona: Developer
 subagent: true
+delegation:
+  capability: work
+  outcome: Create dependency-ordered tasks for the approved design
+  read_paths: [CONSTITUTION.md, active spec.md, active design.md, relevant installed skills]
+  write_authority: Active feature tasks.md only
+  return_format: Path, task count, dependencies, evidence, and blockers
+  max_response: 20KB
+  context_policy: Pass paths; never inline complete files
+  on_failure: Return ERROR with missing prerequisite
 
 gates:
   - check: design.md exists

@@ -1,5 +1,17 @@
 # Release Notes
 
+## Next Patch - Canonical Delegation and Phase Layout
+
+**Status**: Pending release approval
+
+### Changes
+
+- Added bounded, path-based delegation contracts to every subagent command.
+- Added progressive skill evidence to both independent review gates.
+- Standardized phase state under `phases/active` and `phases/archive` with self-contained feature folders.
+- Added schema-3 migration from the legacy nested feature lifecycle layout.
+- Added a canonical init-layout manifest, validation, and S-level real-runtime smoke policy.
+
 ## v0.2.4 - Initialization Scope Enforcement
 
 **Date**: 2026-07-03

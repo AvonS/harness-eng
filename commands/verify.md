@@ -2,6 +2,17 @@
 name: harness-verify
 description: Verify production-ready
 persona: Gatekeeper
+subagent: true
+delegation:
+  capability: verify
+  outcome: Execute approved evidence and return a reproducible verification verdict
+  read_paths: [technology.yaml, active spec.md, active design.md, active tasks.md, active review-pre-verify.md]
+  write_authority: none
+  return_format: Markdown verification report ending with VERDICT PASS or FAIL
+  max_response: 20KB
+  context_policy: Pass paths; never inline complete files or raw logs
+  on_failure: Return ERROR with failed command and bounded evidence
+  persistence: Manager writes the returned report unchanged to verification.md
 
 gates:
   - check: 'review-pre-verify.md "Ref: APPROVED"'

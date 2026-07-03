@@ -44,6 +44,7 @@ def load_helper(script_name: str, module_name: str):
 blocked_state = load_helper("blocked-state.py", "blocked_state")
 sensor_runner = load_helper("sensor-runner.py", "sensor_runner")
 traceability = load_helper("traceability.py", "traceability")
+layout = load_helper("harness_layout.py", "harness_layout")
 
 def msg(*args, **kwargs):
     if JSON_MODE:
@@ -52,18 +53,11 @@ def msg(*args, **kwargs):
         print(*args, **kwargs)
 
 def find_active(filename: str) -> list[Path]:
-    results = []
-    results.extend(HARNESS_DIR.glob(f"specs/active/*/{filename}"))
-    results.extend(HARNESS_DIR.glob(f"phases/*/features/active/*/{filename}"))
-    results.extend(HARNESS_DIR.glob(f"phase-*/features/active/*/{filename}"))
-    return results
+    return layout.active_artifacts(HARNESS_DIR, filename)
 
 
 def active_feature_dirs() -> list[Path]:
-    dirs: list[Path] = []
-    dirs.extend(path.parent for path in HARNESS_DIR.glob("specs/active/*/spec.md"))
-    dirs.extend(path.parent for path in HARNESS_DIR.glob("phases/*/features/active/*/spec.md"))
-    dirs.extend(path.parent for path in HARNESS_DIR.glob("phase-*/features/active/*/spec.md"))
+    dirs = layout.active_feature_dirs(HARNESS_DIR)
     seen: set[Path] = set()
     ordered: list[Path] = []
     for path in dirs:

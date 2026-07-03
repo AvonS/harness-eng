@@ -32,6 +32,8 @@ echo "=== Sanity Check: Happy Path Integration Test ==="
 # PROJECT_TEST_REGION
 # Add project-specific integration tests below this line.
 # Tests here are preserved during harness upgrades.
+# Executable applications must start their real entry point, wait with a
+# timeout, check one stable user route, and clean up the process.
 # ============================================================
 
 # --- F001: All commands have YAML frontmatter ---

@@ -2,6 +2,16 @@
 name: harness-bug
 description: Process bug/CR with simplified workflow
 persona: Analyst
+subagent: true
+delegation:
+  capability: work
+  outcome: Create one simplified bug or CR item under specs/active
+  read_paths: [BRD.md, CONSTITUTION.md, technology.yaml, triage result, relevant installed skills]
+  write_authority: One specs/active item folder only
+  return_format: Paths, classification, scope, evidence, and blockers
+  max_response: 20KB
+  context_policy: Pass paths; never inline complete files
+  on_failure: Return ERROR with unresolved classification
 
 gates:
   - check: triage_classified (critical bug)

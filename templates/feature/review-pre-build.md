@@ -30,6 +30,15 @@ agent_contract:
 **Feature**: <feature name>
 **Ref**: PENDING
 
+## Skill Evidence
+
+| Technology area | Installed skill | Status | Framework capability checks |
+|-----------------|-----------------|--------|-----------------------------|
+| <scope> | <skill path> | CONSULTED / MISSING | <checks> |
+
+**Missing relevant skills**: <None or list>
+**Duplicated framework capabilities**: <None or findings>
+
 ## BRD Coverage
 
 | # | BRD Requirement | Spec Story | Status |

@@ -2,6 +2,7 @@
 name: harness-approve
 description: Human gate for design approval
 persona: Gatekeeper
+subagent: false
 
 gates:
   - check: 'IF NOT bug/cr THEN review-pre-build.md "Ref: APPROVED"'
@@ -33,4 +34,3 @@ must_not_do:
   - Proceed without Ref: APPROVED
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

@@ -4,6 +4,16 @@ description: Fresh-eyes review in isolated subagent context
 persona: Sr Tech Lead
 subagent: true
 reason: Fresh-eyes review, completely isolated from the build process
+delegation:
+  capability: review
+  outcome: Return a complete implementation-gap review with an explicit verdict
+  read_paths: [technology.yaml, active spec.md, active design.md, active tasks.md, changed paths, relevant installed skills]
+  write_authority: none
+  return_format: Markdown report with Skill Evidence ending with VERDICT PASS or FAIL
+  max_response: 20KB
+  context_policy: Pass paths and concise state; never inline complete files or raw output
+  on_failure: Return ERROR with blocker and no approval
+  persistence: Manager writes the returned report unchanged to review-pre-verify.md
 
 gates:
   - check: 'design.md "Ref: APPROVED"'
@@ -14,6 +24,9 @@ gates:
     on_fail: STOP, route to build
 
 actions:
+  - derive_relevant_skills: read technology.yaml and map changed paths to installed skills
+  - load_relevant_skills: read only the installed skills relevant to changed scope
+  - check_framework_capabilities: reject unjustified duplication of capabilities supplied by the selected stack
   - read_changed_files_and_relevant_dependencies
   - read_design (architecture, interfaces)
   - read_spec (requirements, acceptance criteria)
@@ -35,6 +48,7 @@ actions:
     - STOP, route to build
 
 must_do:
+  - Record consulted and missing skills in a Skill Evidence section
   - Audit code for Ponytail YAGNI compliance (flag unnecessary third-party dependencies or excessive abstractions)
   - Read every changed file and each dependency needed to judge the change
   - Verify sanity-check.sh covers changes required by the evidence contract

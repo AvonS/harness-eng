@@ -15,6 +15,7 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from harness_layout import active_artifacts, archived_item_count
 
 HARNESS_DIR = Path(".harness-eng")
 
@@ -34,13 +35,8 @@ def eprint(*args, **kwargs):
 
 
 def find_active(filename: str) -> list[Path]:
-    """Find files matching filename in specs/active/ or phases/*/features/active/."""
-    results: list[Path] = []
-    spec_glob = f"specs/active/*/{filename}"
-    phase_glob = f"phases/*/features/active/*/{filename}"
-    results.extend(HARNESS_DIR.glob(spec_glob))
-    results.extend(HARNESS_DIR.glob(phase_glob))
-    return results
+    """Find files in active CR/bug items and active phase features."""
+    return active_artifacts(HARNESS_DIR, filename)
 
 
 def count_files(filename: str) -> int:
@@ -84,19 +80,7 @@ def verification_passed() -> bool:
 
 
 def count_archived() -> int:
-    count = 0
-    for name in ["done", "archive"]:
-        archive_dir = HARNESS_DIR / "specs" / name
-        if archive_dir.is_dir():
-            count += len([d for d in archive_dir.iterdir() if d.is_dir()])
-    phases_dir = HARNESS_DIR / "phases"
-    if phases_dir.is_dir():
-        for phase_dir in phases_dir.iterdir():
-            for name in ["done", "archive"]:
-                features_archive = phase_dir / "features" / name
-                if features_archive.is_dir():
-                    count += len([d for d in features_archive.iterdir() if d.is_dir()])
-    return count
+    return archived_item_count(HARNESS_DIR)
 
 
 def check_slice_log_freshness() -> dict:
