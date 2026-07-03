@@ -182,6 +182,9 @@ fi
 echo "F004: Checking skills..."
 SKILL_COUNT=0
 SKILLS_ROOT="$HARNESS_DIR/skills"
+if [ -d "$ROOT/.harness-eng/skills" ]; then
+    SKILLS_ROOT="$ROOT/.harness-eng/skills"
+fi
 if [ -d "$SKILLS_ROOT" ]; then
     for skill_dir in "$SKILLS_ROOT"/*; do
         if [ -d "$skill_dir" ]; then

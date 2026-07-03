@@ -8,6 +8,10 @@ subagent: false
 reason: Bootstrap operation
 goal: Produce rich, expressive, and highly readable foundational documents (BRD, Architecture) using the provided templates in .harness-eng/templates/.
 
+preflight:
+  - read_canonical_agents: Read canonical source AGENTS.md before scanning, clarifying, creating files, or running commands
+  - capture_init_baseline: Run scripts/init-boundary.py snapshot --output .harness-eng-init-baseline.json
+
 gates:
   - check: "! .harness-eng/ exists"
     on_fail: STOP, .harness-eng already exists. Use /h:upgrade-harness instead.
@@ -15,6 +19,7 @@ gates:
 actions:
   - scan: project for existing docs (README, PRD, ADR, code)
   - classify_scenario: [A: greenfield, B: brownfield, C: documented]
+  - bind_clarification_context: Treat every requested user answer as initialization input until this command stops
   - create: .harness-eng/ directory structure
   - stamp_manifest: write .harness-eng/manifest.json with product harness-eng, lineage Foundry, schema 2, release 0.2.0
   - if_brownfield: convert existing agents.md, claude.md, .cursorrules, or other agent files to .harness-eng/CONSTITUTION.md
@@ -36,7 +41,11 @@ actions:
   - install_selected_skills: copy only skills required by the derived technology stack
   - present: all docs to human for review
   - wait: human approval
+  - validate_init_boundary: Run scripts/init-boundary.py check --baseline .harness-eng-init-baseline.json
   - commit: initial harness setup
+  - remove_init_baseline: Delete .harness-eng-init-baseline.json
+  - report_next_command: Derive the earliest permitted command from harness filesystem state
+  - stop_after_init: Return control to the user without invoking another workflow command
 
 must_do:
   - Get human approval on all docs
@@ -45,10 +54,15 @@ must_do:
   - Symlink all alternative agent config files to AGENTS.md
   - Explain what was derived and why
   - Record the harness-eng-skills source revision and installed skill digests
+  - Use clarification answers only for bootstrap artifacts and configuration
+  - Stop after reporting the next permitted command
 
 must_not_do:
   - Skip human review
   - Guess without asking
   - Overwrite existing files without asking
+  - Create application implementation files
+  - Interpret a requested clarification answer as authorization for another command
+  - Invoke define, design, tasks, build, verify, or release automatically
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->

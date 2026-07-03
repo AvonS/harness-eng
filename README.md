@@ -60,6 +60,8 @@ Before the first human gate, agents loop to ensure the architecture is sound. If
 | `/h:review-pre-build` | Sr Architect | Agent validates design against BRD and Constitution before human review | Agent Review 1 |
 | `/h:approve` | Gatekeeper | **Human Gate 1:** Review design, approve or request changes | ✅ Human Gate 1 |
 
+Initialization questions collect product context, testing level, and release policy only. They do not authorize implementation; `/h:init` reports the next permitted command and stops.
+
 ### 2. The Agent Loop (Autonomous)
 Once the design is approved, the agent works through these commands iteratively. If `review-pre-verify` or `verify` catches a bug, the agent automatically loops back to `build` (or `design` for major gaps) to fix it.
 

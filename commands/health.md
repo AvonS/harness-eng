@@ -11,6 +11,7 @@ prerequisites:
     on_fail: STOP, run /h:init
 
 actions:
+  - derive_lifecycle_state: inspect filesystem artifacts and gate markers before evaluating compliance
   - verify: constitution read before actions
   - verify: design approved before build
   - verify: SLICE_LOG updated on commits
@@ -18,17 +19,20 @@ actions:
   - verify: correct branch for work
   - verify: tasks followed in order
   - verify: commit message convention
-  - report: violations found
+  - classify_each_check: [PASS: required now and satisfied, FAIL: required now and unsatisfied, PENDING: expected next, N/A: not required in current state]
+  - report: lifecycle-aware findings
   - if violations: STOP, explain corrective action
 
 must_do:
   - Check all 7 compliance rules
+  - Evaluate each rule only when applicable to the derived lifecycle state
+  - Report future-stage artifacts as PENDING or N/A
   - Report violations clearly
   - Suggest corrective actions
 
 must_not_do:
   - Skip any rule check
   - Soft-pedal violations
+  - Report a future-stage artifact as a violation
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
-

@@ -94,6 +94,16 @@ verification.md Release Ref: PENDING → /h:release → APPROVED
 
 On first use, run `/h:init` or say "initialise this project using the harness".
 
+### Manager Routing Rule
+
+User intent selects the desired outcome. Harness state selects the next permitted command.
+
+- Keep requested clarification answers bound to the active command until that command completes or stops.
+- Use `/h:init` clarification answers only as initialization input.
+- Inspect filesystem artifacts and gate markers before routing any later request.
+- Route build-shaped requests to the earliest incomplete lifecycle command.
+- Never treat an answer to a command question as authorization to invoke another command.
+
 ## Session Start (MANDATORY)
 
 **Before ANY action in this project:**

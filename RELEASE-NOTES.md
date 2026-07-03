@@ -1,5 +1,15 @@
 # Release Notes
 
+## Next Patch - Initialization Scope Enforcement
+
+**Status**: Pending release approval
+
+### Changes
+
+- **Fix**: Bound `/h:init` clarification answers to bootstrap context and prohibited automatic implementation.
+- **Feature**: Added deterministic initialization write-boundary validation and state-based Manager routing.
+- **Fix**: Made `/h:health` lifecycle-aware and aligned sanity skill checks with progressive external skill installation.
+
 ## v0.2.3 - Ponytail UI Design & Migration Fixes
 
 **Date**: 2026-07-03
