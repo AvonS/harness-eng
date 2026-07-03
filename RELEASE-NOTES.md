@@ -1,8 +1,9 @@
 # Release Notes
 
-## Next Patch - Initialization Scope Enforcement
+## v0.2.4 - Initialization Scope Enforcement
 
-**Status**: Pending release approval
+**Date**: 2026-07-03
+**Status**: Released
 
 ### Changes
 
