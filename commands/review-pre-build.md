@@ -30,15 +30,17 @@ actions:
   - derive_relevant_skills: read technology.yaml and map design scope to installed skills
   - load_relevant_skills: read only the installed skills relevant to the review scope
   - check_framework_capabilities: reject unjustified duplication of capabilities supplied by the selected stack
-  - read: BRD.md (business requirements)
-  - read: constitution.md (rules, constraints)
-  - read: spec.md (feature requirements)
-  - read: design.md (proposed architecture)
-  - check: design covers ALL BRD requirements
-  - check: design follows constitution constraints
-  - check: design addresses all spec acceptance criteria
-  - check: evidence contract is sufficient and proportionate before approval
-  - check: no gaps between requirements and design
+  - check_previous_review: if review-pre-build.md exists and has a FAIL verdict, extract its gap list. Focus exclusively on verifying these gaps are addressed in the design. Do NOT re-audit the entire design.
+  - if no_previous_review_or_passed:
+    - read: BRD.md (business requirements)
+    - read: constitution.md (rules, constraints)
+    - read: spec.md (feature requirements)
+    - read: design.md (proposed architecture)
+    - check: design covers ALL BRD requirements
+    - check: design follows constitution constraints
+    - check: design addresses all spec acceptance criteria
+    - check: evidence contract is sufficient and proportionate before approval
+    - check: no gaps between requirements and design
   - if gaps_found:
     - write: review-pre-build.md with gap list
     - set: 'Ref: PENDING'
@@ -52,6 +54,7 @@ outputs:
   - review-pre-build.md (PASS/FAIL + gap list)
 
 must_do:
+  - Check for existing review-pre-build.md; if FAIL exists, focus on gap verification (only check what failed) rather than a full re-audit
   - Record consulted and missing skills in a Skill Evidence section
   - Benchmark design against the global Ponytail YAGNI policy (reject over-engineered architectures)
   - Reject UI bloat and over-engineered, bespoke front-end components, enforcing the Ponytail YAGNI Framework

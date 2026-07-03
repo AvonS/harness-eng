@@ -27,15 +27,17 @@ actions:
   - derive_relevant_skills: read technology.yaml and map changed paths to installed skills
   - load_relevant_skills: read only the installed skills relevant to changed scope
   - check_framework_capabilities: reject unjustified duplication of capabilities supplied by the selected stack
-  - read_changed_files_and_relevant_dependencies
-  - read_design (architecture, interfaces)
-  - read_spec (requirements, acceptance criteria)
-  - run_required_sensors from technology.yaml
-  - check_evidence_contract_compliance
-  - check_design_implementation_gaps
-  - check_spec_requirement_gaps
-  - check_required_evidence_coverage
-  - check_code_quality (patterns, conventions, errors)
+  - check_previous_review: if review-pre-verify.md exists and has a FAIL verdict, extract its gap list. Focus exclusively on verifying these gaps are fixed + checking for adjacent regressions. Do NOT re-audit the entire codebase.
+  - if no_previous_review_or_passed:
+    - read_changed_files_and_relevant_dependencies
+    - read_design (architecture, interfaces)
+    - read_spec (requirements, acceptance criteria)
+    - run_required_sensors from technology.yaml
+    - check_evidence_contract_compliance
+    - check_design_implementation_gaps
+    - check_spec_requirement_gaps
+    - check_required_evidence_coverage
+    - check_code_quality (patterns, conventions, errors)
   - write_review_report: verdict, critical_gaps, high_gaps, medium_gaps, low_gaps
   - if verdict == PASS:
     - set_ref: APPROVED
@@ -48,6 +50,7 @@ actions:
     - STOP, route to build
 
 must_do:
+  - Check for existing review-pre-verify.md; if FAIL exists, focus on gap verification (only test what failed) rather than a full codebase re-audit
   - Record consulted and missing skills in a Skill Evidence section
   - Audit code for Ponytail YAGNI compliance (flag unnecessary third-party dependencies or excessive abstractions)
   - Read EVERY source file related to the current phase or CR/Bug, but exclude auto-generated files (e.g., .templ, .pb.go) to avoid transport limits
