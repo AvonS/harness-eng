@@ -7,11 +7,11 @@ reason: Fresh-eyes review, completely isolated from the build process
 delegation:
   capability: review
   outcome: Return a complete implementation-gap review with an explicit verdict
-  read_paths: [technology.yaml, active spec.md, active design.md, active tasks.md, changed paths, relevant installed skills]
+  read_paths: [technology.yaml, .harness-eng/CONSTITUTION.md, active spec.md, active design.md, active tasks.md, changed paths, relevant installed skills]
   write_authority: none
   return_format: Markdown report with Skill Evidence ending with VERDICT PASS or FAIL
   max_response: 20KB
-  context_policy: Pass paths and concise state; never inline complete files or raw output
+  context_policy: Pass references/paths to required files (NOT file contents); never inline complete files or raw output
   on_failure: Return ERROR with blocker and no approval
   persistence: Manager writes the returned report unchanged to review-pre-verify.md
 
@@ -50,7 +50,7 @@ actions:
 must_do:
   - Record consulted and missing skills in a Skill Evidence section
   - Audit code for Ponytail YAGNI compliance (flag unnecessary third-party dependencies or excessive abstractions)
-  - Audit the critical path of changed files and dependencies without breaking transport limits
+  - Read EVERY source file related to the current phase or CR/Bug, but exclude auto-generated files (e.g., .templ, .pb.go) to avoid transport limits
   - Verify sanity-check.sh covers changes required by the evidence contract
   - Verify sanity-check.sh has regression tests for bug fixes
   - Compare against design and spec
