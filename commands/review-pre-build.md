@@ -11,12 +11,12 @@ delegation:
   capability: review
   outcome: Return a complete design-gap review with an explicit verdict
   read_paths: [technology.yaml, BRD.md, CONSTITUTION.md, active spec.md, active design.md, relevant installed skills]
-  write_authority: none
-  return_format: Markdown report with Skill Evidence ending with VERDICT PASS or FAIL
-  max_response: 20KB
-  context_policy: Pass paths and concise state; never inline complete files or raw output
+  write_authority: .harness-eng/reviews/active/review-pre-build.md
+  return_format: A concise success message (the report must be written directly to disk using the write tool)
+  max_response: 2KB
+  context_policy: Pass references/paths to required files (NOT file contents); never inline complete files or raw output
   on_failure: Return ERROR with blocker and no approval
-  persistence: Manager writes the returned report unchanged to review-pre-build.md
+  persistence: Subagent writes the report directly to disk. Manager checks the verdict in the written file.
 
 gates:
   - check: design.md exists
@@ -60,6 +60,7 @@ must_do:
   - Check spec acceptance criteria are addressed
   - Report ALL gaps, not just critical ones
   - Challenge missing evidence and unnecessary evidence with equal rigor
+  - MUST use the write tool to save the final report directly to disk. Do NOT output the report in your final chat response.
 
 must_not_do:
   - Skip any BRD requirement

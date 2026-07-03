@@ -8,12 +8,12 @@ delegation:
   capability: review
   outcome: Return a complete implementation-gap review with an explicit verdict
   read_paths: [technology.yaml, .harness-eng/CONSTITUTION.md, active spec.md, active design.md, active tasks.md, changed paths, relevant installed skills]
-  write_authority: none
-  return_format: Markdown report with Skill Evidence ending with VERDICT PASS or FAIL
-  max_response: 20KB
+  write_authority: .harness-eng/reviews/active/review-pre-verify.md
+  return_format: A concise success message (the report must be written directly to disk using the write tool)
+  max_response: 2KB
   context_policy: Pass references/paths to required files (NOT file contents); never inline complete files or raw output
   on_failure: Return ERROR with blocker and no approval
-  persistence: Manager writes the returned report unchanged to review-pre-verify.md
+  persistence: Subagent writes the report directly to disk. Manager checks the verdict in the written file.
 
 gates:
   - check: 'design.md "Ref: APPROVED"'
@@ -59,6 +59,7 @@ must_do:
   - Classify each missing item as defect, design_gap, or improvement
   - Block defects and design gaps
   - Record improvements as non-blocking backlog items
+  - MUST use the write tool to save the final report directly to disk. Do NOT output the report in your final chat response.
 
 must_not_do:
   - Assume build agent did things correctly
