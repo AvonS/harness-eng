@@ -18,6 +18,7 @@ gates:
 
 actions:
   - run_version_check: python3 .harness-eng/scripts/version-check.py . .harness-eng
+  - bootstrap_migration_engine: If .harness-eng/scripts/migrate-harness.py or .harness-eng/migrations/catalog.json are missing, download them from the canonical repository before planning migration.
   - plan_migration: python3 .harness-eng/scripts/migrate-harness.py plan --target staged
   - apply_pre_migration: python3 .harness-eng/scripts/migrate-harness.py apply --target staged
   - fetch_and_replace_from_canonical:

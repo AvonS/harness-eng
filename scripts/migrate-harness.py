@@ -217,7 +217,7 @@ def main():
             dry_run=(args.command == "plan")
         )
         
-        catalog_path = project_root / "migrations" / "catalog.json"
+        catalog_path = harness_root / "migrations" / "catalog.json"
         if not catalog_path.exists():
             print(json.dumps({"status": "FAILED", "reason": f"No catalog found at {catalog_path}"}))
             sys.exit(1)

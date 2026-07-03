@@ -110,13 +110,13 @@ def fetch_latest_version() -> Optional[str]:
     # Fallback: GitHub API via HTTP
     if not latest_version:
         api_url = f"https://api.github.com/repos/{REPO}/releases/latest"
+        import json
         try:
             req = urllib.request.Request(
                 api_url,
                 headers={"User-Agent": "harness-eng/version-check", "Accept": "application/vnd.github.v3+json"},
             )
             with urllib.request.urlopen(req, timeout=15) as resp:
-                import json
                 data = json.loads(resp.read().decode("utf-8"))
                 latest_version = data.get("tag_name", "")
         except (urllib.error.URLError, json.JSONDecodeError, OSError):

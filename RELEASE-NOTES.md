@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.2.3 - Ponytail UI Design Enforcement
+
+**Date**: 2026-07-03
+**Status**: Unreleased
+
+### Changes
+
+- **Feature**: Enforced UI design patterns from `design-registry.yaml` into the design template and review gates to mandate the Ponytail YAGNI Framework (CR-304).
+
 ## v0.2.2 - Post-Phase 2 Hotfixes
 
 **Date**: 2026-07-02
