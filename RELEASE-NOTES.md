@@ -1,8 +1,9 @@
 # Release Notes
 
-## Next Patch - Canonical Delegation and Phase Layout
+## v0.2.5 - Canonical Delegation and Phase Layout
 
-**Status**: Pending release approval
+**Date**: 2026-07-03
+**Status**: Released
 
 ### Changes
 
