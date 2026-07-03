@@ -1,13 +1,16 @@
 # Release Notes
 
-## v0.2.3 - Ponytail UI Design Enforcement
+## v0.2.3 - Ponytail UI Design & Migration Fixes
 
 **Date**: 2026-07-03
-**Status**: Unreleased
+**Status**: Released
 
 ### Changes
 
 - **Feature**: Enforced UI design patterns from `design-registry.yaml` into the design template and review gates to mandate the Ponytail YAGNI Framework (CR-304).
+- **Feature**: Added explicit `SLICE_LOG` appending and post-upgrade health check validation to the `/h:upgrade-harness` workflow.
+- **Fix**: Resolved `UnboundLocalError` in `version-check.py` and corrected `catalog.json` path resolution in `migrate-harness.py`.
+- **Fix**: Added explicit bootstrap instruction for the migration engine in `upgrade-harness.md` for legacy (v0.0.x) upgrades.
 
 ## v0.2.2 - Post-Phase 2 Hotfixes
 
@@ -18,8 +21,6 @@
 
 - **Fix**: Corrected `ROOT` path resolution in `sanity-check.sh` to prevent `HARNESS_DIR` from resolving to `.harness-eng/.harness-eng` in managed projects.
 - **Fix**: Added `VERSION` to the `fetch_and_replace_from_canonical` block in `upgrade-harness.md` so managed projects sync their framework version correctly.
-- **Fix**: Resolved `UnboundLocalError` in `version-check.py` and corrected `catalog.json` path resolution in `migrate-harness.py`.
-- **Fix**: Added explicit bootstrap instruction for the migration engine in `upgrade-harness.md` for legacy (v0.0.x) upgrades.
 - **Feature**: Added `shadcn-svelte` and `web.dev-patterns` to `design-registry.yaml` to support Svelte/Tailwind architectures and Chrome Developers best practices.
 - **Feature**: Split `design-registry.yaml` into a canonical template and local project overrides to resolve confusion and merge collisions.
 
