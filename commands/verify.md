@@ -23,12 +23,14 @@ gates:
     on_fail: STOP, fix evidence failures
 
 actions:
+  - read_deferred_ledger: if deferred.md exists in active feature, read it for reporting
   - run_evidence_contract_checks
   - run_existing_regression_suite
   - run_required_sensors from technology.yaml
   - if evidence_fails: STOP, fix evidence failures
   - check_readme_updated (if user-facing changes)
   - check_release_notes_updated
+  - report_deferred_items: include a "Deferred Items" section in the verification output listing open items with IDs and destinations
   - write_verification (Release Ref: PENDING)
   - commit_verification
   - route: to /h:release (human gate)
@@ -39,10 +41,12 @@ must_do:
   - README updated if user-facing changes
   - RELEASE-NOTES.md updated
   - Include Release Ref: PENDING
+  - Report deferred items separately from required evidence
 
 must_not_do:
   - Skip required evidence
   - Write verification if tests fail
   - Skip documentation checks
+  - Block verification for unresolved deferred items unless promoted to blocker
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
