@@ -26,6 +26,9 @@ gates:
   - check: BRD.md exists
     on_fail: STOP, no BRD to validate against
 
+preflight:
+  - read_deferred_ledger: if deferred.md exists in active feature, read it for reconciliation
+
 actions:
   - derive_relevant_skills: read technology.yaml and map design scope to installed skills
   - load_relevant_skills: read only the installed skills relevant to the review scope
@@ -42,9 +45,16 @@ actions:
     - check: evidence contract is sufficient and proportionate before approval
     - check: no gaps between requirements and design
   - if gaps_found:
-    - write: review-pre-build.md with gap list
-    - set: 'Ref: PENDING'
-    - STOP: route back to /h:design
+    - classify_each_finding: apply the blocker predicate (concrete evidence + invalidated approved contract + earliest corrective command). A finding is a blocker only if it satisfies ALL three predicate fields. Missing any field means the finding is deferred.
+    - if blockers_found:
+      - write: review-pre-build.md with FAIL + blocker gap list + route to /h:design
+      - set: 'Ref: PENDING'
+      - STOP: route back to /h:design
+    - if only_deferred:
+      - append_each_to_deferred: write each finding to deferred.md with ID, source, rationale, destination, status=open
+      - write: review-pre-build.md with PASS (all findings deferred to ledger)
+      - set: 'Ref: APPROVED'
+      - route: to /h:approve (human gate)
   - if no_gaps:
     - write: review-pre-build.md with PASS
     - set: 'Ref: APPROVED'
@@ -52,6 +62,7 @@ actions:
 
 outputs:
   - review-pre-build.md (PASS/FAIL + gap list)
+  - deferred.md (if deferred findings were appended)
 
 must_do:
   - Check for existing review-pre-build.md; if FAIL exists, focus on gap verification (only check what failed) rather than a full re-audit
@@ -63,6 +74,8 @@ must_do:
   - Check spec acceptance criteria are addressed
   - Report ALL gaps, not just critical ones
   - Challenge missing evidence and unnecessary evidence with equal rigor
+  - Apply the blocker predicate to every finding: concrete evidence + invalidated approved contract + earliest corrective command
+  - Append deferred findings to deferred.md with ID, source, rationale, destination, and status
   - MUST use the write tool to save the final report directly to disk. Do NOT output the report in your final chat response.
 
 must_not_do:
@@ -71,5 +84,7 @@ must_not_do:
   - Approve if gaps exist
   - Proceed to /h:approve without PASS
   - Defer evidence-scope decisions until pre-verify
+  - Defer findings that satisfy the blocker predicate
+  - Route deferred findings backward to design
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
