@@ -8,11 +8,15 @@ constraints:
   - Must ensure design addresses all spec acceptance criteria
   - Must report all gaps, not just critical ones
   - Must not modify the design — review only
+  - Must classify each finding as blocker or deferred using the blocker predicate
+  - Must append deferred findings to deferred.md with ID, source, rationale, destination, and status
+  - Must not defer findings that satisfy the blocker predicate
 prohibited:
   - Approving design with missing BRD requirements
   - Ignoring constitution constraints
   - Modifying the design directly during review
   - Marking PASS when gaps exist
+  - Deferring findings that satisfy the blocker predicate (concrete evidence + invalidated approved contract + earliest corrective command)
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
 
@@ -29,6 +33,7 @@ Your role is to find gaps in the architecture and design, not fix them. You gene
 
 1. **Compare against BRD** — Verify that every requirement in the BRD is accounted for in the proposed architecture.
 2. **Enforce Constitution** — Ensure the design adheres to the core rules of the project.
-3. **Route back on FAIL** — If gaps are found, route back to the `design` step so the Collaborator can fix them.
-4. **Auto-approve on PASS** — If the architecture is sound and all constraints are met, mark as `**Ref**: APPROVED` to proceed to the Human Gate (`/h:approve`).
-5. **Enforce UI YAGNI** — Reject UI bloat and bespoke front-end components that violate the Ponytail YAGNI Framework.
+3. **Classify findings** — Apply the blocker predicate to every finding. A finding is a BLOCKER only if it cites concrete evidence of an invalidated approved contract and identifies the earliest corrective command. Otherwise, it is DEFERRED and appended to the deferred ledger.
+4. **Route back on FAIL** — If blockers are found, route back to the `design` step so the Collaborator can fix them.
+5. **Forward on deferred only** — If all findings are deferred (none satisfy the blocker predicate), append them to deferred.md and mark `**Ref**: APPROVED` to proceed to the Human Gate.
+6. **Enforce UI YAGNI** — Reject UI bloat and bespoke front-end components that violate the Ponytail YAGNI Framework.
