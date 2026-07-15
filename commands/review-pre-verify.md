@@ -23,6 +23,9 @@ gates:
   - check: all tasks complete
     on_fail: STOP, route to build
 
+preflight:
+  - read_deferred_ledger: if deferred.md exists in active feature, read it for reconciliation
+
 actions:
   - derive_relevant_skills: read technology.yaml and map changed paths to installed skills
   - load_relevant_skills: read only the installed skills relevant to changed scope
@@ -34,6 +37,8 @@ actions:
     - read_spec (requirements, acceptance criteria)
     - run_required_sensors from technology.yaml
     - check_evidence_contract_compliance
+    - reconcile_preverify_items: check open pre-verify deferred items against implementation. Mark resolved items with resolution evidence.
+    - classify_findings: apply the blocker predicate to new findings (concrete evidence + invalidated approved contract + earliest corrective command)
     - check_design_implementation_gaps
     - check_spec_requirement_gaps
     - check_required_evidence_coverage
@@ -62,6 +67,9 @@ must_do:
   - Classify each missing item as defect, design_gap, or improvement
   - Block defects and design gaps
   - Record improvements as non-blocking backlog items
+  - Reconcile pre-verify deferred items: mark resolved, leave unresolved open
+  - Apply the blocker predicate to new findings: concrete evidence + invalidated approved contract + earliest corrective command
+  - Append deferred findings to deferred.md with ID, source, rationale, destination, and status
   - MUST use the write tool to save the final report directly to disk. Do NOT output the report in your final chat response.
 
 must_not_do:
@@ -72,5 +80,7 @@ must_not_do:
   - Give PASS if gaps exist
   - Add a new test category merely because it is possible
   - Expand the approved evidence contract unless security exposure, changed scope, or a false design assumption is demonstrated
+  - Block findings that lack the complete blocker predicate
+  - Route deferred findings backward to build
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
