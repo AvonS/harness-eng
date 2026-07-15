@@ -15,7 +15,8 @@ actions:
   - read: .harness-eng/PHASES.md
   - read: .harness-eng/SLICE_LOG.md
   - scan: specs/active/*
-  - display_formatted_status_report: version, phases progress, active specs, recent commits
+  - scan: deferred.md in active features
+  - display_formatted_status_report: version, phases progress, active specs, deferred item counts, recent commits
 
 must_do:
   - Show complete state snapshot
