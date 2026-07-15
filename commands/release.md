@@ -20,7 +20,10 @@ gates:
     on_fail: STOP, ask human to choose local_merge, pull_request, or direct
 
 actions:
+  - read_deferred_ledger: if deferred.md exists in active feature, read it for disclosure
+  - block_on_promoted_blockers: if any deferred item has status=promoted-to-blocker, STOP and route to the earliest affected command
   - read_release_policy: strategy, target_branch, require_human_approval, push_branch, push_tag
+  - disclose_deferred_items: present open deferred items to human before the approval gate with IDs and destinations
   - wait_for_explicit_human_gate_2_approval
   - if strategy == local_merge:
     - checkout_target_branch
@@ -33,6 +36,7 @@ actions:
     - synchronize_target_branch
   - if strategy == direct:
     - push_target_branch_if_enabled
+  - archive_deferred_ledger: move deferred.md with the feature archive (specs/done/ or phases/archive/)
   - if phase_release: move .harness-eng/phases/active/<phase> → .harness-eng/phases/archive/<phase>
   - if bug_or_cr_release: move .harness-eng/specs/active/<item> → .harness-eng/specs/done/<item>
   - run: python3 scripts/harness-status.py
@@ -49,6 +53,8 @@ must_do:
   - Push the release tag when push_tag is true
   - Verify the published target branch and tag match the local release
   - Archive spec to done/
+  - Archive deferred.md with the feature
+  - Disclose unresolved deferred items before human gate
   - Update SLICE_LOG.md
 
 must_not_do:
@@ -57,5 +63,6 @@ must_not_do:
   - Skip archiving
   - Forget version bump
   - Skip SLICE_LOG update
+  - Block release for unresolved deferred items unless promoted to blocker
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
