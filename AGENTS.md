@@ -106,6 +106,7 @@ User intent selects the desired outcome. Harness state selects the next permitte
 - Pass relevant paths and concise state to subagents; never inline complete project files or session history.
 - Persist read-only review reports unchanged after validating their verdict marker.
 - Load only the installed skills relevant to delegated scope and record them in review evidence.
+- Classify findings as blocker or deferred. Only blockers trigger loopback. Deferred items preserve gate markers and continue forward.
 
 ## Session Start (MANDATORY)
 
@@ -152,13 +153,13 @@ Read command files from `.harness-eng/commands/` and follow them. Users talk nat
 | `/h:design` | Design architecture, interfaces, file layout | — |
 | `/h:approve` | **Human gate** — review design, approve or request changes | ✅ Human |
 | `/h:tasks` | Break design into granular tasks with dependencies | — |
-| `/h:review-pre-build` | **Agent gate** — Sr Architect review, compare design vs BRD | ✅ Agent |
+| `/h:review-pre-build` | **Agent gate** — Sr Architect review, classify findings as blocker or deferred | ✅ Agent |
 | `/h:build` | Implement against the approved Evidence Contract — one commit per task | — |
-| `/h:review-pre-verify` | **Agent gate** — Sr Tech Lead review, compare design vs code | ✅ Agent |
-| `/h:verify` | Run tests, check acceptance criteria, fill verification report | — |
-| `/h:release` | **Human gate** — create PR, merge, archive, update status | ✅ Human |
+| `/h:review-pre-verify` | **Agent gate** — Sr Tech Lead review, reconcile pre-verify deferred items | ✅ Agent |
+| `/h:verify` | Run tests, check acceptance criteria, report deferred items separately | — |
+| `/h:release` | **Human gate** — disclose deferred items, create PR, merge, archive | ✅ Human |
 | `/h:upgrade-harness` | Fetch the latest command from `https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md`; execute the fetched contract, never the installed copy | — |
-| `/h:status` | Print project status | — |
+| `/h:status` | Print project status including deferred item counts | — |
 | `/h:health` | Check agent compliance with harness rules | — |
 
 ## Three Gates
@@ -170,18 +171,21 @@ The harness enforces three critical gates. You MUST stop at each gate and wait f
    - **Gate**: design.md must have `Ref: APPROVED`
    - **Action**: Present design to human, wait for approval
    - **Cannot proceed** until human approves
+   - **Deferred items**: Editorial amendments route to deferred.md without resetting Ref: APPROVED
 
 2. **Agent review** (Agent) — `/h:review-pre-verify`
    - **When**: After build is complete
    - **Gate**: review-pre-verify.md must have `Ref: APPROVED`
    - **Action**: Review code against design, verify all requirements met
    - **Cannot proceed** until review passes
+   - **Deferred items**: Non-blocker findings are deferred to ledger, not routed backward
 
 3. **Release approval** (Human) — `/h:release`
    - **When**: After verification passes
    - **Gate**: verification.md must have `Release Ref: APPROVED`
-   - **Action**: Present verification report to human, wait for approval
+   - **Action**: Present verification report and deferred items to human, wait for approval
    - **Cannot proceed** until human approves
+   - **Deferred items**: Open deferred items are disclosed but do not block. Only promoted-to-blocker items block release.
 
 **Why gates matter**: They prevent you from proceeding without explicit approval. This is the external accountability that catches blind spots.
 

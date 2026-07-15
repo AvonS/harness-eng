@@ -370,6 +370,14 @@ def validate_release() -> int:
     else:
         fail_msg("Verification not complete or not marked PENDING")
         errors += 1
+    for f in find_active("deferred.md"):
+        content = f.read_text(encoding="utf-8", errors="replace")
+        for line in content.splitlines():
+            if line.startswith("|") and not line.startswith("|--"):
+                cells = [c.strip() for c in line.split("|")]
+                if len(cells) >= 7 and cells[6].lower() == "promoted-to-blocker":
+                    fail_msg(f"Deferred item {cells[1]} is promoted-to-blocker: must route to earliest affected command before release")
+                    errors += 1
     if errors == 0:
         pass_msg("Ready to release")
     return errors

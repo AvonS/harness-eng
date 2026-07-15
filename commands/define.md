@@ -33,6 +33,8 @@ actions:
   - classify_change: documentation, configuration, executable_logic, workflow, bug_fix, business_behavior, ui_behavior, security_boundary, migration, or prototype
   - perform_adaptive_behavior_discovery: use examples only when behavior, state transitions, or user outcomes require clarification
   - propose_behavior_model: identify actors, goals, initial conditions, event flow, state transitions, and invariants
+  - identify_primary_functional_flow: name the primary happy-path functional flow or justify inspection as stronger and cheaper
+  - propose_testing_level: select S/M/L from change classification, risk, and boundary depth
   - present_behavior_playback_to_human: ask bounded, contextual questions about load-bearing uncertainties
   - for_each_requirement:
     - create_testable_acceptance_examples: use Given/When/Then only for material behavior
@@ -42,7 +44,7 @@ actions:
   - route: to /h:design
 
 outputs:
-  - spec.md with Ref: PENDING
+  - spec.md with Ref: PENDING (including Testing Level and primary functional flow)
 
 must_do:
   - Classify the change before selecting evidence
@@ -51,6 +53,8 @@ must_do:
   - Present a concise behavior playback to the human before writing spec
   - Make acceptance criteria testable without forcing one notation
   - Cover all acceptance criteria
+  - Define one primary happy-path functional flow or justify inspection as stronger and cheaper
+  - Propose S/M/L testing level from risk and boundary depth
   - Get human review of spec
 
 must_not_do:

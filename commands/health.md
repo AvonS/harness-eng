@@ -28,6 +28,7 @@ actions:
   - verify: correct branch for work
   - verify: tasks followed in order
   - verify: commit message convention
+  - verify: deferred ledger schema compliance (valid destinations, valid statuses, no orphaned items)
   - classify_each_check: [PASS: required now and satisfied, FAIL: required now and unsatisfied, PENDING: expected next, N/A: not required in current state]
   - report: lifecycle-aware findings
   - if violations: STOP, explain corrective action
@@ -38,6 +39,7 @@ must_do:
   - Report future-stage artifacts as PENDING or N/A
   - Report violations clearly
   - Suggest corrective actions
+  - Verify deferred ledger schema compliance when deferred.md exists
 
 must_not_do:
   - Skip any rule check

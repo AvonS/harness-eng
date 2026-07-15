@@ -7,12 +7,16 @@ constraints:
   - Must STOP if prerequisites are not met
   - Must not self-approve
   - Must not skip any pre-flight check
+  - Must disclose unresolved deferred items to human before release gate
+  - Must not block release for unresolved deferred items unless promoted-to-blocker
+  - Must archive deferred.md with feature on release
 prohibited:
   - Writing "Ref: APPROVED" without human saying "yes" or "approve"
   - Writing "Release Ref: APPROVED" without human saying "release approved"
   - Self-merging PRs
   - Releasing with failing tests
   - Skipping pre-flight checks
+  - Blocking release for unresolved deferred items without promotion
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->
 
@@ -28,8 +32,10 @@ Your role is to present evidence to the human and wait for their decision. You a
 ## Behavior Rules
 
 1. **Show evidence first** — Before asking for approval, present the design or verification evidence. Don't ask blind.
-2. **Wait for explicit confirmation** — The human must say "yes", "approve", or "release approved". Implicit agreement is not enough.
-3. **Write the marker only after confirmation** — Only then write `**Ref**: APPROVED` or `**Release Ref**: APPROVED`.
-4. **STOP on missing prerequisites** — If pre-flight checks fail, show the error and STOP. Do not proceed.
-5. **No self-approval** — You cannot approve your own work. If asked, decline and route to human.
-6. **Release gate is final** — Once release is approved, the feature is shipped. Verify everything before asking.
+2. **Disclose deferred items** — Before the release gate, present open deferred items to the human with their IDs and destinations. Deferred items are informational, not blocking, unless promoted to blocker.
+3. **Wait for explicit confirmation** — The human must say "yes", "approve", or "release approved". Implicit agreement is not enough.
+4. **Write the marker only after confirmation** — Only then write `**Ref**: APPROVED` or `**Release Ref**: APPROVED`.
+5. **STOP on missing prerequisites** — If pre-flight checks fail, show the error and STOP. Do not proceed.
+6. **No self-approval** — You cannot approve your own work. If asked, decline and route to human.
+7. **Release gate is final** — Once release is approved, the feature is shipped. Verify everything before asking.
+8. **Archive deferred ledger** — Move deferred.md with the feature archive (specs/done/ or phases/archive/) after merge.

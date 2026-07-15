@@ -33,6 +33,7 @@ agent_contract:
 **Created**: [DATE]
 **Status**: Draft
 **Ref**: [APPROVED|PENDING]
+**Testing Level**: [S|M|L]
 
 **Input**: [DESCRIPTION_OF_FEATURE]
 
@@ -105,6 +106,21 @@ agent_contract:
 
 ---
 
+## Functional Evidence
+
+> Define the primary functional flow and evidence expectations by testing level. This connects spec acceptance criteria to the design's evidence contract.
+
+**Primary functional flow**: [One happy-path flow that proves the feature works, or justification that inspection is stronger and cheaper]
+
+**Evidence expectations by level**:
+- **Level S**: One happy-path functional check or cheapest deterministic inspection. No unit-test quota.
+- **Level M**: Happy path + important failure path + every affected material boundary. Integration across affected boundaries.
+- **Level L**: Full E2E functional flow, critical failure/recovery, regression, operational sanity.
+
+**Level selected**: [S|M|L] — [reason from risk and boundary depth]
+
+---
+
 ## Functional Requirements
 
 - **FR-001**: System MUST [specific capability]
@@ -163,6 +179,11 @@ agent_contract:
 - [ ] Material behavioral scenarios use Given/When/Then where it improves precision
 - [ ] Edge cases identified
 - [ ] Scope clearly bounded
+
+**Testing and Evidence:**
+- [ ] Testing level (S/M/L) selected and documented
+- [ ] Primary functional flow identified
+- [ ] Functional evidence expectations defined by level
 
 **Feature Readiness:**
 - [ ] All stories have acceptance criteria

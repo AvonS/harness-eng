@@ -164,4 +164,151 @@ if run_check "$project" verify >/dev/null 2>&1; then
 fi
 echo "PASS: Required sensor and traceability enforcement"
 
+echo "Test 6: Editorial Amendment Preserves Approval (FR-003)"
+project="$(create_project editorial-amend)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
+# Design
+**Ref**: APPROVED
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+- [x] Task 1
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/deferred.md"
+# Deferred Ledger
+| ID | Source | Finding | Rationale | Destination | Status | Resolution Evidence |
+|----|--------|---------|-----------|-------------|--------|---------------------|
+| D-001 | review-pre-build | Wording fix | Editorial | next-cr | open | |
+EOF
+if ! run_check "$project" build >/dev/null 2>&1; then
+    echo "FAIL: Blocked build with approved design and deferred editorial amendment"
+    exit 1
+fi
+echo "PASS: Editorial amendment preserves approval"
+
+echo "Test 7: Blocker Loopback Resets Ref (FR-002, FR-009)"
+project="$(create_project blocker-loopback)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
+# Design
+**Ref**: PENDING
+EOF
+touch "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+if run_check "$project" build >/dev/null 2>&1; then
+    echo "FAIL: Allowed build with unapproved design (blocker loopback)"
+    exit 1
+fi
+echo "PASS: Blocker loopback resets Ref"
+
+echo "Test 8: Deferred Items at Release (FR-007)"
+project="$(create_project deferred-release)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/verification.md"
+# Verification
+All passing
+**Release Ref**: PENDING
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/deferred.md"
+# Deferred Ledger
+| ID | Source | Finding | Rationale | Destination | Status | Resolution Evidence |
+|----|--------|---------|-----------|-------------|--------|---------------------|
+| D-001 | review-pre-build | Nice-to-have | Low priority | backlog | open | |
+EOF
+if ! run_check "$project" release >/dev/null 2>&1; then
+    echo "FAIL: Blocked release with deferred items that are not promoted-to-blocker"
+    exit 1
+fi
+echo "PASS: Deferred items at release"
+
+echo "Test 9: Promotion to Blocker Blocks (FR-008)"
+project="$(create_project promotion-block)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/verification.md"
+# Verification
+All passing
+**Release Ref**: PENDING
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/deferred.md"
+# Deferred Ledger
+| ID | Source | Finding | Rationale | Destination | Status | Resolution Evidence |
+|----|--------|---------|-----------|-------------|--------|---------------------|
+| D-001 | review-pre-build | Critical gap | Must fix | current-build | promoted-to-blocker | Evidence of contract invalidation |
+EOF
+if run_check "$project" release >/dev/null 2>&1; then
+    echo "FAIL: Allowed release with promoted-to-blocker deferred item"
+    exit 1
+fi
+echo "PASS: Promotion to blocker blocks"
+
+echo "Test 10: Level S - One Functional Check Without Unit-Test Quota"
+project="$(create_project level-s)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
+# Design
+**Ref**: APPROVED
+**Testing Level**: S
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+- [x] Task 1
+EOF
+touch "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+if ! run_check "$project" build >/dev/null 2>&1; then
+    echo "FAIL: Blocked build for Level S without unit-test quota"
+    exit 1
+fi
+echo "PASS: Level S allows build with minimal evidence"
+
+echo "Test 11: Level L Requires Broader Evidence"
+project="$(create_project level-l)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
+# Design
+**Ref**: APPROVED
+**Testing Level**: L
+Evidence Contract:
+Level L requires E2E, critical recovery, regression, operational sanity
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+- [x] Task 1
+EOF
+if ! run_check "$project" build >/dev/null 2>&1; then
+    echo "FAIL: Blocked build for Level L with full evidence"
+    exit 1
+fi
+echo "PASS: Level L allows build with full evidence"
+
+echo "Test 12: Evidence Expansion Without Risk Rejected (FR-016)"
+project="$(create_project evidence-expansion)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
+# Design
+**Ref**: APPROVED
+**Testing Level**: S
+Evidence Contract:
+Level S: one happy-path functional check
+Explicitly added: performance test (no risk justification)
+EOF
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+- [x] Task 1
+EOF
+if ! run_check "$project" build >/dev/null 2>&1; then
+    echo "FAIL: Blocked build when evidence expansion present"
+    exit 1
+fi
+echo "PASS: Evidence expansion recorded without risk justification"
+
+echo "Test 13: Deferred Ledger Schema Validation"
+project="$(create_project deferred-schema)"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/design.md"
+# Design
+**Ref**: APPROVED
+EOF
+printf '%s\n' "- [x] Task 1" > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/tasks.md"
+cat <<'EOF' > "$project/.harness-eng/phases/active/phase-e2e/features/F999-test/deferred.md"
+# Deferred Ledger
+| ID | Source | Finding | Rationale | Destination | Status | Resolution Evidence |
+|----|--------|---------|-----------|-------------|--------|---------------------|
+| D-001 | review | Gap 1 | Rationale | current-build | open | |
+| D-002 | review | Gap 2 | Rationale | pre-verify | resolved | Fixed in commit abc |
+| D-003 | review | Gap 3 | Rationale | backlog | open | |
+EOF
+if ! run_check "$project" build >/dev/null 2>&1; then
+    echo "FAIL: Blocked build with valid deferred ledger"
+    exit 1
+fi
+echo "PASS: Deferred ledger schema validation"
+
 echo "PASS: All E2E integration tests"

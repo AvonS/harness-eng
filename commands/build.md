@@ -25,6 +25,7 @@ preflight:
   - read_design (architecture, interfaces)
   - read_tasks (what to build)
   - read_review_pre_verify (to fix code defects if returning from failure)
+  - read_deferred_ledger (if deferred.md exists in active feature)
 
 actions:
   - for_each_task:
@@ -32,6 +33,8 @@ actions:
     - produce_required_evidence: follow the approved evidence contract
     - use_tdd_for_executable_logic: confirm failure before implementation when a meaningful executable test exists
     - commit
+  - resolve_deferred_items: iterate current-build deferred items, resolve each or reroute with explicit destination update to pre-verify or next-cr
+  - update_ledger_status: mark resolved items with resolution evidence in deferred.md
   - after_all_tasks:
     - run_required_evidence
     - run_existing_regression_suite
@@ -45,10 +48,13 @@ must_do:
   - Use TDD for executable logic
   - Record why a required evidence item is not applicable
   - Commit after each task
+  - Resolve or explicitly reroute assigned current-build deferred items
+  - Update ledger status with resolution evidence
 
 must_not_do:
   - Implement executable logic without its required evidence
   - Add test categories excluded by the approved evidence contract without a discovered design gap
   - Commit without passing required evidence
+  - Silently drop deferred items
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->

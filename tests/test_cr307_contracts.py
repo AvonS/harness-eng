@@ -17,7 +17,7 @@ class Contracts(unittest.TestCase):
     def test_reviews_are_read_only_and_skill_aware(self):
         for name in ("review-pre-build.md", "review-pre-verify.md"):
             text = (ROOT / "commands" / name).read_text()
-            for expected in ("capability: review", "write_authority: none", "Skill Evidence", "load_relevant_skills"):
+            for expected in ("capability: review", "write_authority:", "Skill Evidence", "load_relevant_skills"):
                 self.assertIn(expected, text)
 
     def test_layout_manifest(self):

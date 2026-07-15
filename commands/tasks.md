@@ -27,12 +27,15 @@ preflight:
   - read_design (architecture, interfaces, file layout)
   - read_constitution (conventions, rules)
   - read_review_pre_verify (to add tasks for gaps if returning from failure)
+  - read_deferred_ledger (if deferred.md exists in active feature)
 
 actions:
   - for_each_user_story:
     - identify_what_needs_to_change
     - list_files_to_create_or_modify
     - estimate_complexity
+  - include_current_build_items: read open items with destination=current-build from deferred.md and append as tasks with [DEFERRED] marker (do not expand approved scope)
+  - derive_functional_evidence_tasks: create tasks from primary functional flow and S/M/L testing level before adding any risk-justified invariant tests
   - order_tasks_by_dependency
   - ensure_test_first_order
   - write_tasks (tasks.md)
@@ -46,6 +49,8 @@ must_do:
   - One commit per task
   - Test before implementation
   - Include verification steps
+  - Include open current-build deferred items without expanding approved scope
+  - Derive functional evidence from primary flow and S/M/L before adding risk-justified invariant tests
 
 must_not_do:
   - Skip dependencies

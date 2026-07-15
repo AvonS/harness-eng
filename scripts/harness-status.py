@@ -422,6 +422,21 @@ def find_blocked_features() -> list[Path]:
     return find_active("BLOCKED.md")
 
 
+def count_deferred_items() -> dict:
+    """Count deferred items by status across active features."""
+    counts = {"open": 0, "resolved": 0, "superseded": 0, "promoted-to-blocker": 0}
+    for f in find_active("deferred.md"):
+        content = f.read_text(encoding="utf-8", errors="replace")
+        for line in content.splitlines():
+            if line.startswith("|") and not line.startswith("|--"):
+                cells = [c.strip() for c in line.split("|")]
+                if len(cells) >= 7:
+                    status = cells[6].lower()
+                    if status in counts:
+                        counts[status] += 1
+    return counts
+
+
 def format_human(steps: list[dict], slice_log: dict, version: dict):
     """Print human-readable colored output matching the original .sh format."""
     print(f"{CYAN}=== harness-eng Workflow Status ==={NC}")
@@ -498,6 +513,20 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
     print(f"{CYAN}=== Next Step ==={NC}")
     print(f"→ Run: {determine_next_step(steps)}")
 
+    # Deferred items
+    deferred = count_deferred_items()
+    if any(v > 0 for v in deferred.values()):
+        print()
+        print(f"{CYAN}=== Deferred Items ==={NC}")
+        if deferred["open"] > 0:
+            print(f"{YELLOW}   Open: {deferred['open']}{NC}")
+        if deferred["promoted-to-blocker"] > 0:
+            print(f"{RED}   Promoted to blocker: {deferred['promoted-to-blocker']}{NC}")
+        if deferred["resolved"] > 0:
+            print(f"{GREEN}   Resolved: {deferred['resolved']}{NC}")
+        if deferred["superseded"] > 0:
+            print(f"   Superseded: {deferred['superseded']}")
+
 
 def format_json(steps: list[dict], slice_log: dict, version: dict):
     """Output structured JSON with all status information."""
@@ -508,6 +537,7 @@ def format_json(steps: list[dict], slice_log: dict, version: dict):
         "build_times": get_build_times(),
         "skill_install_log": get_skill_install_log(),
         "blocked_features": [str(p) for p in find_blocked_features()],
+        "deferred_items": count_deferred_items(),
         "next_step": determine_next_step(steps),
     }
     print(json.dumps(output, indent=2, default=str))
