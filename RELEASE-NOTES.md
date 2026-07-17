@@ -1,5 +1,25 @@
 # Release Notes
 
+## v0.3.0 - Harness-Light Policy Integration
+
+**Date**: 2026-07-17
+**Status**: Released
+
+### Changes
+
+- Implemented S-level workflow gate skipping (collapsed to `define → build → verify → change → status`).
+- Enforced locked-intent / no-silent-substitution policy.
+- Removed universal TDD/sanity mandates in favor of functional evidence first.
+- Added data/ML/strategy evidence path and persisted-state classification.
+- Enforced bounded delegation context policy (`history: none`) on all subagent commands.
+- Made `/h:status` pure read-only observability with plain, JSON, and self-contained HTML renderer.
+- Implemented derived `handover.yaml` generation and lifecycle.
+- Created `change.md` unified bug/CR workflow alongside `bug.md`.
+- Implemented `/h:upgrade-harness` migration consent flow.
+- Added E2E tests for Scenario A-F and resume-without-history validation.
+
+---
+
 ## v0.2.6 - Blocker-Only Workflow Loopbacks
 
 **Date**: 2026-07-15
