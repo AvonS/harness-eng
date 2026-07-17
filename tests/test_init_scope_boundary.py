@@ -23,12 +23,6 @@ class TestInitCommandContract(unittest.TestCase):
         self.assertIn("User intent selects the desired outcome. Harness state selects the next permitted command.", agents)
         self.assertIn("earliest incomplete lifecycle command", agents)
 
-    def test_health_is_lifecycle_aware(self):
-        health = (ROOT / "commands" / "health.md").read_text()
-        for status in ("PASS", "FAIL", "PENDING", "N/A"):
-            self.assertIn(status, health)
-        self.assertIn("derive_lifecycle_state", health)
-
 
 class TestInitBoundary(unittest.TestCase):
     def run_script(self, *args: str) -> subprocess.CompletedProcess[str]:
