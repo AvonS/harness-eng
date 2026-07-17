@@ -1,5 +1,23 @@
 # Release Notes
 
+## v0.2.6 - Blocker-Only Workflow Loopbacks
+
+**Date**: 2026-07-15
+**Status**: Released
+
+### Changes
+
+- Added deferred ledger template (`deferred.md`) with table schema, destinations, statuses, and archival instructions.
+- Updated design template with Primary Functional Flow section and S/M/L evidence matrix.
+- Updated spec template with Testing Level field and Functional Evidence section.
+- Updated triage, design, define, review-pre-build, tasks, build, review-pre-verify, verify, and release commands for blocker/deferred classification and S/M/L evidence policy.
+- Updated sr-architect, sr-tech-lead, gatekeeper, and developer agents with blocker predicate and deferred reconciliation constraints.
+- Updated `harness-status.py` to scan and display deferred item counts.
+- Added 8 new E2E tests covering editorial amendment, blocker loopback, deferred at release, promotion, and S/M/L level policy.
+- Updated AGENTS.md routing rules and gate descriptions for the blocker/deferred model.
+
+---
+
 ## v0.2.5 - Canonical Delegation and Phase Layout
 
 **Date**: 2026-07-03
