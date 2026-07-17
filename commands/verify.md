@@ -10,7 +10,7 @@ delegation:
   write_authority: none
   return_format: Markdown verification report ending with VERDICT PASS or FAIL
   max_response: 20KB
-  context_policy: Pass paths; never inline complete files or raw logs
+  context_policy: Pass paths; never inline complete files or raw logs; history: none
   on_failure: Return ERROR with failed command and bounded evidence
   persistence: Manager writes the returned report unchanged to verification.md
 

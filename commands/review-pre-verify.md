@@ -11,7 +11,7 @@ delegation:
   write_authority: .harness-eng/reviews/active/review-pre-verify.md
   return_format: A concise success message (the report must be written directly to disk using the write tool)
   max_response: 2KB
-  context_policy: Pass references/paths to required files (NOT file contents); never inline complete files or raw output
+  context_policy: Pass references/paths to required files (NOT file contents); never inline complete files or raw output; history: none
   on_failure: Return ERROR with blocker and no approval
   persistence: Subagent writes the report directly to disk. Manager checks the verdict in the written file.
 

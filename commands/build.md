@@ -10,7 +10,7 @@ delegation:
   write_authority: Task-scoped application files, tests, tasks.md, and SLICE_LOG.md
   return_format: Bounded summary of tasks, changed paths, checks, commits, and blockers
   max_response: 20KB
-  context_policy: Pass paths and concise retry state; never inline complete files or raw logs
+  context_policy: Pass paths and concise retry state; never inline complete files or raw logs; history: none
   on_failure: Return ERROR with blocker and partial task state
 
 gates:

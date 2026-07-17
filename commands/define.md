@@ -11,7 +11,7 @@ delegation:
   write_authority: Active feature spec.md only
   return_format: Path, coverage, assumptions, and blockers
   max_response: 20KB
-  context_policy: Pass paths; never inline complete files
+  context_policy: Pass paths; never inline complete files; history: none
   on_failure: Return ERROR with unresolved requirement
 goal: Produce a rich, expressive, and human-readable spec.md document that explicitly follows templates/feature/spec.md.
 
