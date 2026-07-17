@@ -121,10 +121,10 @@ User intent selects the desired outcome. Harness state selects the next permitte
 ## Your Workflow Rules (NON-NEGOTIABLE)
 
 1. **MUST read `.harness-eng/CONSTITUTION.md` before every action**
-2. **NEVER start implementing before design is human-approved** (after `/h:approve`)
-3. **MUST write tests in the same commit as production code**
+2. **NEVER start implementing before design is human-approved** (after `/h:approve`) — except for S-level projects which skip the design and tasks phase. If `workflow_level` is absent, default to M/L (full gates).
+3. **MUST write tests in the same commit as production code** — for deterministic invariants not reliably provable by the functional flow. Unconditional TDD and coverage percentages are not required for all levels; functional/integration evidence takes precedence.
 4. **MUST run the approved Evidence Contract and existing regression suite before filling `verification.md`**
-5. **MUST pass the full sanity test suite before running `verification.md`**
+5. **MUST pass the full sanity test suite before running `verification.md`** — for M/L-level projects, or when level/risk requires it for S. During build, run only focused affected-only checks.
 6. **Never move a feature to `done/` without a passing `verification.md`**
 7. **After 3 failed fix attempts, write a BLOCKED section and stop — escalate to human**
 8. **Always create/switch to the correct git branch before making changes**
@@ -143,6 +143,26 @@ All personas MUST adhere to the **Ponytail YAGNI Framework** (You Ain't Gonna Ne
 2. **Do not install third-party dependencies** if native platform APIs (HTML5, standard libraries) can solve the problem.
 3. **Never write complex abstraction layers** for simple problems.
 If a design or code PR violates this, it must be rejected during the `review-pre-build` or `review-pre-verify` gates.
+
+## Data, ML, and Quantitative Strategy Projects Policy
+
+For quantitative, data, ML, or strategy work, readiness is not measured by unit-test count or code coverage. Primary evidence follows the real production path:
+
+```
+raw/backfilled data → data-quality audit → production calculation path
+→ leakage-safe backtest/replay → ledger/provenance invariants
+→ robustness/sensitivity summary → frozen strategy/data contract
+```
+
+In quantitative strategy projects, unit tests are used only for risks that functional evidence cannot reliably prove:
+- Accounting and ledger invariants;
+- No-lookahead strategy boundaries;
+- Idempotent ingestion;
+- Deterministic formulas;
+- Schema and contract compatibility;
+- Promotion gates and fail-closed behavior.
+
+Profitability, ranking, accuracy, or return outcomes must be recorded for human evaluation; unit tests must not assert desired profit or minimum accuracy.
 
 ## Commands
 
