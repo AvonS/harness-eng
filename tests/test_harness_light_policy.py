@@ -93,5 +93,38 @@ testing_level: L
             migrate_harness.validate_consent(invalid_consent)
 
 
+    def test_scenario_a_s_level(self) -> None:
+        spec_path = Path("tests/fixtures/scenario-a-s-level-crud/spec.md")
+        content = spec_path.read_text(encoding="utf-8")
+        meta = harness_status.parse_markdown_metadata(content)
+        self.assertEqual(meta.get("workflow_level"), "S")
+
+    def test_scenario_b_data_ml(self) -> None:
+        spec_path = Path("tests/fixtures/scenario-b-data-ml/spec.md")
+        content = spec_path.read_text(encoding="utf-8")
+        meta = harness_status.parse_markdown_metadata(content)
+        self.assertEqual(meta.get("classification"), "data_ml")
+
+    def test_scenario_c_change_record(self) -> None:
+        chg_path = Path("tests/fixtures/scenario-c-brownfield-bug/CHG-001.md")
+        content = chg_path.read_text(encoding="utf-8")
+        meta = harness_status.parse_markdown_metadata(content)
+        self.assertEqual(meta.get("id"), "CHG-001")
+        self.assertEqual(meta.get("type"), "bug")
+
+    def test_scenario_e_consent(self) -> None:
+        consent_path = Path("tests/fixtures/scenario-e-existing-migration/migration-consent.yaml")
+        # Reuse migrate_harness to load consent
+        # Override HARNESS_DIR temporarily
+        orig_harness_dir = migrate_harness.HARNESS_DIR
+        migrate_harness.HARNESS_DIR = consent_path.parent
+        try:
+            consent = migrate_harness.load_consent()
+            self.assertEqual(consent.get("consent_id"), "CONSENT-20260717")
+            self.assertEqual(consent.get("migration_policy_accepted"), True)
+        finally:
+            migrate_harness.HARNESS_DIR = orig_harness_dir
+
+
 if __name__ == "__main__":
     unittest.main()
