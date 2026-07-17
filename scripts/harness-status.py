@@ -528,7 +528,435 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
             print(f"   Superseded: {deferred['superseded']}")
 
 
-def format_json(steps: list[dict], slice_log: dict, version: dict):
+def to_yaml(data) -> str:
+    if isinstance(data, dict):
+        lines = []
+        for k, v in data.items():
+            if isinstance(v, (str, int, bool)) or v is None:
+                val_str = "" if v is None else str(v)
+                if ":" in val_str or "#" in val_str or "\n" in val_str or v == "":
+                    val_str = f'"{val_str}"'
+                lines.append(f"{k}: {val_str}")
+            elif isinstance(v, list):
+                if not v:
+                    lines.append(f"{k}: []")
+                else:
+                    lines.append(f"{k}:")
+                    for item in v:
+                        if isinstance(item, dict):
+                            lines.append(f"  - " + to_yaml(item).replace("\n", "\n    ").strip())
+                        else:
+                            val_str = str(item)
+                            if ":" in val_str or "#" in val_str or "\n" in val_str or item == "":
+                                val_str = f'"{val_str}"'
+                            lines.append(f"  - {val_str}")
+        return "\n".join(lines)
+    return ""
+
+
+def parse_markdown_metadata(content: str) -> dict:
+    meta = {}
+    if content.startswith("---"):
+        parts = content.split("---", 2)
+        if len(parts) >= 3:
+            frontmatter = parts[1]
+            for line in frontmatter.splitlines():
+                if ":" in line:
+                    key, val = line.split(":", 1)
+                    meta[key.strip()] = val.strip().strip('"').strip("'")
+    return meta
+
+
+def extract_decisions(content: str) -> list[dict]:
+    decisions = []
+    lines = content.splitlines()
+    in_section = False
+    for line in lines:
+        if line.startswith("## Technical Decisions") or line.startswith("## Research & Technical Decisions"):
+            in_section = True
+            continue
+        if in_section:
+            if line.startswith("##") or line.startswith("---"):
+                in_section = False
+                continue
+            if line.startswith("|") and "DEC-" in line:
+                cells = [c.strip() for c in line.split("|")[1:-1]]
+                if len(cells) >= 3 and cells[0].startswith("DEC-"):
+                    decisions.append({
+                        "id": cells[0],
+                        "decision": cells[1],
+                        "rationale": cells[2]
+                    })
+    return decisions
+
+
+def extract_assumptions(content: str) -> list[str]:
+    assumptions = []
+    lines = content.splitlines()
+    in_section = False
+    for line in lines:
+        if line.startswith("## Assumptions"):
+            in_section = True
+            continue
+        if in_section:
+            if line.startswith("##") or line.startswith("---"):
+                in_section = False
+                continue
+            if line.strip().startswith("-"):
+                assumptions.append(line.strip().lstrip("-").strip())
+    return assumptions
+
+
+def regenerate_handover(steps: list[dict]) -> dict:
+    """Scan authoritative artifacts and write `.harness-eng/handover.yaml`."""
+    current_slice = ""
+    workflow_level = "M/L"
+    completed_tasks = []
+    decisions = []
+    assumptions = []
+    evidence = []
+    blockers = []
+    
+    specs = find_active("spec.md")
+    if specs:
+        spec_path = specs[0]
+        current_slice = spec_path.parent.name
+        try:
+            content = spec_path.read_text(encoding="utf-8", errors="replace")
+            meta = parse_markdown_metadata(content)
+            workflow_level = meta.get("workflow_level", "M/L")
+            decisions.extend(extract_decisions(content))
+            assumptions.extend(extract_assumptions(content))
+        except Exception:
+            pass
+            
+    designs = find_active("design.md")
+    if designs:
+        try:
+            content = designs[0].read_text(encoding="utf-8", errors="replace")
+            decisions.extend(extract_decisions(content))
+        except Exception:
+            pass
+
+    tasks = find_active("tasks.md")
+    if tasks:
+        try:
+            content = tasks[0].read_text(encoding="utf-8", errors="replace")
+            for line in content.splitlines():
+                if line.startswith("- [x]") or line.startswith("- [X]"):
+                    parts = line.split(" ", 2)
+                    if len(parts) >= 3:
+                        completed_tasks.append(parts[2].strip())
+        except Exception:
+            pass
+
+    blocked_files = find_blocked_features()
+    for f in blocked_files:
+        try:
+            lines = f.read_text(encoding="utf-8", errors="replace").splitlines()
+            for line in lines:
+                if line.strip().startswith("-"):
+                    blockers.append(line.strip().lstrip("-").strip())
+        except Exception:
+            pass
+
+    verifications = find_active("verification.md")
+    if verifications:
+        try:
+            content = verifications[0].read_text(encoding="utf-8", errors="replace")
+            for line in content.splitlines():
+                if line.startswith("|") and ("PASS" in line or "FAIL" in line) and not line.startswith("|--"):
+                    cells = [c.strip() for c in line.split("|")[1:-1]]
+                    if len(cells) >= 2:
+                        evidence.append({"name": cells[0], "status": cells[1]})
+        except Exception:
+            pass
+
+    state = "defined"
+    step_map = {s["step"]: s for s in steps}
+    if blocked_files:
+        state = "blocked"
+    elif step_map.get("verify", {}).get("status") == "done":
+        state = "verified"
+    elif step_map.get("build", {}).get("status") == "done":
+        state = "verification-pending"
+    elif step_map.get("tasks", {}).get("status") == "done":
+        state = "building"
+        
+    next_action = determine_next_step(steps)
+
+    handover_data = {
+        "state": state,
+        "current_slice": current_slice,
+        "workflow_level": workflow_level,
+        "completed": completed_tasks,
+        "decisions": [{"id": d["id"], "ref": "spec.md" if "spec" in d.get("ref", "") else "design.md"} for d in decisions],
+        "assumptions": assumptions,
+        "evidence": [e["name"] for e in evidence],
+        "blockers": blockers,
+        "next_action": next_action
+    }
+
+    try:
+        yaml_content = "# Generated derived handover view. Do not edit directly.\n" + to_yaml(handover_data)
+        (HARNESS_DIR / "handover.yaml").write_text(yaml_content, encoding="utf-8")
+    except Exception as e:
+        eprint(f"Warning: failed to write handover.yaml: {e}")
+
+    return handover_data
+
+
+import html
+
+def format_html(steps: list[dict], slice_log: dict, version: dict, next_step: str, deferred: dict, handover: dict):
+    """Generate a premium, self-contained HTML status page."""
+    step_rows = ""
+    for s in steps:
+        if s["status"] == "done":
+            status_class = "status-done"
+            status_symbol = "&#10003;"
+        elif s["status"] == "pending":
+            status_class = "status-pending"
+            status_symbol = "&#9203;"
+        else:
+            status_class = "status-not-started"
+            status_symbol = "&#10007;"
+        
+        step_rows += f"""
+        <div class="step-card {status_class}">
+            <div class="step-icon">{status_symbol}</div>
+            <div class="step-details">
+                <span class="step-label">{html.escape(s['label'])}</span>
+                <span class="step-message">{html.escape(s['message'])}</span>
+            </div>
+        </div>
+        """
+
+    decisions_list = ""
+    for d in handover.get("decisions", []):
+        decisions_list += f"<li><strong>{html.escape(d.get('id', ''))}</strong> (ref: {html.escape(d.get('ref', ''))})</li>"
+    if not decisions_list:
+        decisions_list = "<li>No decisions recorded</li>"
+
+    completed_list = ""
+    for c in handover.get("completed", []):
+        completed_list += f"<li>&#10003; {html.escape(c)}</li>"
+    if not completed_list:
+        completed_list = "<li>No tasks completed</li>"
+
+    blockers_list = ""
+    for b in handover.get("blockers", []):
+        blockers_list += f"<li class='blocker-item'>&#9940; {html.escape(b)}</li>"
+    if not blockers_list:
+        blockers_list = "<li>No active blockers</li>"
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>harness-eng status</title>
+    <style>
+        body {{
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }}
+        .container {{
+            max-width: 1000px;
+            width: 100%;
+        }}
+        header {{
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 1rem;
+        }}
+        h1 {{
+            color: #38bdf8;
+            font-size: 2.25rem;
+            margin: 0;
+        }}
+        .meta {{
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }}
+        .grid {{
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }}
+        @media (max-width: 768px) {{
+            .grid {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+        .card {{
+            background: #1e293b;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }}
+        h2 {{
+            color: #38bdf8;
+            margin-top: 0;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+        }}
+        .step-card {{
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid transparent;
+        }}
+        .status-done {{
+            background: #14532d;
+            border-left-color: #22c55e;
+        }}
+        .status-pending {{
+            background: #78350f;
+            border-left-color: #eab308;
+        }}
+        .status-not-started {{
+            background: #450a0a;
+            border-left-color: #ef4444;
+        }}
+        .step-icon {{
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            width: 24px;
+            text-align: center;
+        }}
+        .step-details {{
+            display: flex;
+            flex-direction: column;
+        }}
+        .step-label {{
+            font-weight: bold;
+            font-size: 1rem;
+        }}
+        .step-message {{
+            font-size: 0.875rem;
+            color: #cbd5e1;
+        }}
+        .badge {{
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }}
+        .badge-info {{ background-color: #0369a1; color: #e0f2fe; }}
+        .badge-warning {{ background-color: #78350f; color: #fef9c3; }}
+        .badge-success {{ background-color: #14532d; color: #dcfce7; }}
+        ul {{
+            padding-left: 1.25rem;
+            margin: 0;
+        }}
+        li {{
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }}
+        .blocker-item {{
+            color: #f87171;
+            font-weight: bold;
+        }}
+        .next-step-box {{
+            background: #0369a1;
+            border-radius: 6px;
+            padding: 1rem;
+            font-weight: bold;
+            color: #e0f2fe;
+            margin-top: 1rem;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>harness-eng status</h1>
+            <div class="meta">
+                Generated at: {datetime.now(timezone.utc).isoformat()} |
+                Harness Version: {html.escape(version.get('local_version', 'v0.3.0'))} |
+                Workflow Level: <span class="badge badge-info">{html.escape(handover.get('workflow_level', 'M/L'))}</span>
+            </div>
+        </header>
+        
+        <div class="grid">
+            <div class="main-column">
+                <div class="card">
+                    <h2>Workflow Steps</h2>
+                    {step_rows}
+                </div>
+                
+                <div class="card">
+                    <h2>Active Slice & Handover State</h2>
+                    <p><strong>Current Slice:</strong> {html.escape(handover.get('current_slice', 'None'))}</p>
+                    <p><strong>Lifecycle State:</strong> <span class="badge badge-info">{html.escape(handover.get('state', 'unknown'))}</span></p>
+                    
+                    <h3>Completed Tasks / Stories</h3>
+                    <ul>
+                        {completed_list}
+                    </ul>
+                    
+                    <h3>Technical Decisions</h3>
+                    <ul>
+                        {decisions_list}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="card">
+                    <h2>Next Action</h2>
+                    <div class="next-step-box">
+                        → {html.escape(next_step)}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Active Blockers</h2>
+                    <ul>
+                        {blockers_list}
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h2>Deferred Items</h2>
+                    <p><strong>Open:</strong> {deferred.get('open', 0)}</p>
+                    <p><strong>Resolved:</strong> {deferred.get('resolved', 0)}</p>
+                    <p><strong>Promoted to Blocker:</strong> {deferred.get('promoted-to-blocker', 0)}</p>
+                </div>
+
+                <div class="card">
+                    <h2>SLICE_LOG Status</h2>
+                    <p>Status: <span class="badge {'badge-success' if slice_log['status'] == 'fresh' else 'badge-warning'}">{html.escape(slice_log['status'])}</span></p>
+                    {f"<p>Age: {slice_log['age_days']} days ago</p>" if slice_log.get('age_days') is not None else ""}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    try:
+        html_dir = HARNESS_DIR / "status"
+        html_dir.mkdir(parents=True, exist_ok=True)
+        (html_dir / "index.html").write_text(html_content, encoding="utf-8")
+    except Exception as e:
+        eprint(f"Warning: failed to write status HTML: {e}")
+
+
+def format_json(steps: list[dict], slice_log: dict, version: dict, handover: dict):
     """Output structured JSON with all status information."""
     output = {
         "workflow_steps": steps,
@@ -538,6 +966,7 @@ def format_json(steps: list[dict], slice_log: dict, version: dict):
         "skill_install_log": get_skill_install_log(),
         "blocked_features": [str(p) for p in find_blocked_features()],
         "deferred_items": count_deferred_items(),
+        "handover": handover,
         "next_step": determine_next_step(steps),
     }
     print(json.dumps(output, indent=2, default=str))
@@ -547,11 +976,25 @@ def main():
     steps = get_step_statuses()
     slice_log = check_slice_log_freshness()
     version = check_version()
+    
+    # Always regenerate handover view on status run
+    handover = regenerate_handover(steps)
 
-    if JSON_MODE:
-        format_json(steps, slice_log, version)
+    if "--json" in sys.argv:
+        format_json(steps, slice_log, version, handover)
+    elif "--html" in sys.argv:
+        format_html(steps, slice_log, version, determine_next_step(steps), count_deferred_items(), handover)
+        print(f"HTML status written to .harness-eng/status/index.html")
     else:
         format_human(steps, slice_log, version)
+        
+        # Display handover state in human mode too
+        print()
+        print(f"{CYAN}=== Handover View (handover.yaml) ==={NC}")
+        print(f"   State: {handover.get('state')}")
+        print(f"   Workflow Level: {handover.get('workflow_level')}")
+        print(f"   Current Slice: {handover.get('current_slice')}")
+        print(f"   Decisions Count: {len(handover.get('decisions', []))}")
 
 
 if __name__ == "__main__":
