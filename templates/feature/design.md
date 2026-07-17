@@ -43,6 +43,7 @@ agent_contract:
 **Ref**: [APPROVED|PENDING|REJECTED]
 **Approved by**: [Human|Agent]
 **Approved date**: [YYYY-MM-DD]
+**Workflow Level**: [S|M|L] (S skips design/tasks/review gates; M/L applies full gate chain; ABSENT defaults to M/L)
 **Testing Level**: [S|M|L]
 
 **Input**: Feature specification from `specs/[FEATURE]/spec.md`
@@ -170,13 +171,13 @@ agent_contract:
 
 ---
 
-## Research
+## Research & Technical Decisions
 
 > *Technical decisions with rationale.*
 
-| Decision | Rationale | Alternatives Rejected |
-|----------|-----------|----------------------|
-| [DECISION] | [WHY] | [WHAT ELSE AND WHY NOT] |
+| ID | Decision | Rationale | Alternatives Rejected | Assumptions |
+|----|----------|-----------|----------------------|-------------|
+| DEC-001 | [DECISION] | [WHY] | [WHAT ELSE AND WHY NOT] | [ASSUMPTIONS] |
 
 ---
 
