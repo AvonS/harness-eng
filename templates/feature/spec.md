@@ -33,9 +33,24 @@ agent_contract:
 **Created**: [DATE]
 **Status**: Draft
 **Ref**: [APPROVED|PENDING]
+**Workflow Level**: [S|M|L] (S skips design/tasks/review gates; M/L applies full gate chain; ABSENT defaults to M/L)
 **Testing Level**: [S|M|L]
 
 **Input**: [DESCRIPTION_OF_FEATURE]
+
+**Constraints**:
+  locked:
+    - [Name stack, library, model, strategy, data source, cost model, execution mode, or persistence. Agent must implement or STOP — never silently substitute]
+
+**State Classification**:
+  - class: model
+    write_policy: auto-update allowed when marked virtual/replayable
+  - class: operational
+    write_policy: tool may update within documented boundary
+  - class: curated_project
+    write_policy: requires normal build/change authority + focused evidence
+  - class: external_authoritative
+    write_policy: requires explicit user approval at moment of action
 
 ---
 
@@ -145,6 +160,14 @@ agent_contract:
 
 - **[ENTITY_1]**: [What it represents, key attributes]
 - **[ENTITY_2]**: [What it represents, relationships]
+
+---
+
+## Technical Decisions
+
+| ID | Decision | Rationale | Assumptions |
+|---|---|---|---|
+| DEC-001 | [Decision] | [Rationale/Alternatives] | [Assumptions] |
 
 ---
 
