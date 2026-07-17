@@ -35,16 +35,19 @@ actions:
   - propose_behavior_model: identify actors, goals, initial conditions, event flow, state transitions, and invariants
   - identify_primary_functional_flow: name the primary happy-path functional flow or justify inspection as stronger and cheaper
   - propose_testing_level: select S/M/L from change classification, risk, and boundary depth
+  - propose_workflow_level: select S/M/L from risk, size, reversibility, and stack familiarity
+  - propose_locked_constraints: identify user-specified technology constraints
+  - propose_state_classification: classify persisted state by authority (model, operational, curated, external authoritative)
   - present_behavior_playback_to_human: ask bounded, contextual questions about load-bearing uncertainties
   - for_each_requirement:
     - create_testable_acceptance_examples: use Given/When/Then only for material behavior
     - identify_acceptance_criteria
-  - write_spec: write <active-phase>/features/<feature-id>/spec.md using templates/feature/spec.md
+  - write_spec: write spec.md including workflow_level, constraints.locked, state_classification, and technical decisions using templates/feature/spec.md
   - set_ref: PENDING
-  - route: to /h:design
+  - route: to /h:design if workflow_level != S, else to /h:build
 
 outputs:
-  - spec.md with Ref: PENDING (including Testing Level and primary functional flow)
+  - spec.md with Ref: PENDING (including workflow_level, testing level, constraints, state classification, and decisions)
 
 must_do:
   - Classify the change before selecting evidence
@@ -54,8 +57,10 @@ must_do:
   - Make acceptance criteria testable without forcing one notation
   - Cover all acceptance criteria
   - Define one primary happy-path functional flow or justify inspection as stronger and cheaper
-  - Propose S/M/L testing level from risk and boundary depth
+  - Propose S/M/L workflow level and testing level from risk and boundary depth
   - Get human review of spec
+  - Write locked technology constraints and state classification to spec.md
+  - Regenerate derived handover.yaml after spec is written
 
 must_not_do:
   - Skip requirements
