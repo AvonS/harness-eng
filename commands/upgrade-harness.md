@@ -15,6 +15,8 @@ gates:
     on_fail: STOP, run /h:init
   - check: git status is clean
     on_fail: STOP, commit or stash changes before upgrading
+  - check: .harness-eng/migration-consent.yaml exists
+    on_fail: STOP, copy templates/migration-consent.yaml to .harness-eng/migration-consent.yaml, fill it, and restart
 
 actions:
   - run_version_check: python3 .harness-eng/scripts/version-check.py . .harness-eng
@@ -56,6 +58,7 @@ must_do:
   - Exclude sanity-check.sh from script updates
   - Report changes clearly
   - Record the harness-eng-skills source revision and installed skill digests
+  - Verify migration-consent.yaml exists and is fully populated before performing upgrade or file replacement
 
 must_not_do:
   - Continue from an installed local upgrade command after fetching its replacement
