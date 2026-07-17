@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -84,10 +85,10 @@ testing_level: L
             "migration_policy_accepted": False,
             "in_flight_slices_acknowledged": True
         }
-        
+
         # Should not raise exception
         migrate_harness.validate_consent(valid_consent)
-        
+
         # Should raise SystemExit
         with self.assertRaises(SystemExit):
             migrate_harness.validate_consent(invalid_consent)
@@ -131,7 +132,7 @@ testing_level: L
             root = Path(td)
             harness_dir = root / ".harness-eng"
             harness_dir.mkdir()
-            
+
             # Write a mock handover.yaml
             handover_yaml = (
                 "state: building\n"
@@ -150,10 +151,10 @@ testing_level: L
                 "next_action: build\n"
             )
             (harness_dir / "handover.yaml").write_text(handover_yaml, encoding="utf-8")
-            
+
             # Read and parse it back to simulate a fresh agent resuming
             content = (harness_dir / "handover.yaml").read_text(encoding="utf-8")
-            
+
             # A simple parse logic reproducing how a fresh agent parses it
             parsed = {}
             lines = content.splitlines()
@@ -182,6 +183,66 @@ testing_level: L
             self.assertEqual(parsed.get("next_action"), "build")
             self.assertIn("task_1", parsed.get("completed", []))
             self.assertIn("blocker_1", parsed.get("blockers", []))
+
+
+    def test_migrate_harness_inspection(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            harness_dir = root / ".harness-eng"
+            harness_dir.mkdir()
+
+            # Setup version and slice log files
+            (harness_dir / "VERSION").write_text("v0.2.6\n", encoding="utf-8")
+            (harness_dir / "SLICE_LOG.md").write_text("- Initial commit\n", encoding="utf-8")
+
+            # Mock phase active structure
+            active_phase = harness_dir / "phases" / "active" / "phase-3" / "features" / "active" / "F301-harness-light-policy"
+            active_phase.mkdir(parents=True)
+            (active_phase / "spec.md").write_text("Mock Spec", encoding="utf-8")
+
+            # Temporarily redirect HARNESS_DIR in migrate_harness
+            orig_harness_dir = migrate_harness.HARNESS_DIR
+            migrate_harness.HARNESS_DIR = harness_dir
+
+            # Test approval flow
+            os.environ["HARNESS_MIGRATION_APPROVED"] = "y"
+            try:
+                migrate_harness.inspect_and_confirm_migration()
+
+                # Check YAML was written
+                migration_dir = harness_dir / "migration"
+                self.assertTrue(migration_dir.is_dir())
+                yamls = list(migration_dir.glob("workflow-level-*.yaml"))
+                self.assertEqual(len(yamls), 1)
+
+                # Verify Yaml content
+                yaml_content = yamls[0].read_text(encoding="utf-8")
+                self.assertIn("recommended_level: M", yaml_content)
+                self.assertIn("approved_level: M", yaml_content)
+                self.assertIn("current_slice: false", yaml_content)
+                self.assertIn("future_slices: true", yaml_content)
+                self.assertIn("F301-harness-light-policy", yaml_content)
+
+                # Verify SLICE_LOG.md content
+                slice_log_content = (harness_dir / "SLICE_LOG.md").read_text(encoding="utf-8")
+                self.assertIn("- chore: project migrated to v0.3.0, workflow level M approved for future slices", slice_log_content)
+            finally:
+                os.environ.pop("HARNESS_MIGRATION_APPROVED", None)
+
+            # Test rejection flow
+            os.environ["HARNESS_MIGRATION_APPROVED"] = "n"
+            # Delete approval file to force new check
+            for y in migration_dir.glob("*.yaml"):
+                y.unlink()
+            try:
+                with self.assertRaises(SystemExit):
+                    migrate_harness.inspect_and_confirm_migration()
+                # Verify SLICE_LOG.md contains rejected entry
+                slice_log_content = (harness_dir / "SLICE_LOG.md").read_text(encoding="utf-8")
+                self.assertIn("- chore: migration recommended, not approved", slice_log_content)
+            finally:
+                os.environ.pop("HARNESS_MIGRATION_APPROVED", None)
+                migrate_harness.HARNESS_DIR = orig_harness_dir
 
 
 if __name__ == "__main__":
