@@ -101,7 +101,7 @@ The user owns the what and the why. The agent owns the how — within boundaries
 
 ## Mandatory Gates
 
-> *Three checkpoints that enforce quality. Never skip any gate.*
+> *Three checkpoints that enforce quality. Never skip any gate unless workflow level policy permits.*
 
 ```yaml
 gates:
@@ -109,13 +109,13 @@ gates:
     type: human
     command: "/h:approve"
     blocks: "tasks, build"
-    description: "Human reviews architecture before implementation"
+    description: "Human reviews architecture before implementation (only for M/L-level projects; skipped for S-level)"
 
   - name: "Sr Tech Lead review"
     type: agent
     command: "/h:review-pre-verify"
     blocks: "verify"
-    description: "Agent compares design vs code, catches gaps"
+    description: "Agent compares design vs code, catches gaps (only for M/L-level projects; skipped for S-level)"
 
   - name: "Release approval"
     type: human
