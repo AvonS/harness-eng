@@ -15,17 +15,17 @@ delegation:
   persistence: Manager writes the returned report unchanged to verification.md
 
 gates:
-  - check: 'review-pre-verify.md "Ref: APPROVED"'
+  - check: 'review-pre-verify.md "Ref: APPROVED"' (if workflow_level != S; ABSENT defaults to M/L)
     on_fail: STOP, route to review-pre-verify
-  - check: all tasks complete
+  - check: all tasks complete (if workflow_level != S; ABSENT defaults to M/L)
     on_fail: STOP, route to build
   - check: all required evidence passes
     on_fail: STOP, fix evidence failures
 
 actions:
   - read_deferred_ledger: if deferred.md exists in active feature, read it for reporting
-  - run_evidence_contract_checks
-  - run_existing_regression_suite
+  - run_evidence_contract_checks: (for S: run only happy-path or cheapest deterministic inspection; no unit-test quota)
+  - run_existing_regression_suite: (run once, only when level/risk requires it for S)
   - run_required_sensors from technology.yaml
   - if evidence_fails: STOP, fix evidence failures
   - check_readme_updated (if user-facing changes)
@@ -33,6 +33,7 @@ actions:
   - report_deferred_items: include a "Deferred Items" section in the verification output listing open items with IDs and destinations
   - write_verification (Release Ref: PENDING)
   - commit_verification
+  - regenerate_handover: write derived handover.yaml status after verify completes
   - route: to /h:release (human gate)
 
 must_do:
