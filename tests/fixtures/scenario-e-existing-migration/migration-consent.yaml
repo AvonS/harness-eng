@@ -1,0 +1,7 @@
+consent_id: "CONSENT-20260717"
+project_name: "dogfood"
+target_harness_version: "v0.3.0"
+consented_by: "Human"
+consented_at: "2026-07-17T12:00:00Z"
+migration_policy_accepted: true
+in_flight_slices_acknowledged: true
