@@ -25,7 +25,7 @@ actions:
   - write_change_record: create CHG-NNN.md using templates/feature/change.md carrying forward baseline, delta, decisions, and relevant prior decisions
   - implement_smallest_delta: implement the change using the smallest required code delta
   - run_focused_evidence: verify the change on the affected flow and boundary only
-  - regenerate_handover: refresh derived handover.yaml
+  - regenerate_handover: python3 scripts/harness-status.py --regenerate
   - commit: commit the change record and implementation code
   - route: to /h:verify
 

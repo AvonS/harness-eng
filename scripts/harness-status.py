@@ -567,7 +567,7 @@ def parse_markdown_metadata(content: str) -> dict:
     return meta
 
 
-def extract_decisions(content: str) -> list[dict]:
+def extract_decisions(content: str, ref_file: str = "") -> list[dict]:
     decisions = []
     lines = content.splitlines()
     in_section = False
@@ -585,7 +585,8 @@ def extract_decisions(content: str) -> list[dict]:
                     decisions.append({
                         "id": cells[0],
                         "decision": cells[1],
-                        "rationale": cells[2]
+                        "rationale": cells[2],
+                        "ref": ref_file
                     })
     return decisions
 
@@ -625,7 +626,7 @@ def regenerate_handover(steps: list[dict]) -> dict:
             content = spec_path.read_text(encoding="utf-8", errors="replace")
             meta = parse_markdown_metadata(content)
             workflow_level = meta.get("workflow_level", "M/L")
-            decisions.extend(extract_decisions(content))
+            decisions.extend(extract_decisions(content, ref_file="spec.md"))
             assumptions.extend(extract_assumptions(content))
         except Exception:
             pass
@@ -634,7 +635,7 @@ def regenerate_handover(steps: list[dict]) -> dict:
     if designs:
         try:
             content = designs[0].read_text(encoding="utf-8", errors="replace")
-            decisions.extend(extract_decisions(content))
+            decisions.extend(extract_decisions(content, ref_file="design.md"))
         except Exception:
             pass
 
@@ -690,7 +691,7 @@ def regenerate_handover(steps: list[dict]) -> dict:
         "current_slice": current_slice,
         "workflow_level": workflow_level,
         "completed": completed_tasks,
-        "decisions": [{"id": d["id"], "ref": "spec.md" if "spec" in d.get("ref", "") else "design.md"} for d in decisions],
+        "decisions": [{"id": d["id"], "ref": d["ref"]} for d in decisions],
         "assumptions": assumptions,
         "evidence": [e["name"] for e in evidence],
         "blockers": blockers,
@@ -701,7 +702,8 @@ def regenerate_handover(steps: list[dict]) -> dict:
         yaml_content = "# Generated derived handover view. Do not edit directly.\n" + to_yaml(handover_data)
         (HARNESS_DIR / "handover.yaml").write_text(yaml_content, encoding="utf-8")
     except Exception as e:
-        eprint(f"Warning: failed to write handover.yaml: {e}")
+        eprint(f"Error: failed to write handover.yaml: {e}")
+        sys.exit(1)
 
     return handover_data
 
@@ -977,8 +979,103 @@ def main():
     slice_log = check_slice_log_freshness()
     version = check_version()
     
-    # Always regenerate handover view on status run
-    handover = regenerate_handover(steps)
+    if "--regenerate" in sys.argv:
+        regenerate_handover(steps)
+        if len(sys.argv) == 2 or (len(sys.argv) == 3 and "--json" in sys.argv):
+            sys.exit(0)
+
+    # Load existing handover.yaml if it exists
+    handover = {}
+    handover_file = HARNESS_DIR / "handover.yaml"
+    if handover_file.is_file():
+        try:
+            content = handover_file.read_text(encoding="utf-8")
+            lines = content.splitlines()
+            current_key = None
+            for line in lines:
+                if ":" in line and not line.strip().startswith("-"):
+                    k, v = line.split(":", 1)
+                    k = k.strip()
+                    v = v.strip().strip('"').strip("'")
+                    if v == "[]" or v == "":
+                        handover[k] = []
+                    else:
+                        handover[k] = v
+                elif line.strip().startswith("-"):
+                    val = line.strip().lstrip("-").strip().strip('"').strip("'")
+                    if current_key and isinstance(handover.get(current_key), list):
+                        handover[current_key].append(val)
+                if not line.strip().startswith("-") and ":" in line:
+                    current_key = line.split(":", 1)[0].strip()
+                    
+            # Parse decisions list of dicts
+            decisions = []
+            current_decision = None
+            for line in lines:
+                if line.strip().startswith("- id:"):
+                    if current_decision:
+                        decisions.append(current_decision)
+                    current_decision = {"id": line.split(":", 1)[1].strip().strip('"').strip("'")}
+                elif line.strip().startswith("ref:") and current_decision:
+                    current_decision["ref"] = line.split(":", 1)[1].strip().strip('"').strip("'")
+            if current_decision:
+                decisions.append(current_decision)
+            handover["decisions"] = decisions
+
+            # completed list
+            completed = []
+            in_completed = False
+            for line in lines:
+                if line.startswith("completed:"):
+                    in_completed = True
+                elif in_completed:
+                    if line.startswith("  - ") and not ":" in line:
+                        completed.append(line.split("-", 1)[1].strip().strip('"').strip("'"))
+                    elif line.strip() != "" and not line.startswith("  - "):
+                        in_completed = False
+            handover["completed"] = completed
+
+            # assumptions list
+            assumptions = []
+            in_assumptions = False
+            for line in lines:
+                if line.startswith("assumptions:"):
+                    in_assumptions = True
+                elif in_assumptions:
+                    if line.startswith("  - ") and not ":" in line:
+                        assumptions.append(line.split("-", 1)[1].strip().strip('"').strip("'"))
+                    elif line.strip() != "" and not line.startswith("  - "):
+                        in_assumptions = False
+            handover["assumptions"] = assumptions
+
+            # blockers list
+            blockers = []
+            in_blockers = False
+            for line in lines:
+                if line.startswith("blockers:"):
+                    in_blockers = True
+                elif in_blockers:
+                    if line.startswith("  - ") and not ":" in line:
+                        blockers.append(line.split("-", 1)[1].strip().strip('"').strip("'"))
+                    elif line.strip() != "" and not line.startswith("  - "):
+                        in_blockers = False
+            handover["blockers"] = blockers
+
+        except Exception as e:
+            eprint(f"Warning: failed to parse handover.yaml: {e}")
+
+    if not handover:
+        handover = {
+            "state": "pending",
+            "current_slice": "None",
+            "workflow_level": "M/L",
+            "completed": [],
+            "decisions": [],
+            "assumptions": [],
+            "evidence": [],
+            "blockers": [],
+            "next_action": determine_next_step(steps)
+        }
 
     if "--json" in sys.argv:
         format_json(steps, slice_log, version, handover)

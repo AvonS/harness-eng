@@ -44,6 +44,7 @@ actions:
     - identify_acceptance_criteria
   - write_spec: write spec.md including workflow_level, constraints.locked, state_classification, and technical decisions using templates/feature/spec.md
   - set_ref: PENDING
+  - regenerate_handover: python3 scripts/harness-status.py --regenerate
   - route: to /h:design if workflow_level != S, else to /h:build
 
 outputs:

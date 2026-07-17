@@ -39,6 +39,7 @@ actions:
     - run_required_evidence
     - run_existing_regression_suite
     - if evidence_fails: STOP, fix evidence failures
+    - regenerate_handover: python3 scripts/harness-status.py --regenerate
     - if evidence_passes: route to /h:verify if workflow_level == S, else to /h:review-pre-verify
 
 must_do:

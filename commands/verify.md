@@ -33,7 +33,7 @@ actions:
   - report_deferred_items: include a "Deferred Items" section in the verification output listing open items with IDs and destinations
   - write_verification (Release Ref: PENDING)
   - commit_verification
-  - regenerate_handover: write derived handover.yaml status after verify completes
+  - regenerate_handover: python3 scripts/harness-status.py --regenerate
   - route: to /h:release (human gate)
 
 must_do:
