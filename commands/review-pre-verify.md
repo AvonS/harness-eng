@@ -1,6 +1,6 @@
 ---
 name: harness-review-pre-verify
-description: Fresh-eyes review in isolated subagent context
+description: Fresh-eyes review in isolated subagent context (for M/L-level only; S bypasses this gate)
 persona: Sr Tech Lead
 subagent: true
 reason: Fresh-eyes review, completely isolated from the build process
