@@ -252,7 +252,7 @@ echo "   ✅ $DOC_COUNT docs verified"
 if [ "${SKIP_UNITTESTS:-}" = "1" ]; then
     echo "   ✅ CR-004 behavioral regression tests (skipped recursively)"
 else
-    echo "CR-004: Running Python behavioral regression tests..."
+    echo "CR-004: Running Python behavioral regression tests (including test_harness_light_policy.py)..."
     if ! python3 -m unittest discover -v "$HARNESS_DIR/tests" 2>&1 | tail -5; then
         echo "❌ FAIL: CR-004 behavioral regression tests failed"
         ERRORS=$((ERRORS + 1))
