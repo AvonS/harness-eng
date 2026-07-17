@@ -245,5 +245,56 @@ testing_level: L
                 migrate_harness.HARNESS_DIR = orig_harness_dir
 
 
+    def test_migrate_harness_removes_deprecated_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            harness_dir = root / ".harness-eng"
+            harness_dir.mkdir()
+            
+            # Setup migration-consent.yaml
+            (harness_dir / "migration-consent.yaml").write_text(
+                "migration_policy_accepted: true\n"
+                "in_flight_slices_acknowledged: true\n",
+                encoding="utf-8"
+            )
+            
+            # Mock migration decision already exists to skip interactive prompt
+            migration_dir = harness_dir / "migration"
+            migration_dir.mkdir()
+            (migration_dir / "workflow-level-20260717.yaml").write_text("decision: approved\n", encoding="utf-8")
+            
+            # Setup commands folder
+            commands_dir = harness_dir / "commands"
+            commands_dir.mkdir()
+            
+            # Create a standard command file and a deprecated command file
+            (commands_dir / "build.md").write_text("standard build\n", encoding="utf-8")
+            (commands_dir / "health.md").write_text("deprecated health\n", encoding="utf-8")
+            (commands_dir / "unknown-cmd.md").write_text("unknown command\n", encoding="utf-8")
+            
+            # Temporarily redirect HARNESS_DIR in migrate_harness
+            orig_harness_dir = migrate_harness.HARNESS_DIR
+            migrate_harness.HARNESS_DIR = harness_dir
+            
+            try:
+                # Call apply action
+                import sys as sys_orig
+                orig_argv = sys_orig.argv
+                sys_orig.argv = ["migrate-harness.py", "apply"]
+                try:
+                    migrate_harness.main()
+                finally:
+                    sys_orig.argv = orig_argv
+                
+                # Check build.md remains intact
+                self.assertTrue((commands_dir / "build.md").is_file())
+                
+                # Check health.md and unknown-cmd.md are removed
+                self.assertFalse((commands_dir / "health.md").is_file())
+                self.assertFalse((commands_dir / "unknown-cmd.md").is_file())
+            finally:
+                migrate_harness.HARNESS_DIR = orig_harness_dir
+
+
 if __name__ == "__main__":
     unittest.main()

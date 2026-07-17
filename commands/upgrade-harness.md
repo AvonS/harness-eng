@@ -76,7 +76,6 @@ actions:
   - append_slice_log: record the upgrade and the new version in .harness-eng/SLICE_LOG.md
   - report: list of updated files
   - commit: "chore: upgrade harness-eng to latest"
-  - run_health_check: run /h:health to verify the project is healthy post-upgrade
 
 must_do:
   - Execute the fetched canonical upgrade contract instead of the installed local copy

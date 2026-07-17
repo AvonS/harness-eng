@@ -152,7 +152,7 @@ release_policy:
 
 | Logical Role | Commands Managed | File-Based Agent Definition | Responsibility & Context |
 |--------------|------------------|-----------------------------|--------------------------|
-| **Manager** | `/h:init`, `/h:upgrade-harness`, `/h:health`, `/h:status` | *None (Parent Context)* | Orchestrates the workflow execution, manages the subagent invocation loop, and checks status/quality gates. Run directly in the main/parent shell. |
+| **Manager** | `/h:init`, `/h:upgrade-harness`, `/h:status` | *None (Parent Context)* | Orchestrates the workflow execution, manages the subagent invocation loop, and checks status/quality gates. Run directly in the main/parent shell. |
 | **Analyst** | `/h:triage`, `/h:bug`, `/h:define`, `/h:design` | `agents/collaborator/agent.md` | Explores problem space, triages requests, drafts feature specifications (`spec.md`), and architectures designs (`design.md`). |
 | **Sr Architect** | `/h:review-pre-build` | `agents/sr-architect/agent.md` | Audits proposed design documents against the BRD and project constitution before the design is presented for human approval. |
 | **Developer** | `/h:tasks`, `/h:build` | `agents/developer/agent.md` | Breaks the approved design into tasks and implements against its approved Evidence Contract. |

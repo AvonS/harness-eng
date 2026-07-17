@@ -175,6 +175,24 @@ def main():
         status_dir = HARNESS_DIR / "status"
         status_dir.mkdir(parents=True, exist_ok=True)
         print(f"Created directory: {status_dir}")
+        
+        # Remove deprecated commands
+        commands_dir = HARNESS_DIR / "commands"
+        if commands_dir.is_dir():
+            standard_commands = {
+                "approve.md", "bug.md", "build.md", "change.md", "define.md",
+                "design.md", "init.md", "migrate-harness.md", "release.md",
+                "review-pre-build.md", "review-pre-verify.md", "status.md",
+                "tasks.md", "triage.md", "upgrade-harness.md", "verify.md"
+            }
+            for cmd_file in commands_dir.iterdir():
+                if cmd_file.is_file() and cmd_file.name not in standard_commands:
+                    try:
+                        cmd_file.unlink()
+                        print(f"Removed deprecated command: {cmd_file.name}", file=sys.stderr)
+                    except Exception as e:
+                        print(f"Warning: failed to remove deprecated command {cmd_file.name}: {e}", file=sys.stderr)
+
         print("Migration applied successfully.")
     elif action == "status":
         consent_file = HARNESS_DIR / "migration-consent.yaml"
