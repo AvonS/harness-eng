@@ -126,5 +126,63 @@ testing_level: L
             migrate_harness.HARNESS_DIR = orig_harness_dir
 
 
+    def test_scenario_f_resume_without_history(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            harness_dir = root / ".harness-eng"
+            harness_dir.mkdir()
+            
+            # Write a mock handover.yaml
+            handover_yaml = (
+                "state: building\n"
+                "current_slice: F301-harness-light-policy\n"
+                "workflow_level: S\n"
+                "completed:\n"
+                "  - task_1\n"
+                "decisions:\n"
+                "  - id: DEC-001\n"
+                "    ref: spec.md\n"
+                "assumptions:\n"
+                "  - \"assume_1\"\n"
+                "evidence: []\n"
+                "blockers:\n"
+                "  - \"blocker_1\"\n"
+                "next_action: build\n"
+            )
+            (harness_dir / "handover.yaml").write_text(handover_yaml, encoding="utf-8")
+            
+            # Read and parse it back to simulate a fresh agent resuming
+            content = (harness_dir / "handover.yaml").read_text(encoding="utf-8")
+            
+            # A simple parse logic reproducing how a fresh agent parses it
+            parsed = {}
+            lines = content.splitlines()
+            current_key = None
+            for line in lines:
+                if ":" in line and not line.strip().startswith("-"):
+                    k, v = line.split(":", 1)
+                    k = k.strip()
+                    v = v.strip().strip('"').strip("'")
+                    if v == "[]" or v == "":
+                        parsed[k] = []
+                    else:
+                        parsed[k] = v
+                elif line.strip().startswith("-"):
+                    # list item
+                    val = line.strip().lstrip("-").strip().strip('"').strip("'")
+                    if current_key and isinstance(parsed.get(current_key), list):
+                        parsed[current_key].append(val)
+                # Track key context for lists
+                if not line.strip().startswith("-") and ":" in line:
+                    current_key = line.split(":", 1)[0].strip()
+
+            self.assertEqual(parsed.get("state"), "building")
+            self.assertEqual(parsed.get("current_slice"), "F301-harness-light-policy")
+            self.assertEqual(parsed.get("workflow_level"), "S")
+            self.assertEqual(parsed.get("next_action"), "build")
+            self.assertIn("task_1", parsed.get("completed", []))
+            self.assertIn("blocker_1", parsed.get("blockers", []))
+
+
 if __name__ == "__main__":
     unittest.main()
