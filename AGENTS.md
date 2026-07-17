@@ -133,6 +133,8 @@ User intent selects the desired outcome. Harness state selects the next permitte
 11. **Append to `SLICE_LOG.md` on meaningful commits**
 12. **Triage first** — classify incoming requests (bug/CR/feature/deferred)
 13. **Never release without explicit human approval.** Check `verification.md` for `Release Ref: APPROVED`
+14. **Enforce locked-intent and no-silent-technology substitutions.** If a user names a locked technology, library, model, strategy, data source, cost model, execution mode, or persistence mechanism: implement it or STOP and ask. Never silently substitute.
+15. **Use bounded delegation context packets.** Subagents receive only the task packet (objective, authorized read/write paths, constraints, evidence expectations, prohibited changes, stop conditions). History defaults to `none`. Full project history and constitution are not sent by default.
 
 ## Global Policy: The Ponytail Philosophy (YAGNI)
 
