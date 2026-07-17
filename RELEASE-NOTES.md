@@ -15,7 +15,7 @@
 - Made `/h:status` pure read-only observability with plain, JSON, and self-contained HTML renderer.
 - Implemented derived `handover.yaml` generation and lifecycle.
 - Created `change.md` unified bug/CR workflow alongside `bug.md`.
-- Implemented `/h:upgrade-harness` migration consent flow.
+- Implemented `/h:upgrade-harness` migration consent flow with interactive project inspection, S/M/L recommendation, user approval prompts, and yaml decision archiving.
 - Added E2E tests for Scenario A-F and resume-without-history validation.
 
 ---

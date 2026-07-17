@@ -247,6 +247,7 @@ Licensed under the GNU Affero General Public License v3.0 only (`AGPL-3.0-only`)
 
 ## Harness Migrations
 This version of `harness-eng` uses the `Foundry` lineage.
+When upgrading, the `/h:upgrade-harness` command performs a safe reclassification. It inspects the project layout, recommends an S/M/L workflow level with a concrete rationale, awaits explicit user approval, records the decision durably under `.harness-eng/migration/workflow-level-YYYYMMDD.yaml`, preserves active slices, and applies the new policy to future work.
 If you are upgrading from a legacy installation (v1 or unversioned), the `/h:upgrade-harness` command will automatically apply one-time migrations and preserve your state.
 
 ### Recovery
