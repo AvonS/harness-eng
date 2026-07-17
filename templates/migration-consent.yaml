@@ -1,0 +1,12 @@
+consent_id: "CONSENT-YYYYMMDD"
+project_name: "[PROJECT_NAME]"
+target_harness_version: "v0.3.0"
+consented_by: "[OPERATOR_NAME]"
+consented_at: "YYYY-MM-DDTHH:MM:SSZ"
+migration_policy_accepted: true
+in_flight_slices_acknowledged: true
+notes: >
+  By creating this artifact, the project owner consents to upgrading
+  harness-eng to the target version. Active in-flight slices are not
+  migrated mid-flight. Legacy structures are migrated in accordance
+  with the migration consent flow.
