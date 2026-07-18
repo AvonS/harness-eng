@@ -1,13 +1,13 @@
 ---
 name: harness-review-pre-verify
-description: Fresh-eyes review in isolated subagent context (for M/L-level only; S bypasses this gate)
+description: Manager-spawned fresh-eyes review in isolated subagent context (for M/L-level only; S bypasses this gate). Do not run directly.
 persona: Sr Tech Lead
 subagent: true
 reason: Fresh-eyes review, completely isolated from the build process
 delegation:
   capability: review
   outcome: Return a complete implementation-gap review with an explicit verdict
-  read_paths: [technology.yaml, .harness-eng/CONSTITUTION.md, active spec.md, active design.md, active tasks.md, changed paths, relevant installed skills]
+  read_paths: [technology.yaml, .harness-eng/CONSTITUTION.md, active spec.yaml (or spec.md), active design.md, active tasks.md, changed paths, relevant installed skills]
   write_authority: .harness-eng/reviews/active/review-pre-verify.md
   return_format: A concise success message (the report must be written directly to disk using the write tool)
   max_response: 2KB
@@ -16,10 +16,8 @@ delegation:
   persistence: Subagent writes the report directly to disk. Manager checks the verdict in the written file.
 
 gates:
-  - check: 'design.md "Ref: APPROVED"'
-    on_fail: STOP, route to design
-  - check: spec.md exists
-    on_fail: STOP, route to define (or /h:bug)
+  - check: spec.yaml (or spec.md) exists
+    on_fail: STOP, route to define (or /h:change)
   - check: all tasks complete
     on_fail: STOP, route to build
 

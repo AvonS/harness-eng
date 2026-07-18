@@ -1,9 +1,8 @@
 ---
 name: harness-review-pre-build
 description: >
-  Sr Architect pre-flight review. Checks gaps between project docs 
-  (PRD, BRD, constitution) and design BEFORE human approval.
-  This command is only required for M/L-level projects; skipped for S-level.
+  Sr Architect pre-flight review. Retired in v0.3.x. Kept for legacy compatibility only.
+  Managers do not invoke this command for new slices.
 
 persona: Sr Architect
 subagent: true

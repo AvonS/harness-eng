@@ -165,49 +165,45 @@ In quantitative strategy projects, unit tests are used only for risks that funct
 Profitability, ranking, accuracy, or return outcomes must be recorded for human evaluation; unit tests must not assert desired profit or minimum accuracy.
 
 ## Commands
-
+ 
 Read command files from `.harness-eng/commands/` and follow them. Users talk naturally — you read the files.
-
+ 
+### Five User-Facing Commands
+ 
 | Command | What happens | Gate |
 |---------|-------------|------|
-| `/h:init` | Scan docs, derive constitution/BRD/architecture, generate Phase 0 | — |
-| `/h:define` | Create feature spec from BRD. Large BRDs auto-organize into phases | — |
-| `/h:design` | Design architecture, interfaces, file layout | — |
-| `/h:approve` | **Human gate** — review design, approve or request changes | ✅ Human |
-| `/h:tasks` | Break design into granular tasks with dependencies | — |
-| `/h:review-pre-build` | **Agent gate** — Sr Architect review, classify findings as blocker or deferred | ✅ Agent |
-| `/h:build` | Implement against the approved Evidence Contract — one commit per task | — |
-| `/h:review-pre-verify` | **Agent gate** — Sr Tech Lead review, reconcile pre-verify deferred items | ✅ Agent |
-| `/h:verify` | Run tests, check acceptance criteria, report deferred items separately | — |
-| `/h:release` | **Human gate** — disclose deferred items, approve, merge, archive, refresh handover | ✅ Human |
-| `/h:upgrade-harness` | Fetch the latest command from `https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md`; execute the fetched contract, never the installed copy | — |
-| `/h:status` | Print project status including deferred item counts | — |
-
-## Three Gates
-
-The harness enforces three critical gates. You MUST stop at each gate and wait for approval.
-
-1. **Design approval** (Human) — `/h:approve`
-   - **When**: After design.md is created
-   - **Gate**: design.md must have `Ref: APPROVED`
-   - **Action**: Present design to human, wait for approval
-   - **Cannot proceed** until human approves
-   - **Deferred items**: Editorial amendments route to deferred.md without resetting Ref: APPROVED
-
-2. **Agent review** (Agent) — `/h:review-pre-verify`
-   - **When**: After build is complete
+| `/h:define` | Create slice contract (spec.yaml) from BRD. Design/tasks are internalised. | — |
+| `/h:build` | Implement against approved Evidence Contract — one commit per task | — |
+| `/h:verify` | Run tests, check acceptance criteria, fill verify/slice.yaml | — |
+| `/h:change` | Unified bug and CR workflow: baseline → implement smallest delta → verify | — |
+| `/h:status` | Read-only project status snapshot — no tests, no network, no mutations | — |
+ 
+### Infrequent and Internal Commands
+ 
+| Command | What happens | Gate |
+|---------|-------------|------|
+| `/h:init` | Scan docs, derive project.yaml, plan.yaml, constitution | — |
+| `/h:release` | **Human gate** — disclose deferred, approve, merge, archive feature | ✅ Human |
+| `/h:upgrade-harness` | Fetch and execute upgrade contract | — |
+| `review-pre-verify` | **Agent gate** — Sr Tech Lead review of build vs spec (Manager-spawned) | ✅ Agent |
+ 
+## Two Gates
+ 
+The harness enforces two active gates. You MUST stop at each gate and wait for approval.
+ 
+1. **Agent review** (Agent) — `review-pre-verify`
+   - **When**: After build is complete (skipped for S-level)
    - **Gate**: review-pre-verify.md must have `Ref: APPROVED`
-   - **Action**: Review code against design, verify all requirements met
+   - **Action**: Review code against spec.yaml, verify all requirements met
    - **Cannot proceed** until review passes
    - **Deferred items**: Non-blocker findings are deferred to ledger, not routed backward
-
-3. **Release approval** (Human) — `/h:release`
+ 
+2. **Release approval** (Human) — `/h:release`
    - **When**: After verification passes
-   - **Gate**: verification.md must have `Release Ref: APPROVED`
-   - **Action**: Present verification report and deferred items to human, wait for approval, then mark verification approved and complete the release state transition
+   - **Gate**: verify/slice.yaml (or verification.md) must have `Release Ref: APPROVED`
+   - **Action**: Present verification report and deferred items to human, wait for approval, then complete release
    - **Cannot proceed** until human approves
-   - **Deferred items**: Open deferred items are disclosed but do not block. Only promoted-to-blocker items block release.
-
+ 
 **Why gates matter**: They prevent you from proceeding without explicit approval. This is the external accountability that catches blind spots.
 
 ## How to Resume a Session
@@ -220,13 +216,12 @@ The harness enforces three critical gates. You MUST stop at each gate and wait f
 After a release, confirm `.harness-eng/handover.yaml` is regenerated and no longer points to the archived phase or feature.
 
 ## Bugs and Change Requests
-
-For bugs or CRs, read `.harness-eng/commands/bug.md`:
-
+ 
+For bugs or CRs, read `.harness-eng/commands/change.md`:
+ 
 | Type | Branch | Workflow |
 |------|--------|----------|
-| **Bug** | `bugfix/BUG-NNN-<slug>` | Skip design, write regression test first |
-| **CR** | `cr/CR-NNN-<slug>` | Simplified spec + approval |
+| **Change** | `change/CHG-NNN-<slug>` | Create CHG-NNN.yaml, characterize baseline, implement smallest delta, verify affected flow |
 
 ## Skill Improvement
 
@@ -319,16 +314,15 @@ Each command runs in an isolated subagent context with a specific persona:
 4. **Prevents mode confusion**: Developer doesn't try to design, Analyst doesn't implement
 5. **Maintains discipline**: Subagents follow strict rules, Manager enforces gates
 
-### Bug/CR Workflow
-
+### Change Workflow
+ 
 For bugs and change requests, the workflow is streamlined:
-
+ 
 | Type | Branch | Subagent Flow |
 |------|--------|---------------|
-| **Bug** | `bugfix/BUG-NNN-<slug>` | Manager → Analyst (simplified spec) → Developer (tasks) → Developer (regression test + fix) → Gatekeeper (verify) |
-| **CR** | `cr/CR-NNN-<slug>` | Manager → Analyst (simplified spec + approval) → Developer → Developer → Gatekeeper |
-
-Both skip the full design cycle but retain approval gates and a proportionate Evidence Contract.
+| **Change** | `change/CHG-NNN-<slug>` | Manager → Developer (baseline + worktree) → Developer (smallest delta) → Gatekeeper (verify) |
+ 
+Both skip the full design/tasks cycle and pre-build approval gates, using one change record (CHG-NNN.yaml) and focused evidence verification.
 
 ### Migration and Legacy Support
 The harness supports versioned migrations for internal data structures (.harness-eng/manifest.json).

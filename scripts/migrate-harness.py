@@ -326,10 +326,10 @@ def main():
         commands_dir = HARNESS_DIR / "commands"
         if commands_dir.is_dir():
             standard_commands = {
-                "approve.md", "bug.md", "build.md", "change.md", "define.md",
+                "approve.md", "build.md", "change.md", "define.md",
                 "design.md", "init.md", "migrate-harness.md", "release.md",
                 "review-pre-build.md", "review-pre-verify.md", "status.md",
-                "tasks.md", "triage.md", "upgrade-harness.md", "verify.md"
+                "tasks.md", "upgrade-harness.md", "verify.md"
             }
             for cmd_file in commands_dir.iterdir():
                 if cmd_file.is_file() and cmd_file.name not in standard_commands:
