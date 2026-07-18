@@ -206,6 +206,7 @@ testing_level: L
 
             # Test approval flow
             os.environ["HARNESS_MIGRATION_APPROVED"] = "y"
+            os.environ["HARNESS_MIGRATION_CURRENT_APPROVED"] = "n"
             try:
                 migrate_harness.inspect_and_confirm_migration()
 
@@ -228,6 +229,7 @@ testing_level: L
                 self.assertIn("- chore: project migrated to v0.3.0, workflow level M approved for future slices", slice_log_content)
             finally:
                 os.environ.pop("HARNESS_MIGRATION_APPROVED", None)
+                os.environ.pop("HARNESS_MIGRATION_CURRENT_APPROVED", None)
 
             # Test rejection flow
             os.environ["HARNESS_MIGRATION_APPROVED"] = "n"
@@ -242,6 +244,7 @@ testing_level: L
                 self.assertIn("- chore: migration recommended, not approved", slice_log_content)
             finally:
                 os.environ.pop("HARNESS_MIGRATION_APPROVED", None)
+                os.environ.pop("HARNESS_MIGRATION_CURRENT_APPROVED", None)
                 migrate_harness.HARNESS_DIR = orig_harness_dir
 
 
@@ -250,32 +253,32 @@ testing_level: L
             root = Path(td)
             harness_dir = root / ".harness-eng"
             harness_dir.mkdir()
-            
+
             # Setup migration-consent.yaml
             (harness_dir / "migration-consent.yaml").write_text(
                 "migration_policy_accepted: true\n"
                 "in_flight_slices_acknowledged: true\n",
                 encoding="utf-8"
             )
-            
+
             # Mock migration decision already exists to skip interactive prompt
             migration_dir = harness_dir / "migration"
             migration_dir.mkdir()
             (migration_dir / "workflow-level-20260717.yaml").write_text("decision: approved\n", encoding="utf-8")
-            
+
             # Setup commands folder
             commands_dir = harness_dir / "commands"
             commands_dir.mkdir()
-            
+
             # Create a standard command file and a deprecated command file
             (commands_dir / "build.md").write_text("standard build\n", encoding="utf-8")
             (commands_dir / "health.md").write_text("deprecated health\n", encoding="utf-8")
             (commands_dir / "unknown-cmd.md").write_text("unknown command\n", encoding="utf-8")
-            
+
             # Temporarily redirect HARNESS_DIR in migrate_harness
             orig_harness_dir = migrate_harness.HARNESS_DIR
             migrate_harness.HARNESS_DIR = harness_dir
-            
+
             try:
                 # Call apply action
                 import sys as sys_orig
@@ -285,15 +288,39 @@ testing_level: L
                     migrate_harness.main()
                 finally:
                     sys_orig.argv = orig_argv
-                
+
                 # Check build.md remains intact
                 self.assertTrue((commands_dir / "build.md").is_file())
-                
+
                 # Check health.md and unknown-cmd.md are removed
                 self.assertFalse((commands_dir / "health.md").is_file())
                 self.assertFalse((commands_dir / "unknown-cmd.md").is_file())
             finally:
                 migrate_harness.HARNESS_DIR = orig_harness_dir
+
+
+    def test_update_spec_workflow_level(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            spec_file = root / "spec.md"
+
+            # Case 1: spec has no existing workflow_level field
+            spec_content = "---\ntitle: test spec\n---\nbody text\n"
+            spec_file.write_text(spec_content, encoding="utf-8")
+
+            migrate_harness.update_spec_workflow_level(spec_file, "S")
+            updated = spec_file.read_text(encoding="utf-8")
+            self.assertIn("workflow_level: S", updated)
+            self.assertIn("title: test spec", updated)
+
+            # Case 2: spec already has workflow_level field
+            spec_content_2 = "---\ntitle: test spec\nworkflow_level: M/L\n---\nbody text\n"
+            spec_file.write_text(spec_content_2, encoding="utf-8")
+
+            migrate_harness.update_spec_workflow_level(spec_file, "M")
+            updated_2 = spec_file.read_text(encoding="utf-8")
+            self.assertIn("workflow_level: M", updated_2)
+            self.assertNotIn("workflow_level: M/L", updated_2)
 
 
 if __name__ == "__main__":

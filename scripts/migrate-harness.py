@@ -47,6 +47,11 @@ def validate_consent(consent: dict):
 
 
 def ask_user_confirmation(prompt: str) -> bool:
+    if "active slice" in prompt.lower() or "current slice" in prompt.lower():
+        if os.environ.get("HARNESS_MIGRATION_CURRENT_APPROVED") == "y":
+            return True
+        if os.environ.get("HARNESS_MIGRATION_CURRENT_APPROVED") == "n":
+            return False
     if os.environ.get("HARNESS_MIGRATION_APPROVED") == "y":
         return True
     if os.environ.get("HARNESS_MIGRATION_APPROVED") == "n":
@@ -57,6 +62,34 @@ def ask_user_confirmation(prompt: str) -> bool:
         return response in ("y", "yes")
     except Exception:
         return False
+
+
+def update_spec_workflow_level(spec_path: Path, level: str):
+    if not spec_path.is_file():
+        return
+    try:
+        content = spec_path.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        frontmatter_indices = []
+        for idx, line in enumerate(lines):
+            if line.strip() == "---":
+                frontmatter_indices.append(idx)
+
+        if len(frontmatter_indices) >= 2:
+            start, end = frontmatter_indices[0], frontmatter_indices[1]
+            fm_lines = lines[start+1:end]
+            has_wl = False
+            for idx_fm, fm_line in enumerate(fm_lines):
+                if fm_line.strip().startswith("workflow_level:"):
+                    fm_lines[idx_fm] = f"workflow_level: {level}"
+                    has_wl = True
+                    break
+            if not has_wl:
+                fm_lines.append(f"workflow_level: {level}")
+            lines = lines[:start+1] + fm_lines + lines[end:]
+            spec_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    except Exception as e:
+        print(f"Warning: failed to update spec.md workflow level: {e}", file=sys.stderr)
 
 
 def inspect_and_confirm_migration():
@@ -76,6 +109,7 @@ def inspect_and_confirm_migration():
         version_str = version_file.read_text(encoding="utf-8").strip()
 
     active_slice = "None"
+    active_spec_path = None
     # Look for active slices
     phases_dir = HARNESS_DIR / "phases" / "active"
     if phases_dir.is_dir():
@@ -86,6 +120,9 @@ def inspect_and_confirm_migration():
                     for f in features_dir.iterdir():
                         if f.is_dir():
                             active_slice = f.name
+                            spec_file = f / "spec.md"
+                            if spec_file.is_file():
+                                active_spec_path = spec_file
                             break
 
     # 3. Recommend M with concrete rationale
@@ -108,6 +145,11 @@ def inspect_and_confirm_migration():
     slice_log = HARNESS_DIR / "SLICE_LOG.md"
 
     if approved:
+        # Ask if active slice should also be migrated if one exists
+        apply_to_current = False
+        if active_spec_path:
+            apply_to_current = ask_user_confirmation(f"Do you want to apply workflow level M to the active slice ({active_slice}) as well? (y/n): ")
+
         # Create directory
         migration_dir.mkdir(parents=True, exist_ok=True)
         date_str = datetime.now().strftime("%Y%m%d")
@@ -127,11 +169,15 @@ approved_level: M
 approval: approved
 rationale: Recommended M-level fits project profile
 applies_to:
-  current_slice: false
+  current_slice: {"true" if apply_to_current else "false"}
   future_slices: true
-notes: Active slice {active_slice} preserved on previous workflow.
+notes: Active slice {active_slice} {"migrated to level M" if apply_to_current else "preserved on previous workflow"}.
 """
         target_yaml.write_text(yaml_content, encoding="utf-8")
+
+        if apply_to_current and active_spec_path:
+            update_spec_workflow_level(active_spec_path, "M")
+            print(f"Updated active spec workflow_level to M in {active_spec_path}", file=sys.stderr)
 
         # Append to SLICE_LOG.md
         if slice_log.is_file():
@@ -175,7 +221,7 @@ def main():
         status_dir = HARNESS_DIR / "status"
         status_dir.mkdir(parents=True, exist_ok=True)
         print(f"Created directory: {status_dir}")
-        
+
         # Remove deprecated commands
         commands_dir = HARNESS_DIR / "commands"
         if commands_dir.is_dir():
