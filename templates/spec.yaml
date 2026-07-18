@@ -1,0 +1,66 @@
+# Unified slice contract. Replaces spec.md + design.md + tasks.md.
+metadata:
+  id: F101
+  name: "Feature/Slice Name"
+  workflow_level: "S" # S | M | L (absent defaults to M/L)
+  state: "active" # active | review-pending | building | verification-pending | resolved | archived
+  created_at: "YYYY-MM-DD"
+state_classification:
+  model_state:
+    - name: "Model/Data Entity"
+      description: "Description"
+  operational_state:
+    - name: "Operational state"
+      description: "Description"
+  curated_state:
+    - name: "Curated state"
+      description: "Description"
+  external_authoritative_state:
+    - name: "External state"
+      description: "Description"
+constraints:
+  locked:
+    - id: CON-001
+      constraint: "Constraint description"
+      rationale: "Why this constraint is locked"
+stories:
+  - id: ST-001
+    as_a: "User type"
+    i_want_to: "Perform action"
+    so_that: "Achieve value"
+    acceptance_criteria:
+      - "Criterion 1"
+functional_requirements:
+  - id: FR-001
+    requirement: "Requirement description"
+    priority: "P1"
+architecture:
+  component_map:
+    - name: "Component Name"
+      role: "Component Role"
+      interaction: "How it interacts"
+  file_layout:
+    - path: "path/to/file"
+      action: "modify | create"
+      description: "Description of changes"
+tasks:
+  - id: T1.1
+    task: "Task description"
+    dependencies: []
+    status: "pending" # pending | completed
+evidence_contract:
+  scenarios:
+    - id: SC-001
+      scenario: "Scenario description"
+      expected: "Expected output/behavior"
+  unit_tests:
+    - path: "path/to/test"
+      invariant: "Invariant to prove"
+decisions:
+  - id: DEC-001
+    decision: "Technical decision description"
+    rationale: "Why this choice was made"
+deferred:
+  - id: DEF-001
+    finding: "Finding description"
+    destination: "backlog | next-change"

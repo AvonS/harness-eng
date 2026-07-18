@@ -13,7 +13,9 @@ def active_artifacts(harness: Path, filename: str) -> list[Path]:
 
 
 def active_feature_dirs(harness: Path) -> list[Path]:
-    return [path.parent for path in active_artifacts(harness, "spec.md")]
+    dirs = [path.parent for path in active_artifacts(harness, "spec.md")]
+    dirs.extend([path.parent for path in active_artifacts(harness, "spec.yaml")])
+    return sorted(list(set(dirs)))
 
 
 def archived_item_count(harness: Path) -> int:

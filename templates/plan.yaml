@@ -1,0 +1,10 @@
+# Two-resolution milestone plan. Regenerated automatically; do NOT edit manually.
+phases:
+  - id: PHASE-01
+    name: "Phase Name"
+    status: "active" # active | pending | completed
+    slices:
+      - id: F101
+        name: "Slice/Feature Name"
+        status: "active" # active | pending | completed | archived
+        resolution: "detailed" # detailed | summary

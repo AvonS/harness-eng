@@ -15,7 +15,7 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from harness_layout import active_artifacts, archived_item_count
+from harness_layout import active_artifacts, archived_item_count, active_feature_dirs
 
 HARNESS_DIR = Path(".harness-eng")
 
@@ -974,7 +974,120 @@ def format_json(steps: list[dict], slice_log: dict, version: dict, handover: dic
     print(json.dumps(output, indent=2, default=str))
 
 
+def ensure_compiled_policy():
+    project_yaml = HARNESS_DIR / "project.yaml"
+    if not project_yaml.is_file():
+        import hashlib
+        locked_constraints = []
+        tech_stack = []
+        constitution_content = ""
+        constitution_file = HARNESS_DIR / "CONSTITUTION.md"
+        if constitution_file.is_file():
+            constitution_content = constitution_file.read_text(encoding="utf-8")
+            
+        const_hash = hashlib.sha256(constitution_content.encode("utf-8")).hexdigest() if constitution_content else "unknown"
+        
+        tech_file = HARNESS_DIR / "technology.yaml"
+        if tech_file.is_file():
+            try:
+                for line in tech_file.read_text(encoding="utf-8").splitlines():
+                    if "-" in line and not line.strip().startswith("#"):
+                        tech_stack.append(line.split("-", 1)[1].strip())
+            except Exception:
+                pass
+        if not tech_stack:
+            tech_stack = ["Python", "Git"]
+            
+        yaml_content = f"""project_name: "harness-eng"
+locked_constraints: []
+constitution_hash: "{const_hash}"
+workflow_default: "M/L"
+technology_stack:
+"""
+        for tech in tech_stack:
+            yaml_content += f"  - \"{tech}\"\n"
+            
+        project_yaml.write_text(yaml_content, encoding="utf-8")
+        eprint(f"Generated {project_yaml} from CONSTITUTION.md")
+
+
+def ensure_plan():
+    plan_yaml = HARNESS_DIR / "plan.yaml"
+    if not plan_yaml.is_file():
+        phases = []
+        phases_file = HARNESS_DIR / "PHASES.md"
+        if phases_file.is_file():
+            content = phases_file.read_text(encoding="utf-8")
+            current_phase = None
+            for line in content.splitlines():
+                if line.startswith("# Phase") or line.startswith("## Phase"):
+                    phase_name = line.lstrip("#").strip()
+                    current_phase = {
+                        "id": f"PHASE-{len(phases)+1:02d}",
+                        "name": phase_name,
+                        "status": "pending",
+                        "slices": []
+                    }
+                    phases.append(current_phase)
+                elif line.strip().startswith("-") and current_phase is not None:
+                    slice_name = line.strip().lstrip("-").strip()
+                    current_phase["slices"].append({
+                        "id": f"F{len(phases)}0{len(current_phase['slices'])+1}",
+                        "name": slice_name,
+                        "status": "pending",
+                        "resolution": "summary"
+                    })
+        
+        if not phases:
+            phases = [{
+                "id": "PHASE-01",
+                "name": "Phase 1: Foundation",
+                "status": "active",
+                "slices": []
+            }]
+            
+        active_dirs = active_feature_dirs(HARNESS_DIR)
+        for d in active_dirs:
+            found = False
+            for p in phases:
+                for s in p["slices"]:
+                    if s["id"] == d.name:
+                        s["status"] = "active"
+                        s["resolution"] = "detailed"
+                        p["status"] = "active"
+                        found = True
+                        break
+            if not found:
+                phases[0]["slices"].append({
+                    "id": d.name,
+                    "name": d.name,
+                    "status": "active",
+                    "resolution": "detailed"
+                })
+                phases[0]["status"] = "active"
+                
+        yaml_lines = ["phases:"]
+        for p in phases:
+            yaml_lines.append(f"  - id: {p['id']}")
+            yaml_lines.append(f"    name: \"{p['name']}\"")
+            yaml_lines.append(f"    status: {p['status']}")
+            if not p["slices"]:
+                yaml_lines.append("    slices: []")
+            else:
+                yaml_lines.append("    slices:")
+                for s in p["slices"]:
+                    yaml_lines.append(f"      - id: {s['id']}")
+                    yaml_lines.append(f"        name: \"{s['name']}\"")
+                    yaml_lines.append(f"        status: {s['status']}")
+                    yaml_lines.append(f"        resolution: {s['resolution']}")
+                    
+        plan_yaml.write_text("\n".join(yaml_lines) + "\n", encoding="utf-8")
+        eprint(f"Generated {plan_yaml}")
+
+
 def main():
+    ensure_compiled_policy()
+    ensure_plan()
     steps = get_step_statuses()
     slice_log = check_slice_log_freshness()
     version = check_version()

@@ -322,6 +322,32 @@ testing_level: L
             self.assertIn("workflow_level: M", updated_2)
             self.assertNotIn("workflow_level: M/L", updated_2)
 
+    def test_merge_triplet_to_spec_yaml(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            feature_dir = Path(td)
+            spec_file = feature_dir / "spec.md"
+            design_file = feature_dir / "design.md"
+            tasks_file = feature_dir / "tasks.md"
+
+            spec_file.write_text("---\nworkflow_level: S\nstatus: active\n---\nSpec body text\n", encoding="utf-8")
+            design_file.write_text("Design body text\n", encoding="utf-8")
+            tasks_file.write_text("- [ ] Task 1\n", encoding="utf-8")
+
+            migrate_harness.merge_triplet_to_spec_yaml(feature_dir)
+
+            target_yaml = feature_dir / "spec.yaml"
+            self.assertTrue(target_yaml.is_file())
+            self.assertFalse(spec_file.exists())
+            self.assertFalse(design_file.exists())
+            self.assertFalse(tasks_file.exists())
+
+            yaml_content = target_yaml.read_text(encoding="utf-8")
+            self.assertIn("workflow_level: S", yaml_content)
+            self.assertIn("state: active", yaml_content)
+            self.assertIn("Spec body text", yaml_content)
+            self.assertIn("Design body text", yaml_content)
+            self.assertIn("Task 1", yaml_content)
+
 
 if __name__ == "__main__":
     unittest.main()

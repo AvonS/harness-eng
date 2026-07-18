@@ -186,7 +186,7 @@ notes: Active slice {active_slice} {"migrated to level M" if apply_to_current el
                 slice_log.write_text(log_content.rstrip() + f"\n- chore: project migrated to v0.3.0, workflow level M approved for future slices\n", encoding="utf-8")
             except Exception:
                 pass
-        print(f"Recorded migration decision at {target_yaml}", file=sys.stderr)
+            print(f"Recorded migration decision at {target_yaml}", file=sys.stderr)
     else:
         # Rejected
         if slice_log.is_file():
@@ -197,6 +197,106 @@ notes: Active slice {active_slice} {"migrated to level M" if apply_to_current el
                 pass
         print("Migration to workflow level M rejected. Leaving lifecycle behavior unchanged.", file=sys.stderr)
         sys.exit(1)
+
+
+def merge_triplet_to_spec_yaml(feature_dir: Path):
+    spec_path = feature_dir / "spec.md"
+    design_path = feature_dir / "design.md"
+    tasks_path = feature_dir / "tasks.md"
+    
+    spec_content = spec_path.read_text(encoding="utf-8") if spec_path.is_file() else ""
+    design_content = design_path.read_text(encoding="utf-8") if design_path.is_file() else ""
+    tasks_content = tasks_path.read_text(encoding="utf-8") if tasks_path.is_file() else ""
+    
+    metadata = {
+        "id": feature_dir.name,
+        "name": feature_dir.name,
+        "workflow_level": "M/L",
+        "state": "active",
+        "created_at": datetime.now().strftime("%Y-%m-%d")
+    }
+    
+    for line in spec_content.splitlines():
+        if "workflow level" in line.lower() or "workflow_level" in line.lower():
+            if "s" in line.lower():
+                metadata["workflow_level"] = "S"
+            elif "m" in line.lower():
+                metadata["workflow_level"] = "M"
+            elif "l" in line.lower():
+                metadata["workflow_level"] = "L"
+        if "status" in line.lower() and ":" in line:
+            parts = line.split(":", 1)
+            metadata["state"] = parts[1].strip().lower()
+
+    yaml_lines = [
+        "metadata:",
+        f"  id: {metadata['id']}",
+        f"  name: \"{metadata['name']}\"",
+        f"  workflow_level: {metadata['workflow_level']}",
+        f"  state: {metadata['state']}",
+        f"  created_at: \"{metadata['created_at']}\"",
+        "state_classification:",
+        "  model_state: []",
+        "  operational_state: []",
+        "  curated_state: []",
+        "  external_authoritative_state: []",
+        "constraints:",
+        "  locked: []",
+        "stories: |"
+    ]
+    
+    for line in spec_content.splitlines():
+        yaml_lines.append("  " + line)
+        
+    yaml_lines.append("architecture: |")
+    for line in design_content.splitlines():
+        yaml_lines.append("  " + line)
+        
+    yaml_lines.append("tasks: |")
+    for line in tasks_content.splitlines():
+        yaml_lines.append("  " + line)
+
+    yaml_lines.append("evidence_contract:")
+    yaml_lines.append("  scenarios: []")
+    yaml_lines.append("  unit_tests: []")
+    
+    target_yaml = feature_dir / "spec.yaml"
+    target_yaml.write_text("\n".join(yaml_lines) + "\n", encoding="utf-8")
+    
+    if target_yaml.is_file():
+        if spec_path.is_file(): spec_path.unlink()
+        if design_path.is_file(): design_path.unlink()
+        if tasks_path.is_file(): tasks_path.unlink()
+        print(f"Merged spec.md + design.md + tasks.md into spec.yaml in {feature_dir}", file=sys.stderr)
+
+
+def migrate_markdown_triplets():
+    # Search both .harness-eng/specs/active/* and .harness-eng/phases/active/*/features/active/*
+    search_dirs = [
+        HARNESS_DIR / "specs" / "active",
+        HARNESS_DIR / "phases" / "active"
+    ]
+    candidate_dirs = []
+    
+    for s_dir in search_dirs:
+        if not s_dir.is_dir():
+            continue
+        if s_dir.name == "active" and s_dir.parent.name == "specs":
+            for f in s_dir.iterdir():
+                if f.is_dir() and (f / "spec.md").is_file():
+                    candidate_dirs.append(f)
+        elif s_dir.name == "active" and s_dir.parent.name == "phases":
+            for p in s_dir.iterdir():
+                if p.is_dir():
+                    features_dir = p / "features" / "active"
+                    if features_dir.is_dir():
+                        for f in features_dir.iterdir():
+                            if f.is_dir() and (f / "spec.md").is_file():
+                                candidate_dirs.append(f)
+                                
+    for c_dir in candidate_dirs:
+        if ask_user_confirmation(f"Do you approve migrating {c_dir.name} spec/design/tasks to spec.yaml? (y/n): "):
+            merge_triplet_to_spec_yaml(c_dir)
 
 
 def main():
@@ -238,6 +338,10 @@ def main():
                         print(f"Removed deprecated command: {cmd_file.name}", file=sys.stderr)
                     except Exception as e:
                         print(f"Warning: failed to remove deprecated command {cmd_file.name}: {e}", file=sys.stderr)
+
+        # Migrate legacy spec.md/design.md/tasks.md triplets
+        print("Checking for legacy markdown specs to migrate...")
+        migrate_markdown_triplets()
 
         print("Migration applied successfully.")
     elif action == "status":

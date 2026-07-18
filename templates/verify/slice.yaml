@@ -1,0 +1,10 @@
+# Verification evidence record for one slice or change.
+slice_id: "F101"
+evidence_contract_ref: "spec.yaml"
+results:
+  - id: SC-001
+    result: "pass" # pass | fail
+    evidence_path: "path/to/evidence/log"
+recorded_at: "ISO-8601-timestamp"
+config_hash: "sha256_hash_of_project_config"
+environment_hash: "sha256_hash_of_environment_lockfile"
