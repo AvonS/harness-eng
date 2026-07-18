@@ -208,10 +208,11 @@ The harness enforces two active gates. You MUST stop at each gate and wait for a
 
 ## How to Resume a Session
 
-1. Read `.harness-eng/SLICE_LOG.md` — last 3 entries recover context fastest
-2. Check for active phase in `.harness-eng/phases/active/*/features/` or `.harness-eng/specs/active/`
-3. Confirm you are on the correct git branch
-4. Continue from the current active task in `tasks.md`
+1. Read `.harness-eng/handover.yaml` — the compact derived snapshot linking current slice, workflow level, decisions, evidence, and next action
+2. Read `.harness-eng/SLICE_LOG.md` — last 3 entries recover narrative context fastest
+3. Check for active phase in `.harness-eng/phases/active/*/features/` or `.harness-eng/specs/active/`
+4. Confirm you are on the correct git branch
+5. Continue from the current active task in the active `spec.yaml` (or `CHG-NNN.yaml` for a change)
 
 After a release, confirm `.harness-eng/handover.yaml` is regenerated and no longer points to the archived phase or feature.
 
