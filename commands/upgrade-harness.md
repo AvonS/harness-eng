@@ -44,7 +44,7 @@ actions:
     - report files to create, update, preserve, or archive
     - STOP if the plan would overwrite project-owned state or an unknown dirty path
   - apply_pre_migration:
-    - apply only the approved, ordered migration plan
+    - run migration: python3 .harness-eng/scripts/migrate-harness.py apply
     - preserve active in-flight slices on their existing workflow unless the user separately approved mid-slice migration
     - apply the approved workflow level to future slices and changes
   - fetch_and_replace_from_canonical:
