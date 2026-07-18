@@ -15,6 +15,10 @@ def active_artifacts(harness: Path, filename: str) -> list[Path]:
 def active_feature_dirs(harness: Path) -> list[Path]:
     dirs = [path.parent for path in active_artifacts(harness, "spec.md")]
     dirs.extend([path.parent for path in active_artifacts(harness, "spec.yaml")])
+    for path in harness.glob("specs/active/*/CHG-*.md"):
+        dirs.append(path.parent)
+    for path in harness.glob("specs/active/*/CHG-*.yaml"):
+        dirs.append(path.parent)
     return sorted(list(set(dirs)))
 
 

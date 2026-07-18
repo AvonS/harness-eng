@@ -742,6 +742,68 @@ def extract_assumptions(content: str) -> list[str]:
     return assumptions
 
 
+def extract_decisions_from_yaml(content: str) -> list[dict]:
+    decisions = []
+    current_dec = None
+    in_decisions = False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if "decisions" in stripped.lower():
+            in_decisions = True
+        elif in_decisions:
+            indent = len(line) - len(line.lstrip())
+            if indent == 0 and stripped and not stripped.startswith("-") and not "decisions" in stripped.lower():
+                in_decisions = False
+                continue
+            if stripped.startswith("- id:") or (stripped.startswith("-") and "id:" in stripped):
+                if current_dec:
+                    decisions.append(current_dec)
+                if "id:" in stripped:
+                    item_id = stripped.split("id:", 1)[1].strip().strip('"').strip("'")
+                else:
+                    item_id = stripped.lstrip("-").strip()
+                current_dec = {"id": item_id, "ref": "spec.yaml"}
+            elif "decision:" in stripped and current_dec:
+                current_dec["decision"] = stripped.split("decision:", 1)[1].strip().strip('"').strip("'")
+            elif "ref:" in stripped and current_dec:
+                current_dec["ref"] = stripped.split("ref:", 1)[1].strip().strip('"').strip("'")
+    if current_dec:
+        decisions.append(current_dec)
+    return decisions
+
+
+def extract_assumptions_from_yaml(content: str) -> list[str]:
+    assumptions = []
+    in_assumptions = False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("assumptions:"):
+            in_assumptions = True
+        elif in_assumptions:
+            indent = len(line) - len(line.lstrip())
+            if indent == 0 and stripped and not stripped.startswith("-") and not stripped.startswith("assumptions:"):
+                in_assumptions = False
+                continue
+            if stripped.startswith("-"):
+                assumptions.append(stripped.lstrip("-").strip().strip('"').strip("'"))
+    return assumptions
+
+
+def get_current_git_branch() -> str:
+    import subprocess
+    try:
+        res = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=HARNESS_DIR.parent,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return res.stdout.strip()
+    except Exception:
+        return ""
+
+
 def regenerate_handover(steps: list[dict]) -> dict:
     """Scan authoritative artifacts and write `.harness-eng/handover.yaml`."""
     current_slice = ""
@@ -752,38 +814,120 @@ def regenerate_handover(steps: list[dict]) -> dict:
     evidence = []
     blockers = []
     
-    specs = find_active("spec.md")
-    if specs:
-        spec_path = specs[0]
-        current_slice = spec_path.parent.name
-        try:
-            content = spec_path.read_text(encoding="utf-8", errors="replace")
-            meta = parse_markdown_metadata(content)
-            workflow_level = meta.get("workflow_level", "M/L")
-            decisions.extend(extract_decisions(content, ref_file="spec.md"))
-            assumptions.extend(extract_assumptions(content))
-        except Exception:
-            pass
-            
-    designs = find_active("design.md")
-    if designs:
-        try:
-            content = designs[0].read_text(encoding="utf-8", errors="replace")
-            decisions.extend(extract_decisions(content, ref_file="design.md"))
-        except Exception:
-            pass
+    active_dirs = active_feature_dirs(HARNESS_DIR)
+    if active_dirs:
+        # Select active dir matching current git branch if possible
+        branch = get_current_git_branch()
+        active_dir = active_dirs[0]
+        if branch:
+            normalized_branch = branch.lower().replace("cr/", "").replace("bugfix/", "").replace("change/", "")
+            for d in active_dirs:
+                if normalized_branch in d.name.lower() or d.name.lower() in normalized_branch:
+                    active_dir = d
+                    break
+        current_slice = active_dir.name
+        
+        spec_yaml = active_dir / "spec.yaml"
+        if spec_yaml.is_file():
+            try:
+                content = spec_yaml.read_text(encoding="utf-8")
+                for line in content.splitlines():
+                    if "workflow_level:" in line:
+                        workflow_level = line.split(":", 1)[1].strip().strip('"').strip("'")
+                decisions.extend(extract_decisions_from_yaml(content))
+                assumptions.extend(extract_assumptions_from_yaml(content))
+            except Exception:
+                pass
+                
+        spec_md = active_dir / "spec.md"
+        if spec_md.is_file():
+            try:
+                content = spec_md.read_text(encoding="utf-8", errors="replace")
+                meta = parse_markdown_metadata(content)
+                workflow_level = meta.get("workflow_level", "M/L")
+                decisions.extend(extract_decisions(content, ref_file="spec.md"))
+                assumptions.extend(extract_assumptions(content))
+            except Exception:
+                pass
+                
+        design_md = active_dir / "design.md"
+        if design_md.is_file():
+            try:
+                content = design_md.read_text(encoding="utf-8", errors="replace")
+                decisions.extend(extract_decisions(content, ref_file="design.md"))
+            except Exception:
+                pass
 
-    tasks = find_active("tasks.md")
-    if tasks:
-        try:
-            content = tasks[0].read_text(encoding="utf-8", errors="replace")
-            for line in content.splitlines():
-                if line.startswith("- [x]") or line.startswith("- [X]"):
-                    parts = line.split(" ", 2)
-                    if len(parts) >= 3:
-                        completed_tasks.append(parts[2].strip())
-        except Exception:
-            pass
+        tasks_md = active_dir / "tasks.md"
+        if tasks_md.is_file():
+            try:
+                content = tasks_md.read_text(encoding="utf-8", errors="replace")
+                for line in content.splitlines():
+                    if line.startswith("- [x]") or line.startswith("- [X]"):
+                        parts = line.split(" ", 2)
+                        if len(parts) >= 3:
+                            completed_tasks.append(parts[2].strip())
+            except Exception:
+                pass
+
+        # Check for change records (CHG-*.yaml or CHG-*.md)
+        for chg_path in active_dir.glob("CHG-*.yaml"):
+            try:
+                content = chg_path.read_text(encoding="utf-8")
+                for line in content.splitlines():
+                    if "workflow_level:" in line:
+                        workflow_level = line.split(":", 1)[1].strip().strip('"').strip("'")
+                decisions.extend(extract_decisions_from_yaml(content))
+                assumptions.extend(extract_assumptions_from_yaml(content))
+            except Exception:
+                pass
+
+        for chg_path in active_dir.glob("CHG-*.md"):
+            try:
+                content = chg_path.read_text(encoding="utf-8", errors="replace")
+                meta = parse_markdown_metadata(content)
+                if "workflow_level" in meta:
+                    workflow_level = meta["workflow_level"]
+                # Change record can list decisions in YAML or MD format
+                dec_list = extract_decisions_from_yaml(content)
+                for d in dec_list:
+                    d["ref"] = chg_path.name
+                decisions.extend(dec_list)
+                decisions.extend(extract_decisions(content, ref_file=chg_path.name))
+                assumptions.extend(extract_assumptions(content))
+                assumptions.extend(extract_assumptions_from_yaml(content))
+            except Exception:
+                pass
+                
+        verifications = active_dir.glob("verification.md")
+        for f in verifications:
+            try:
+                content = f.read_text(encoding="utf-8", errors="replace")
+                for line in content.splitlines():
+                    if line.startswith("|") and ("PASS" in line or "FAIL" in line) and not line.startswith("|--"):
+                        cells = [c.strip() for c in line.split("|")[1:-1]]
+                        if len(cells) >= 2:
+                            evidence.append({"name": cells[0], "status": cells[1]})
+            except Exception:
+                pass
+
+        verifications_yaml = active_dir.glob("verify/slice.yaml")
+        for f in verifications_yaml:
+            try:
+                content = f.read_text(encoding="utf-8")
+                in_results = False
+                for line in content.splitlines():
+                    if line.strip().startswith("results:"):
+                        in_results = True
+                    elif in_results:
+                        indent = len(line) - len(line.lstrip())
+                        if indent == 0 and line.strip():
+                            in_results = False
+                            continue
+                        if "id:" in line:
+                            evidence.append({"name": line.split(":", 1)[1].strip(), "status": "PASS"})
+            except Exception:
+                pass
 
     blocked_files = find_blocked_features()
     for f in blocked_files:
@@ -792,18 +936,6 @@ def regenerate_handover(steps: list[dict]) -> dict:
             for line in lines:
                 if line.strip().startswith("-"):
                     blockers.append(line.strip().lstrip("-").strip())
-        except Exception:
-            pass
-
-    verifications = find_active("verification.md")
-    if verifications:
-        try:
-            content = verifications[0].read_text(encoding="utf-8", errors="replace")
-            for line in content.splitlines():
-                if line.startswith("|") and ("PASS" in line or "FAIL" in line) and not line.startswith("|--"):
-                    cells = [c.strip() for c in line.split("|")[1:-1]]
-                    if len(cells) >= 2:
-                        evidence.append({"name": cells[0], "status": cells[1]})
         except Exception:
             pass
 
