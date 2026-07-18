@@ -25,6 +25,9 @@ actions:
   - read_release_policy: strategy, target_branch, require_human_approval, push_branch, push_tag
   - disclose_deferred_items: present open deferred items to human before the approval gate with IDs and destinations
   - wait_for_explicit_human_gate_2_approval
+  - after_human_approval:
+    - update the active verification.md marker from `Release Ref: PENDING` to `Release Ref: APPROVED`
+    - record the approval in the release commit or release log before merge/publish
   - if strategy == local_merge:
     - checkout_target_branch
     - merge_feature_branch
@@ -39,12 +42,19 @@ actions:
   - archive_deferred_ledger: move deferred.md with the feature archive (specs/done/ or phases/archive/)
   - if phase_release: move .harness-eng/phases/active/<phase> → .harness-eng/phases/archive/<phase>
   - if bug_or_cr_release: move .harness-eng/specs/active/<item> → .harness-eng/specs/done/<item>
-  - run: python3 scripts/harness-status.py
   - update: VERSION according to phase, change, or bug version policy
+  - update: .harness-eng/SLICE_LOG.md (add release entry)
+  - regenerate_handover:
+    - run `python3 scripts/harness-status.py --regenerate` after archiving, version, and SLICE_LOG updates
+    - confirm `.harness-eng/handover.yaml` has no active phase/feature after a completed phase release
+    - confirm `next_action` reflects the next permitted command or no active work
+  - verify_release_state:
+    - confirm archived verification.md contains `Release Ref: APPROVED`
+    - confirm the active phase/feature paths are absent after archival
+    - confirm handover.yaml, VERSION, and SLICE_LOG describe the same released state
   - create_release_tag
   - push_release_tag_if_enabled
   - delete_feature_branch_after_merge
-  - update: .harness-eng/SLICE_LOG.md (add release entry)
 
 must_do:
   - Read release_policy from the project constitution
@@ -55,6 +65,9 @@ must_do:
   - Archive spec to done/
   - Archive deferred.md with the feature
   - Disclose unresolved deferred items before human gate
+  - Write `Release Ref: APPROVED` only after explicit human approval
+  - Regenerate handover after all release-state mutations, not before them
+  - Verify verification, archive, VERSION, SLICE_LOG, and handover state agree
   - Update SLICE_LOG.md
 
 must_not_do:
@@ -63,6 +76,9 @@ must_not_do:
   - Skip archiving
   - Forget version bump
   - Skip SLICE_LOG update
+  - Run status or generate handover before release mutations are complete
+  - Leave an archived verification.md with `Release Ref: PENDING`
+  - Leave handover.yaml pointing at an archived phase or released feature
   - Block release for unresolved deferred items unless promoted to blocker
 ---
 <!-- *** Maintained by AvonS/harness-eng, DON'T modify this, will be overwritten during next upgrade *** -->

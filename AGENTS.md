@@ -132,7 +132,7 @@ User intent selects the desired outcome. Harness state selects the next permitte
 10. **Never commit failing tests**
 11. **Append to `SLICE_LOG.md` on meaningful commits**
 12. **Triage first** — classify incoming requests (bug/CR/feature/deferred)
-13. **Never release without explicit human approval.** Check `verification.md` for `Release Ref: APPROVED`
+13. **Never release without explicit human approval.** After approval, update `verification.md` from `Release Ref: PENDING` to `Release Ref: APPROVED`, complete archive/version/SLICE_LOG mutations, regenerate `handover.yaml`, and verify all release artifacts agree.
 14. **Enforce locked-intent and no-silent-technology substitutions.** If a user names a locked technology, library, model, strategy, data source, cost model, execution mode, or persistence mechanism: implement it or STOP and ask. Never silently substitute.
 15. **Use bounded delegation context packets.** Subagents receive only the task packet (objective, authorized read/write paths, constraints, evidence expectations, prohibited changes, stop conditions). History defaults to `none`. Full project history and constitution are not sent by default.
 
@@ -179,7 +179,7 @@ Read command files from `.harness-eng/commands/` and follow them. Users talk nat
 | `/h:build` | Implement against the approved Evidence Contract — one commit per task | — |
 | `/h:review-pre-verify` | **Agent gate** — Sr Tech Lead review, reconcile pre-verify deferred items | ✅ Agent |
 | `/h:verify` | Run tests, check acceptance criteria, report deferred items separately | — |
-| `/h:release` | **Human gate** — disclose deferred items, create PR, merge, archive | ✅ Human |
+| `/h:release` | **Human gate** — disclose deferred items, approve, merge, archive, refresh handover | ✅ Human |
 | `/h:upgrade-harness` | Fetch the latest command from `https://raw.githubusercontent.com/AvonS/harness-eng/main/commands/upgrade-harness.md`; execute the fetched contract, never the installed copy | — |
 | `/h:status` | Print project status including deferred item counts | — |
 
@@ -204,7 +204,7 @@ The harness enforces three critical gates. You MUST stop at each gate and wait f
 3. **Release approval** (Human) — `/h:release`
    - **When**: After verification passes
    - **Gate**: verification.md must have `Release Ref: APPROVED`
-   - **Action**: Present verification report and deferred items to human, wait for approval
+   - **Action**: Present verification report and deferred items to human, wait for approval, then mark verification approved and complete the release state transition
    - **Cannot proceed** until human approves
    - **Deferred items**: Open deferred items are disclosed but do not block. Only promoted-to-blocker items block release.
 
@@ -216,6 +216,8 @@ The harness enforces three critical gates. You MUST stop at each gate and wait f
 2. Check for active phase in `.harness-eng/phases/active/*/features/` or `.harness-eng/specs/active/`
 3. Confirm you are on the correct git branch
 4. Continue from the current active task in `tasks.md`
+
+After a release, confirm `.harness-eng/handover.yaml` is regenerated and no longer points to the archived phase or feature.
 
 ## Bugs and Change Requests
 

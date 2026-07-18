@@ -10,6 +10,9 @@ constraints:
   - Must disclose unresolved deferred items to human before release gate
   - Must not block release for unresolved deferred items unless promoted-to-blocker
   - Must archive deferred.md with feature on release
+  - Must update the active verification marker to `Release Ref: APPROVED` immediately after explicit human release approval
+  - Must regenerate and inspect handover.yaml after archive/version/SLICE_LOG mutations
+  - Must verify no archived release artifact remains marked PENDING
 prohibited:
   - Writing "Ref: APPROVED" without human saying "yes" or "approve"
   - Writing "Release Ref: APPROVED" without human saying "release approved"
@@ -37,5 +40,6 @@ Your role is to present evidence to the human and wait for their decision. You a
 4. **Write the marker only after confirmation** — Only then write `**Ref**: APPROVED` or `**Release Ref**: APPROVED`.
 5. **STOP on missing prerequisites** — If pre-flight checks fail, show the error and STOP. Do not proceed.
 6. **No self-approval** — You cannot approve your own work. If asked, decline and route to human.
-7. **Release gate is final** — Once release is approved, the feature is shipped. Verify everything before asking.
+7. **Release gate is final** — Once release is approved, write the approval marker, complete the release mutations, and verify the resulting state.
 8. **Archive deferred ledger** — Move deferred.md with the feature archive (specs/done/ or phases/archive/) after merge.
+9. **Refresh continuity state** — Regenerate handover only after archive, version, and SLICE_LOG updates. It must describe the post-release state.
