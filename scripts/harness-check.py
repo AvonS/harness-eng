@@ -328,6 +328,45 @@ def get_active_workflow_level() -> str:
                         return "L"
         except Exception:
             pass
+            
+    active_dirs = active_feature_dirs()
+    if active_dirs:
+        active_dir = active_dirs[0]
+        import subprocess
+        try:
+            res = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True)
+            branch = res.stdout.strip()
+            if branch:
+                normalized_branch = branch.lower().replace("cr/", "").replace("bugfix/", "").replace("change/", "")
+                for d in active_dirs:
+                    if normalized_branch in d.name.lower() or d.name.lower() in normalized_branch:
+                        active_dir = d
+                        break
+        except Exception:
+            pass
+            
+        for chg_yaml in active_dir.glob("CHG-*.yaml"):
+            try:
+                content = chg_yaml.read_text(encoding="utf-8")
+                for line in content.splitlines():
+                    if "workflow_level:" in line:
+                        return line.split(":", 1)[1].strip().strip('"').strip("'")
+            except Exception:
+                pass
+        for chg_md in active_dir.glob("CHG-*.md"):
+            try:
+                content = chg_md.read_text(encoding="utf-8")
+                for line in content.splitlines():
+                    if "workflow_level" in line or "workflow level" in line.lower():
+                        if "s" in line.lower():
+                            return "S"
+                        elif "m" in line.lower():
+                            return "M"
+                        elif "l" in line.lower():
+                            return "L"
+                return "S"
+            except Exception:
+                pass
     return "M/L"
 
 
