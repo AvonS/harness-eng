@@ -6,10 +6,13 @@ subagent: true
 delegation:
   capability: work
   outcome: Resolve bug or CR via classify -> baseline -> delta -> implement -> verify -> archive
-  read_paths: [change context, technology.yaml, relevant installed skills]
+  read_paths: [project.yaml, change context, technology.yaml, relevant installed skills]
   write_authority: Task-scoped application files, tests, CHG-NNN.yaml (or CHG-NNN.md), worktree.yaml, and handover.yaml
   return_format: CHG-NNN path, implementation paths, evidence, and verdict
   max_response: 20KB
+  max_input_tokens: 12000
+  max_output_tokens: 4000
+  retry_threshold: 3
   context_policy: Pass paths; never inline complete files; history: none
   on_failure: Return ERROR with unresolved blocker
 

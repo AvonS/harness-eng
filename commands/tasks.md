@@ -11,6 +11,9 @@ delegation:
   write_authority: Active feature tasks.md only
   return_format: Path, task count, dependencies, evidence, and blockers
   max_response: 20KB
+  max_input_tokens: 12000
+  max_output_tokens: 4000
+  retry_threshold: 3
   context_policy: Pass paths; never inline complete files
   on_failure: Return ERROR with missing prerequisite
 

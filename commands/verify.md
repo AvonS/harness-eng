@@ -6,10 +6,13 @@ subagent: true
 delegation:
   capability: verify
   outcome: Execute approved evidence and return a reproducible verification verdict
-  read_paths: [technology.yaml, active spec.md, active design.md, active tasks.md, active review-pre-verify.md]
+  read_paths: [project.yaml, technology.yaml, active spec.yaml (or spec.md), active design.md, active tasks.md, active review-pre-verify.md]
   write_authority: none
   return_format: Markdown verification report ending with VERDICT PASS or FAIL
   max_response: 20KB
+  max_input_tokens: 12000
+  max_output_tokens: 4000
+  retry_threshold: 3
   context_policy: Pass paths; never inline complete files or raw logs; history: none
   on_failure: Return ERROR with failed command and bounded evidence
   persistence: Manager writes the returned report unchanged to verification.md
@@ -23,6 +26,7 @@ gates:
     on_fail: STOP, fix evidence failures
 
 actions:
+  - check_evidence_reuse: check if config_hash, environment_hash, and revision match the previous verification record; if unchanged, reuse recorded evidence and skip re-running tests
   - read_deferred_ledger: if deferred.md exists in active feature, read it for reporting
   - run_evidence_contract_checks: (for S: run only happy-path or cheapest deterministic inspection; no unit-test quota)
   - run_existing_regression_suite: (run once, only when level/risk requires it for S)
@@ -37,6 +41,7 @@ actions:
   - route: to /h:release (human gate)
 
 must_do:
+  - Reuse recorded evidence when config_hash, environment_hash, and revision are unchanged
   - All required evidence must pass
   - Existing regression suite must not regress
   - README updated if user-facing changes

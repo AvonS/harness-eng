@@ -7,10 +7,13 @@ subagent: true
 delegation:
   capability: work
   outcome: Create spec.yaml in the active feature folder (includes spec + design + tasks for M/L)
-  read_paths: [BRD.md, CONSTITUTION.md, PHASES.md, relevant installed skills]
+  read_paths: [project.yaml, plan.yaml, technology.yaml, relevant installed skills]
   write_authority: Active feature spec.yaml only
   return_format: Path, coverage, assumptions, and blockers
   max_response: 20KB
+  max_input_tokens: 12000
+  max_output_tokens: 4000
+  retry_threshold: 3
   context_policy: Pass paths; never inline complete files; history: none
   on_failure: Return ERROR with unresolved requirement
 goal: Produce a unified, machine-readable spec.yaml document that explicitly follows templates/spec.yaml.

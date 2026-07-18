@@ -974,41 +974,81 @@ def format_json(steps: list[dict], slice_log: dict, version: dict, handover: dic
     print(json.dumps(output, indent=2, default=str))
 
 
-def ensure_compiled_policy():
-    project_yaml = HARNESS_DIR / "project.yaml"
-    if not project_yaml.is_file():
-        import hashlib
-        locked_constraints = []
-        tech_stack = []
-        constitution_content = ""
-        constitution_file = HARNESS_DIR / "CONSTITUTION.md"
-        if constitution_file.is_file():
-            constitution_content = constitution_file.read_text(encoding="utf-8")
-            
-        const_hash = hashlib.sha256(constitution_content.encode("utf-8")).hexdigest() if constitution_content else "unknown"
-        
-        tech_file = HARNESS_DIR / "technology.yaml"
-        if tech_file.is_file():
+def get_environment_hash() -> str:
+    import hashlib
+    lockfiles = [
+        "package-lock.json", "go.sum", "Cargo.lock", "poetry.lock",
+        "Gemfile.lock", "mix.lock", "composer.lock", "requirements.txt"
+    ]
+    for lf in lockfiles:
+        path = Path(lf)
+        if path.is_file():
             try:
-                for line in tech_file.read_text(encoding="utf-8").splitlines():
-                    if "-" in line and not line.strip().startswith("#"):
-                        tech_stack.append(line.split("-", 1)[1].strip())
+                return hashlib.sha256(path.read_bytes()).hexdigest()
             except Exception:
                 pass
-        if not tech_stack:
-            tech_stack = ["Python", "Git"]
+    fallback_str = f"{sys.version}_{sys.platform}"
+    return hashlib.sha256(fallback_str.encode("utf-8")).hexdigest()
+
+
+def get_config_hash() -> str:
+    import hashlib
+    content = b""
+    constitution_file = HARNESS_DIR / "CONSTITUTION.md"
+    if constitution_file.is_file():
+        try:
+            content += constitution_file.read_bytes()
+        except Exception:
+            pass
             
-        yaml_content = f"""project_name: "harness-eng"
+    spec_yamls = active_artifacts(HARNESS_DIR, "spec.yaml")
+    if spec_yamls:
+        try:
+            content += spec_yamls[0].read_bytes()
+        except Exception:
+            pass
+    else:
+        spec_mds = active_artifacts(HARNESS_DIR, "spec.md")
+        if spec_mds:
+            try:
+                content += spec_mds[0].read_bytes()
+            except Exception:
+                pass
+                
+    return hashlib.sha256(content).hexdigest()
+
+
+def ensure_compiled_policy():
+    project_yaml = HARNESS_DIR / "project.yaml"
+    config_h = get_config_hash()
+    env_h = get_environment_hash()
+    
+    project_name = "harness-eng"
+    tech_stack = []
+    
+    tech_file = HARNESS_DIR / "technology.yaml"
+    if tech_file.is_file():
+        try:
+            for line in tech_file.read_text(encoding="utf-8").splitlines():
+                if "-" in line and not line.strip().startswith("#"):
+                    tech_stack.append(line.split("-", 1)[1].strip())
+        except Exception:
+            pass
+    if not tech_stack:
+        tech_stack = ["Python", "Git"]
+        
+    yaml_content = f"""project_name: "{project_name}"
 locked_constraints: []
-constitution_hash: "{const_hash}"
+constitution_hash: "{config_h}"
+config_hash: "{config_h}"
+environment_hash: "{env_h}"
 workflow_default: "M/L"
 technology_stack:
 """
-        for tech in tech_stack:
-            yaml_content += f"  - \"{tech}\"\n"
-            
-        project_yaml.write_text(yaml_content, encoding="utf-8")
-        eprint(f"Generated {project_yaml} from CONSTITUTION.md")
+    for tech in tech_stack:
+        yaml_content += f"  - \"{tech}\"\n"
+        
+    project_yaml.write_text(yaml_content, encoding="utf-8")
 
 
 def ensure_plan():

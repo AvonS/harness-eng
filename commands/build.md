@@ -6,10 +6,13 @@ subagent: true
 delegation:
   capability: work
   outcome: Implement only the approved incomplete tasks and their evidence
-  read_paths: [technology.yaml, active spec.md, active design.md, active tasks.md, relevant installed skills]
+  read_paths: [project.yaml, technology.yaml, active spec.yaml (or spec.md), active design.md, active tasks.md, relevant installed skills]
   write_authority: Task-scoped application files, tests, tasks.md, and SLICE_LOG.md
   return_format: Bounded summary of tasks, changed paths, checks, commits, and blockers
   max_response: 20KB
+  max_input_tokens: 12000
+  max_output_tokens: 4000
+  retry_threshold: 3
   context_policy: Pass paths and concise retry state; never inline complete files or raw logs; history: none
   on_failure: Return ERROR with blocker and partial task state
 
