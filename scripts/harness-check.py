@@ -5,7 +5,7 @@ harness-check.py — Validate prerequisites for each workflow step.
 
 Usage: python3 scripts/harness-check.py <command> [--json]
 
-Commands: init, triage, bug, define, design, review-pre-build, approve, tasks, build, review-pre-verify, verify, release
+Commands: init, define, design, approve, tasks, build, change, review-pre-verify, verify, release
 Exit: 0 = prerequisites met, 1 = prerequisites not met
 """
 
@@ -213,22 +213,19 @@ def validate_init() -> int:
     pass_msg("Ready to run init")
     return errors
 
-def validate_triage() -> int:
+def validate_change() -> int:
+    """Validate prerequisites for the unified /h:change command (bug + CR)."""
     errors = 0
-    msg("=== Checking prerequisites for: triage ===")
+    msg("=== Checking prerequisites for: change ===")
     if not check_file(HARNESS_DIR, ".harness-eng/ exists"):
         errors += 1
-    if errors == 0:
-        pass_msg("Ready to triage")
-    return errors
-
-def validate_bug() -> int:
-    errors = 0
-    msg("=== Checking prerequisites for: bug ===")
-    if not check_file(HARNESS_DIR, ".harness-eng/ exists"):
+    if not check_file(HARNESS_DIR / "CONSTITUTION.md", "Constitution exists"):
         errors += 1
+    if not check_file(HARNESS_DIR / "BRD.md", "BRD exists"):
+        errors += 1
+    errors += fail_if_blocked()
     if errors == 0:
-        pass_msg("Ready to run bug workflow")
+        pass_msg("Ready to run change workflow")
     return errors
 
 def validate_define() -> int:
@@ -477,17 +474,18 @@ COMMAND = args[0] if args else ""
 errors = 0
 match COMMAND:
     case "init": errors = validate_init()
-    case "triage": errors = validate_triage()
-    case "bug": errors = validate_bug()
     case "define": errors = validate_define()
     case "design": errors = validate_design()
     case "review-pre-build": errors = validate_review_pre_build()
     case "approve": errors = validate_approve()
     case "tasks": errors = validate_tasks()
     case "build": errors = validate_build()
+    case "change": errors = validate_change()
     case "review-pre-verify": errors = validate_review_pre_verify()
     case "verify": errors = validate_verify()
     case "release": errors = validate_release()
+    # Legacy aliases — route to change for backward compat
+    case "triage" | "bug": errors = validate_change()
     case _:
         msg(f"Usage: python3 {sys.argv[0]} <command> [--json]")
         sys.exit(1)

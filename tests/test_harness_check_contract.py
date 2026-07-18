@@ -155,5 +155,27 @@ evidence_strategy: verification.md
         self.assertEqual(proc.returncode, 0)
 
 
+    def test_validate_change(self) -> None:
+        # change passes when .harness-eng, CONSTITUTION.md, and BRD.md are present
+        root = self.make_project()
+        (root / ".harness-eng" / "CONSTITUTION.md").write_text("# Constitution\n", encoding="utf-8")
+        (root / ".harness-eng" / "BRD.md").write_text("# BRD\n", encoding="utf-8")
+
+        proc = self.run_check(root, "change")
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Ready to run change workflow", proc.stdout)
+
+        # Legacy aliases triage and bug also route to change
+        proc_triage = self.run_check(root, "triage")
+        self.assertEqual(proc_triage.returncode, 0)
+        proc_bug = self.run_check(root, "bug")
+        self.assertEqual(proc_bug.returncode, 0)
+
+        # Fails when CONSTITUTION.md is missing
+        root2 = self.make_project()
+        proc2 = self.run_check(root2, "change")
+        self.assertNotEqual(proc2.returncode, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
