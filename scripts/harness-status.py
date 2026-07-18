@@ -10,6 +10,7 @@ Default: Colored human-readable output.
 """
 
 import json
+from dataclasses import dataclass
 import os
 import re
 import sys
@@ -27,6 +28,26 @@ CYAN = "\033[0;36m"
 NC = "\033[0m"
 
 JSON_MODE = "--json" in sys.argv
+PLAIN_MODE = "--plain" in sys.argv
+
+if PLAIN_MODE:
+    GREEN = ""
+    YELLOW = ""
+    RED = ""
+    CYAN = ""
+    NC = ""
+
+@dataclass
+class StatusSnapshot:
+    steps: list[dict]
+    slice_log: dict
+    version: dict
+    build_times: dict | None
+    skill_install_log: dict | None
+    blocked_features: list[str]
+    deferred_items: dict
+    handover: dict
+    next_step: str
 
 
 def eprint(*args, **kwargs):
@@ -437,12 +458,108 @@ def count_deferred_items() -> dict:
     return counts
 
 
-def format_human(steps: list[dict], slice_log: dict, version: dict):
+def load_plan() -> dict:
+    plan_file = HARNESS_DIR / "plan.yaml"
+    if not plan_file.is_file():
+        return {"phases": []}
+    phases = []
+    try:
+        content = plan_file.read_text(encoding="utf-8")
+        current_phase = None
+        current_slice = None
+        for line in content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            indent = len(line) - len(line.lstrip())
+            if stripped.startswith("- id:"):
+                item_id = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                if indent == 2:
+                    if current_phase:
+                        phases.append(current_phase)
+                    current_phase = {"id": item_id, "slices": []}
+                    current_slice = None
+                elif indent == 6:
+                    current_slice = {"id": item_id, "status": "pending", "name": "", "resolution": ""}
+                    if current_phase:
+                        current_phase["slices"].append(current_slice)
+            elif stripped.startswith("name:"):
+                val = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                if indent == 4 and current_phase:
+                    current_phase["name"] = val
+                elif indent == 8 and current_slice:
+                    current_slice["name"] = val
+            elif stripped.startswith("status:"):
+                val = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                if indent == 4 and current_phase:
+                    current_phase["status"] = val
+                elif indent == 8 and current_slice:
+                    current_slice["status"] = val
+            elif stripped.startswith("resolution:"):
+                val = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                if indent == 8 and current_slice:
+                    current_slice["resolution"] = val
+        if current_phase:
+            phases.append(current_phase)
+    except Exception as e:
+        eprint(f"Warning: failed to parse plan.yaml: {e}")
+    return {"phases": phases}
+
+
+def get_evidence_freshness(slice_id: str) -> str:
+    active_dirs = active_feature_dirs(HARNESS_DIR)
+    for d in active_dirs:
+        if d.name == slice_id or d.name.startswith(slice_id + "-"):
+            slice_yaml = d / "verify" / "slice.yaml"
+            if slice_yaml.is_file():
+                try:
+                    content = slice_yaml.read_text(encoding="utf-8")
+                    recorded_at = None
+                    config_h = None
+                    env_h = None
+                    for line in content.splitlines():
+                        if "recorded_at:" in line:
+                            recorded_at = line.split(":", 1)[1].strip().strip('"').strip("'")
+                        elif "config_hash:" in line:
+                            config_h = line.split(":", 1)[1].strip().strip('"').strip("'")
+                        elif "environment_hash:" in line:
+                            env_h = line.split(":", 1)[1].strip().strip('"').strip("'")
+                    
+                    age_str = "unknown age"
+                    is_stale = False
+                    if recorded_at:
+                        try:
+                            # Parse UTC timestamp
+                            dt = datetime.fromisoformat(recorded_at.replace("Z", "+00:00"))
+                            delta = datetime.now(timezone.utc) - dt
+                            age_days = delta.days
+                            if age_days == 0:
+                                age_str = "today"
+                            else:
+                                age_str = f"{age_days}d ago"
+                            if age_days >= 1:
+                                is_stale = True
+                        except Exception:
+                            pass
+                    
+                    curr_config_h = get_config_hash()
+                    curr_env_h = get_environment_hash()
+                    if config_h != curr_config_h or env_h != curr_env_h:
+                        is_stale = True
+                        
+                    status_lbl = "stale" if is_stale else "fresh"
+                    return f"({status_lbl}, {age_str})"
+                except Exception:
+                    pass
+    return ""
+
+
+def format_human(snapshot: StatusSnapshot):
     """Print human-readable colored output matching the original .sh format."""
     print(f"{CYAN}=== harness-eng Workflow Status ==={NC}")
     print()
 
-    for s in steps:
+    for s in snapshot.steps:
         if s["status"] == "done":
             icon = f"{GREEN}✅{NC}"
         elif s["status"] == "pending":
@@ -451,13 +568,31 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
             icon = f"{RED}❌{NC}"
         print(f"{icon} {s['label'].lower():8} — {s['message']}")
 
-    blocked = find_blocked_features()
+    blocked = snapshot.blocked_features
     if blocked:
         print()
         print(f"{RED}⛔ BLOCKED{NC} — {blocked[0]}")
 
+    # Plan Phases
+    plan_data = load_plan()
+    show_all = "--all" in sys.argv
+    print()
+    print(f"{CYAN}=== Plan Phases ==={NC}")
+    for p in plan_data.get("phases", []):
+        if p["status"] == "active" or show_all:
+            status_icon = "🟢" if p["status"] == "active" else ("⚪" if p["status"] == "pending" else "🔵")
+            print(f" {status_icon} {p['name']} ({p['status']})")
+            for s in p.get("slices", []):
+                slice_icon = "  ⏳" if s["status"] == "active" else ("  ⚪" if s["status"] == "pending" else "  ✅")
+                freshness = ""
+                if s["status"] == "active":
+                    freshness = get_evidence_freshness(s["id"])
+                    if freshness:
+                        freshness = " " + freshness
+                print(f"{slice_icon} {s['id']}: {s['name']} [{s['status']}]{freshness}")
+
     # Build times
-    build_data = get_build_times()
+    build_data = snapshot.build_times
     if build_data:
         print()
         print(f"{CYAN}=== Build Times ==={NC}")
@@ -470,13 +605,13 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
     # SLICE_LOG
     print()
     print(f"{CYAN}=== SLICE_LOG ==={NC}")
-    if slice_log["status"] == "fresh":
-        print(f"{GREEN}✅ Fresh{NC} — last entry {slice_log['age_days']} days ago")
-    elif slice_log["status"] == "stale":
-        print(f"{YELLOW}⚠️  Stale{NC} — last entry {slice_log['age_days']} days ago")
-    elif slice_log["status"] == "no_date":
+    if snapshot.slice_log["status"] == "fresh":
+        print(f"{GREEN}✅ Fresh{NC} — last entry {snapshot.slice_log['age_days']} days ago")
+    elif snapshot.slice_log["status"] == "stale":
+        print(f"{YELLOW}⚠️  Stale{NC} — last entry {snapshot.slice_log['age_days']} days ago")
+    elif snapshot.slice_log["status"] == "no_date":
         print(f"{YELLOW}⚠️  No date found{NC}")
-    elif slice_log["status"] == "not_found":
+    elif snapshot.slice_log["status"] == "not_found":
         print(f"{RED}❌ Not found{NC}")
     else:
         print(f"{YELLOW}⚠️  Unknown{NC}")
@@ -484,25 +619,24 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
     # Version
     print()
     print(f"{CYAN}=== Version ==={NC}")
-    if version["status"] == "up_to_date":
-        v = version.get("local_version", "?")
+    if snapshot.version["status"] == "up_to_date":
+        v = snapshot.version.get("local_version", "?")
         print(f"{GREEN}✅ VERSION_CHECK:UP-TO-DATE{NC} — {v}")
-    elif version["status"] == "dogfood":
-        v = version.get("local_version", "?")
+    elif snapshot.version["status"] == "dogfood":
+        v = snapshot.version.get("local_version", "?")
         print(f"{GREEN}✅ VERSION_CHECK:DOGFOOD{NC} — {v} (canonical source repo)")
-    elif version["status"] == "behind":
-        raw = version.get("raw_output", "")
-        # Extract the version from raw output
+    elif snapshot.version["status"] == "behind":
+        raw = snapshot.version.get("raw_output", "")
         print(f"{YELLOW}{raw}{NC}" if raw else f"{YELLOW}⚠️  Update available{NC}")
-    elif version["status"] == "unavailable":
+    elif snapshot.version["status"] == "unavailable":
         print(f"{YELLOW}⚠️  VERSION_CHECK:UNAVAILABLE{NC} — Could not fetch latest version")
-    elif version["status"] == "unknown_version":
-        raw = version.get("raw_output", "")
+    elif snapshot.version["status"] == "unknown_version":
+        raw = snapshot.version.get("raw_output", "")
         print(f"{YELLOW}{raw}{NC}" if raw else f"{YELLOW}⚠️  Version format unknown{NC}")
     else:
         print(f"{YELLOW}⚠️  Version check not available{NC}")
 
-    skill_log = get_skill_install_log()
+    skill_log = snapshot.skill_install_log
     if skill_log is not None:
         print()
         print(f"{CYAN}=== Skill Install Log ==={NC}")
@@ -511,10 +645,10 @@ def format_human(steps: list[dict], slice_log: dict, version: dict):
     # Next step
     print()
     print(f"{CYAN}=== Next Step ==={NC}")
-    print(f"→ Run: {determine_next_step(steps)}")
+    print(f"→ Run: {snapshot.next_step}")
 
     # Deferred items
-    deferred = count_deferred_items()
+    deferred = snapshot.deferred_items
     if any(v > 0 for v in deferred.values()):
         print()
         print(f"{CYAN}=== Deferred Items ==={NC}")
@@ -710,8 +844,14 @@ def regenerate_handover(steps: list[dict]) -> dict:
 
 import html
 
-def format_html(steps: list[dict], slice_log: dict, version: dict, next_step: str, deferred: dict, handover: dict):
+def format_html(snapshot: StatusSnapshot):
     """Generate a premium, self-contained HTML status page."""
+    steps = snapshot.steps
+    slice_log = snapshot.slice_log
+    version = snapshot.version
+    next_step = snapshot.next_step
+    deferred = snapshot.deferred_items
+    handover = snapshot.handover
     step_rows = ""
     for s in steps:
         if s["status"] == "done":
@@ -958,18 +1098,18 @@ def format_html(steps: list[dict], slice_log: dict, version: dict, next_step: st
         eprint(f"Warning: failed to write status HTML: {e}")
 
 
-def format_json(steps: list[dict], slice_log: dict, version: dict, handover: dict):
+def format_json(snapshot: StatusSnapshot):
     """Output structured JSON with all status information."""
     output = {
-        "workflow_steps": steps,
-        "slice_log": slice_log,
-        "version": version,
-        "build_times": get_build_times(),
-        "skill_install_log": get_skill_install_log(),
-        "blocked_features": [str(p) for p in find_blocked_features()],
-        "deferred_items": count_deferred_items(),
-        "handover": handover,
-        "next_step": determine_next_step(steps),
+        "workflow_steps": snapshot.steps,
+        "slice_log": snapshot.slice_log,
+        "version": snapshot.version,
+        "build_times": snapshot.build_times,
+        "skill_install_log": snapshot.skill_install_log,
+        "blocked_features": snapshot.blocked_features,
+        "deferred_items": snapshot.deferred_items,
+        "handover": snapshot.handover,
+        "next_step": snapshot.next_step,
     }
     print(json.dumps(output, indent=2, default=str))
 
@@ -1230,15 +1370,26 @@ def main():
             "next_action": determine_next_step(steps)
         }
 
+    snapshot = StatusSnapshot(
+        steps=steps,
+        slice_log=slice_log,
+        version=version,
+        build_times=get_build_times(),
+        skill_install_log=get_skill_install_log(),
+        blocked_features=[str(p) for p in find_blocked_features()],
+        deferred_items=count_deferred_items(),
+        handover=handover,
+        next_step=determine_next_step(steps)
+    )
+
     if "--json" in sys.argv:
-        format_json(steps, slice_log, version, handover)
+        format_json(snapshot)
     elif "--html" in sys.argv:
-        format_html(steps, slice_log, version, determine_next_step(steps), count_deferred_items(), handover)
+        format_html(snapshot)
         print(f"HTML status written to .harness-eng/status/index.html")
     else:
-        format_human(steps, slice_log, version)
+        format_human(snapshot)
         
-        # Display handover state in human mode too
         print()
         print(f"{CYAN}=== Handover View (handover.yaml) ==={NC}")
         print(f"   State: {handover.get('state')}")

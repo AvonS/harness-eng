@@ -348,6 +348,56 @@ testing_level: L
             self.assertIn("Design body text", yaml_content)
             self.assertIn("Task 1", yaml_content)
 
+    def test_status_snapshot_and_plain_mode(self) -> None:
+        steps = [{"label": "init", "status": "done", "message": "created"}]
+        slice_log = {"status": "fresh", "age_days": 0}
+        version = {"status": "up_to_date", "local_version": "v0.3.3"}
+        snapshot = harness_status.StatusSnapshot(
+            steps=steps,
+            slice_log=slice_log,
+            version=version,
+            build_times=None,
+            skill_install_log=None,
+            blocked_features=[],
+            deferred_items={"open": 0, "resolved": 0, "superseded": 0, "promoted-to-blocker": 0},
+            handover={},
+            next_step="verify"
+        )
+        self.assertEqual(snapshot.steps, steps)
+        self.assertEqual(snapshot.slice_log, slice_log)
+        self.assertEqual(snapshot.version, version)
+        self.assertEqual(snapshot.next_step, "verify")
+
+        # Test plain mode check
+        self.assertFalse(harness_status.PLAIN_MODE)
+
+    def test_load_plan_parsing(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            harness_status.HARNESS_DIR = Path(td)
+            plan_file = Path(td) / "plan.yaml"
+            plan_file.write_text("""phases:
+  - id: PHASE-01
+    name: "Phase 1: Foundation"
+    status: active
+    slices:
+      - id: BUG-311-cleanup
+        name: "BUG-311-cleanup"
+        status: active
+        resolution: detailed
+""", encoding="utf-8")
+            plan_data = harness_status.load_plan()
+            self.assertEqual(len(plan_data["phases"]), 1)
+            p = plan_data["phases"][0]
+            self.assertEqual(p["id"], "PHASE-01")
+            self.assertEqual(p["name"], "Phase 1: Foundation")
+            self.assertEqual(p["status"], "active")
+            self.assertEqual(len(p["slices"]), 1)
+            s = p["slices"][0]
+            self.assertEqual(s["id"], "BUG-311-cleanup")
+            self.assertEqual(s["name"], "BUG-311-cleanup")
+            self.assertEqual(s["status"], "active")
+            self.assertEqual(s["resolution"], "detailed")
+
 
 if __name__ == "__main__":
     unittest.main()
