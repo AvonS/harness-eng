@@ -1,0 +1,5 @@
+# Track files and their classification inside the worktree for brownfield safety.
+files:
+  - path: "path/to/file"
+    classification: "preexisting" # preexisting | authorized | generated
+    owner: "harness" # harness | user

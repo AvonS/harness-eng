@@ -304,15 +304,51 @@ def validate_tasks() -> int:
         pass_msg("Ready to create tasks")
     return errors
 
+def get_active_workflow_level() -> str:
+    spec_yamls = find_active("spec.yaml")
+    if spec_yamls:
+        try:
+            content = spec_yamls[0].read_text(encoding="utf-8")
+            for line in content.splitlines():
+                if line.strip().startswith("workflow_level:"):
+                    return line.split(":", 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            pass
+    spec_mds = find_active("spec.md")
+    if spec_mds:
+        try:
+            content = spec_mds[0].read_text(encoding="utf-8")
+            for line in content.splitlines():
+                if "workflow_level" in line or "workflow level" in line.lower():
+                    if "s" in line.lower():
+                        return "S"
+                    elif "m" in line.lower():
+                        return "M"
+                    elif "l" in line.lower():
+                        return "L"
+        except Exception:
+            pass
+    return "M/L"
+
+
 def validate_build() -> int:
     errors = 0
     msg("=== Checking prerequisites for: build ===")
     errors += fail_if_blocked()
-    if not check_active_file("tasks.md", "Tasks exist"):
-        errors += 1
-    if not check_active_file_approved("design.md"):
-        fail_msg("Design not approved")
-        errors += 1
+    
+    level = get_active_workflow_level()
+    if level == "S":
+        if not (check_active_file("spec.yaml", "Spec YAML exists") or check_active_file("spec.md", "Spec MD exists")):
+            errors += 1
+    else:
+        if not check_active_file("tasks.md", "Tasks exist"):
+            errors += 1
+        if not (check_active_file_approved("design.md") or check_active_file_approved("spec.yaml")):
+            fail_msg("Design/Spec not approved")
+            errors += 1
+        if not check_file(HARNESS_DIR / "worktree.yaml", "worktree.yaml exists"):
+            errors += 1
+            
     if errors == 0:
         pass_msg("Ready to build")
     return errors

@@ -99,3 +99,38 @@ evidence_strategy: verification.md
 
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("not complete or not marked PENDING", proc.stdout)
+
+    def test_validate_build_with_worktree_yaml(self) -> None:
+        root = self.make_project()
+        feature = root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
+        
+        # Test M/L-level (default): fails when tasks/design/worktree.yaml missing
+        proc = self.run_check(root, "build")
+        self.assertNotEqual(proc.returncode, 0)
+
+        # Write spec.md, design.md (approved), tasks.md
+        (feature / "spec.md").write_text("# Spec\nworkflow_level: M/L\n", encoding="utf-8")
+        (feature / "design.md").write_text("# Design\n**Ref**: APPROVED\n", encoding="utf-8")
+        (feature / "tasks.md").write_text("- [ ] Task 1\n", encoding="utf-8")
+
+        # Fails because worktree.yaml is missing
+        proc = self.run_check(root, "build")
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("worktree.yaml exists", proc.stdout)
+
+        # Write worktree.yaml -> now passes
+        (root / ".harness-eng" / "worktree.yaml").write_text("files: []\n", encoding="utf-8")
+        proc = self.run_check(root, "build")
+        self.assertEqual(proc.returncode, 0)
+
+        # Test S-level: skips design/tasks/worktree.yaml checks, needs only spec.yaml/spec.md
+        s_root = self.make_project()
+        s_feature = s_root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
+        (s_feature / "spec.yaml").write_text("metadata:\n  workflow_level: S\n", encoding="utf-8")
+        
+        proc = self.run_check(s_root, "build")
+        self.assertEqual(proc.returncode, 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
