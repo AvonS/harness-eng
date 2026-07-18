@@ -376,14 +376,16 @@ def validate_verify() -> int:
     errors = 0
     msg("=== Checking prerequisites for: verify ===")
     errors += fail_if_blocked()
-    if not check_active_file_approved("review-pre-verify.md"):
-        fail_msg("review-pre-verify.md not approved (Agent Gate 2)")
-        errors += 1
-    remaining = count_incomplete_tasks()
-    if remaining > 0:
-        fail_msg(f"{remaining} tasks still incomplete")
-        errors += 1
-    errors += enforce_traceability(require_evidence=True)
+    level = get_active_workflow_level()
+    if level != "S":
+        if not check_active_file_approved("review-pre-verify.md"):
+            fail_msg("review-pre-verify.md not approved (Agent Gate 2)")
+            errors += 1
+        remaining = count_incomplete_tasks()
+        if remaining > 0:
+            fail_msg(f"{remaining} tasks still incomplete")
+            errors += 1
+        errors += enforce_traceability(require_evidence=True)
     errors += run_required_sensors("verify")
     if errors == 0:
         pass_msg("Ready to verify")

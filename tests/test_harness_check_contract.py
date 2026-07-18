@@ -131,6 +131,29 @@ evidence_strategy: verification.md
         proc = self.run_check(s_root, "build")
         self.assertEqual(proc.returncode, 0)
 
+    def test_validate_verify_skipping(self) -> None:
+        # Test M/L-level (default): verify fails when review-pre-verify.md is missing
+        root = self.make_project()
+        (root / "technology.yaml").write_text("sensors:\n  - id: unit-tests\n    command: python3 -c 'print(1)'\n    required_before: verify\n    timeout: 5\n    evidence: logs\n", encoding="utf-8")
+        feature = root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
+        (feature / "spec.md").write_text("# Spec\nworkflow_level: M/L\n", encoding="utf-8")
+        (feature / "design.md").write_text("# Design\n**Ref**: APPROVED\n", encoding="utf-8")
+        (feature / "tasks.md").write_text("- [ ] Task 1\n", encoding="utf-8")
+        (root / ".harness-eng" / "worktree.yaml").write_text("files: []\n", encoding="utf-8")
+
+        proc = self.run_check(root, "verify")
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("review-pre-verify.md not approved", proc.stdout)
+
+        # Test S-level: verify passes without review-pre-verify.md
+        s_root = self.make_project()
+        (s_root / "technology.yaml").write_text("sensors:\n  - id: unit-tests\n    command: python3 -c 'print(1)'\n    required_before: verify\n    timeout: 5\n    evidence: logs\n", encoding="utf-8")
+        s_feature = s_root / ".harness-eng" / "phases" / "active" / "phase-test" / "features" / "F999-test"
+        (s_feature / "spec.yaml").write_text("metadata:\n  workflow_level: S\n", encoding="utf-8")
+
+        proc = self.run_check(s_root, "verify")
+        self.assertEqual(proc.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
